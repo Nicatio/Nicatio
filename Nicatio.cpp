@@ -42,23 +42,28 @@ int main(int argc, char** argv ){
 
 	cv::Size size =  _image.size();
 	cv::Mat _image4(size,CV_8UC1);
-	cv::Mat _image5(size,CV_8UC1);
+	cv::Mat _image5(size,CV_8UC3);
 	int sz = _image.cols*_image.rows;
 	int iter=1;
+	double **yuv = new double*[3];
+	yuv[0] = new double[sz];
+	yuv[1] = new double[sz];
+	yuv[2] = new double[sz];
+
 	for (int j=0;j<iter;j++){
 		//nicatio::MorphColor(nicatio::Dilation,_image.data,_image4.data,_image.cols,_image.rows);
-		nicatio::MedianFilter(_image.data,_image4.data,_image.cols,_image.rows);
+		nicatio::FaceRegion(_image.data,_image4.data,_image.cols,_image.rows,0xff);
 	std::cout<<j<<std::endl;
 	}
 	for(int i=0; i < sz;i++){
-		_image5.data[i] = abs(_image4.data[i] - _image2.data[i]);
+		_image5.data[i] = abs(_image4.data[i] - _image.data[i]);
 
 	}
 
 	cv::namedWindow( "a", CV_WINDOW_AUTOSIZE );
 	cv::imshow( "a", _image4 );
 	cv::namedWindow( "b", CV_WINDOW_AUTOSIZE );
-	cv::imshow( "b", _image2 );
+	cv::imshow( "b", _image );
 	cv::namedWindow( "c", CV_WINDOW_AUTOSIZE );
 	cv::imshow( "c", _image5 );
 

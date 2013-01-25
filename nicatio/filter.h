@@ -75,6 +75,16 @@ void Threshold(
 		const int&						binary=0,
 		const int&						bg=0x00);
 
+void Threshold(
+		const double					*inputImg,
+		unsigned char					*outputImg,
+		const int&						lower_limit,
+		const int&						upper_limit,
+		const int&						width,
+		const int&						height,
+		const int&						binary=0,
+		const int&						bg=0x00);
+
 void Invert(
 		const unsigned char				*inputImg,
 		unsigned char					*outputImg,

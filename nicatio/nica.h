@@ -10,6 +10,8 @@
 
 #include "core.h"
 #include "filter.h"
+#include "face.h"
+#include "math.h"
 
 
 #endif /* NICA_H_ */

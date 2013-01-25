@@ -18,6 +18,12 @@ unsigned char Median(
 		unsigned char					*num,
 		const int&						len);
 
+void Ycbcr(
+	const unsigned char						*inputImg,
+	double									**ycbcr,
+	const int&								width,
+	const int&								height);
+
 }
 
 

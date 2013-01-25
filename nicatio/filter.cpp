@@ -442,6 +442,32 @@ void Threshold(
 	}
 }
 
+void Threshold(
+		const double					*inputImg,
+		unsigned char					*outputImg,
+		const int&						lower_limit,
+		const int&						upper_limit,
+		const int&						width,
+		const int&						height,
+		const int&						binary,
+		const int&						bg)
+{
+	if (lower_limit < upper_limit) {
+		int sz = width*height;
+		if (!binary){
+			for (int i=0; i<sz; i++){
+				double temp = inputImg[i];
+				outputImg[i] = (unsigned char) ((temp>=lower_limit && temp<=upper_limit)? temp : bg);
+			}
+		} else {
+			for (int i=0; i<sz; i++){
+				double temp = inputImg[i];
+				outputImg[i] = (unsigned char) ((temp>=lower_limit && temp<=upper_limit)? binary : bg);
+			}
+		}
+	}
+}
+
 void Invert(
 		const unsigned char				*inputImg,
 		unsigned char					*outputImg,
