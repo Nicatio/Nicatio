@@ -5,6 +5,7 @@
  *      Author: HDSP
  */
 
+
 #include "filter.h"
 
 
@@ -745,10 +746,88 @@ void Grayscale(
 	for( int p = 0; p < sz; p++ )
 	{
 		int index = (p<<2)-p;
-		outputImg[p] = (int) (0.299 * (double)inputImg[index] + 0.587 * (double)inputImg[index+1] + 0.114 * (double)inputImg[index+2] + 0.5);
+		outputImg[p] = (int) floor(0.299 * (double)inputImg[index] + 0.587 * (double)inputImg[index+1] + 0.114 * (double)inputImg[index+2] + 0.5);
 	}
 }
 
+void Gamma(
+		const unsigned char				*inputImg,
+		double 							*outputImg,
+		const int&						width,
+		const int&						height,
+		const double&					gamma)
+{
+	int _max = 0;
+	int sz = width*height;
+	for( int p = 0; p < sz; p++ ){
+		outputImg[p] = inputImg[p] & 0xff;
+		if(_max < outputImg[p]) _max = outputImg[p];
+	}
+	if (gamma == 0.0) {
+
+		for( int p = 0; p < sz; p++ )
+		{
+			outputImg[p] = log((double) (outputImg[p] + (1>_max)?1:_max))/256;
+		}
+	} else {
+		for( int p = 0; p < sz; p++ )
+		{
+			outputImg[p] = pow((double)outputImg[p]/255,gamma)*255;
+		}
+	}
+}
+
+void HistEqualize(
+		const unsigned char				*inputImg,
+		unsigned char					*outputImg,
+		const int&						width,
+		const int&						height)
+{
+	int sum = 0;
+	int sz = width*height;
+	int hist[256] = {0};
+    int sum_of_hist[256] = {0};
+
+    for(int i = 0 ; i < sz ; i++ ) hist[inputImg[i]]++;
+
+    for(int i = 0 ; i < 256 ; i++ ) {
+            sum = sum + hist[i] ;
+            sum_of_hist[i] = sum ;
+    }
+
+    for(int i = 0 ; i < sz ; i++ ) {
+		outputImg[i] = sum_of_hist[inputImg[i]] * (255.0/sz);
+    }
+}
+
+void HistEqualize2(
+		const unsigned char				*inputImg,
+		unsigned char					*outputImg,
+		const int&						width,
+		const int&						height)
+{
+	int sum = 0;
+	int sz = width*height;
+	int hist[256] = {0};
+    int sum_of_hist[256] = {0};
+
+    for(int i = 0 ; i < sz ; i++ ) hist[inputImg[i]]++;
+
+	int start = 0;
+	int check = 0;
+    for(int i = 0 ; i < 255 ; i++ ) {
+            sum = sum + hist[i] ;
+            sum_of_hist[i] = sum ;
+			if (!check && sum_of_hist[i]!=0) {start=i;check++;}
+    }
+
+    for(int i = 0 ; i < sz ; i++ ) {
+		unsigned char aa;
+		if (inputImg[i] == start) aa = 0;
+		else aa = sum_of_hist[inputImg[i]-1] * (255.0/sz) ;
+		outputImg[i] = aa;
+    }
+}
 
 }
 

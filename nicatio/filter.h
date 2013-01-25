@@ -119,6 +119,25 @@ void Grayscale(
 		const int&						width,
 		const int&						height);
 
+void Gamma(
+		const unsigned char				*inputImg,
+		double 							*outputImg,
+		const int&						width,
+		const int&						height,
+		const double&					gamma);
+
+void HistEqualize(
+		const unsigned char				*inputImg,
+		unsigned char					*outputImg,
+		const int&						width,
+		const int&						height);
+
+void HistEqualize2(
+		const unsigned char				*inputImg,
+		unsigned char					*outputImg,
+		const int&						width,
+		const int&						height);
+
 }
 
 

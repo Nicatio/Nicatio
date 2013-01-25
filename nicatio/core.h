@@ -7,6 +7,7 @@
 
 #ifndef CORE_H_
 #define CORE_H_
+#include <math.h>
 
 #define UINT unsigned int
 
