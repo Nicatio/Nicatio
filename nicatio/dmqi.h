@@ -8,6 +8,7 @@
 #ifndef DMQI_H_
 #define DMQI_H_
 
+#include <math.h>
 #include "filter.h"
 
 namespace nicatio {
@@ -19,7 +20,21 @@ void DynamicMorphQuotImage(
 		const int&						height,
 		const int&						equalize=0);
 
+void DynamicMorphQuotImage_revision(
+		const unsigned char 			*inputImg,
+		unsigned char					*outputImg,
+		const int&						width,
+		const int&						height,
+		const int&						equalize);
+
 void Reflectance(
+		const unsigned char 			*deno,
+		const unsigned char				*closedeno,
+		unsigned char					*outputImg,
+		const int&						w,
+		const int&						h);
+
+void Reflectance_revision(
 		const unsigned char 			*deno,
 		const unsigned char				*closedeno,
 		unsigned char					*outputImg,

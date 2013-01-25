@@ -73,22 +73,28 @@ int main(int argc, char** argv ){
 	Mat _image7(size,CV_8UC1);
 	Mat _image8(size,CV_8UC1);
 	Mat _image9(size,CV_8UC1);
+	Mat _image9_(size,CV_8UC1);
+	Mat _image10(size,CV_8UC1);
+	Mat _image10_(size,CV_8UC1);
 	nicatio::Grayscale(_image.data,_image6.data,_image.cols,_image.rows);
-	nicatio::HistEqualize(_image6.data,_image7.data,_image.cols,_image.rows);
-	nicatio::HistEqualize2(_image6.data,_image8.data,_image.cols,_image.rows);
+	nicatio::Denoise(_image6.data,_image7.data,_image.cols,_image.rows);
+	nicatio::DynamicClosing(_image7.data,_image8.data,_image.cols,_image.rows);
 	for (int j=0;j<iter;j++){
-		nicatio::DynamicMorphQuotImage(_image6.data,_image9.data,_image.cols,_image.rows, 2);
+		nicatio::DynamicMorphQuotImage(_image6.data,_image9_.data,_image.cols,_image.rows, 2);
+		nicatio::DynamicMorphQuotImage_revision(_image6.data,_image9.data,_image.cols,_image.rows, 2);
+		nicatio::Threshold(_image9.data,_image10.data,0,58,_image.cols,_image.rows,0xff,0x00);
+		nicatio::Threshold(_image9_.data,_image10_.data,0,58,_image.cols,_image.rows,0xff,0x00);
 		cout<<j<<endl;
 	}
 
 	namedWindow( "e", CV_WINDOW_AUTOSIZE );
-	imshow( "e", _image6 );
+	imshow( "e", _image9_ );
 	namedWindow( "f", CV_WINDOW_AUTOSIZE );
-	imshow( "f", _image7 );
+	imshow( "f", _image10_ );
 	namedWindow( "g", CV_WINDOW_AUTOSIZE );
-	imshow( "g", _image8 );
+	imshow( "g", _image9 );
 	namedWindow( "h", CV_WINDOW_AUTOSIZE );
-	imshow( "h", _image9 );
+	imshow( "h", _image10 );
 	waitKey(0);
 	return e;
 }

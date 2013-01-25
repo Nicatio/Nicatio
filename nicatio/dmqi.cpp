@@ -43,6 +43,54 @@ void DynamicMorphQuotImage(
 	delete [] dc;
 }
 
+
+void DynamicMorphQuotImage_revision(
+		const unsigned char 			*inputImg,
+		unsigned char					*outputImg,
+		const int&						width,
+		const int&						height,
+		const int&						equalize)
+{
+	int sz = width*height;
+	unsigned char *deno = new unsigned char[sz];
+	unsigned char *dc = new unsigned char[sz];
+	//unsigned char *med = new unsigned char[sz];
+	unsigned char *refTemp;
+
+	Denoise        (inputImg, deno, width, height);
+	DynamicClosing (deno,     dc,   width, height);
+
+
+	if (!equalize) refTemp = outputImg;
+	else refTemp = new unsigned char[sz];
+
+	Reflectance_revision (deno, dc, refTemp, width, height);
+
+//	if (equalize == 1) {
+//		MedianFilter(refTemp,med,width,height);
+//		HistEqualize (med, outputImg, width, height);
+//		delete [] med;
+//		delete [] refTemp;
+//	} else if (equalize == 2) {
+//		MedianFilter(refTemp,med,width,height);
+//		HistEqualize2 (med, outputImg, width, height);
+//		delete [] med;
+//		delete [] refTemp;
+//	}
+	if (equalize == 1) {
+		HistEqualize (refTemp, outputImg, width, height);
+		delete [] refTemp;
+	} else if (equalize == 2) {
+		HistEqualize2 (refTemp, outputImg, width, height);
+		delete [] refTemp;
+	}
+
+	delete [] deno;
+	delete [] dc;
+}
+
+
+
 void Reflectance(
 		const unsigned char 			*deno,
 		const unsigned char				*closedeno,
@@ -55,7 +103,33 @@ void Reflectance(
 	unsigned char *ptrCloseDeno = (unsigned char*) closedeno;
 	unsigned char *ptrOutputImg = (unsigned char*) outputImg;
 	for(int i=0; i<sz; i++){
-		double a = (double)(*(ptrDeno++)&0xff)/((double)(*(ptrCloseDeno++)&0xff)+0.0001);
+		double a = (double)(*(ptrDeno++))/((double)(*(ptrCloseDeno++))+0.0001);
+		if (a>2) a=2/a;
+		int b = a * 128.0;
+		*(ptrOutputImg++) = b;
+	}
+}
+
+void Reflectance_revision(
+		const unsigned char 			*deno,
+		const unsigned char				*closedeno,
+		unsigned char					*outputImg,
+		const int&						w,
+		const int&						h)
+{
+	int sz = w*h;
+    unsigned char *ptrDeno = (unsigned char*) deno;
+	unsigned char *ptrCloseDeno = (unsigned char*) closedeno;
+	unsigned char *ptrOutputImg = (unsigned char*) outputImg;
+	for(int i=0; i<sz; i++,ptrDeno++,ptrCloseDeno++){
+		//double a = 255 /((double)(*(ptrCloseDeno++)&0xff)+0.0001 +255-  (double)(*(ptrDeno++)&0xff));
+		double a;
+		if (*(ptrDeno)<255)
+			a = 50 /(  (double)(*(ptrDeno)));
+		else
+			a = (double)(*(ptrDeno))/((double)(*(ptrCloseDeno))+0.0001);
+
+
 		if (a>2) a=2/a;
 		int b = a * 128.0;
 		*(ptrOutputImg++) = b;
@@ -268,7 +342,7 @@ void DynamicClosing(
 
 	for (int i=0; i<sz; i++){
 		if((double)d[7][i]>(double)d[12][i]*alpha) outputImg[i] = d[7][i];
-		if((double)d[7][i]>(double)d[12][i]*beta&&(double)d[7][i]<=(double)d[12][i]*alpha) outputImg[i] = d[10][i];
+		if(((double)d[7][i]>(double)d[12][i]*beta)&&((double)d[7][i]<=(double)d[12][i]*alpha)) outputImg[i] = d[10][i];
 		else outputImg[i] = d[12][i];
 	}
 
