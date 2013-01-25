@@ -19,10 +19,16 @@ unsigned char Median(
 		const int&						len);
 
 void Ycbcr(
-	const unsigned char						*inputImg,
-	double									**ycbcr,
-	const int&								width,
-	const int&								height);
+		const unsigned char				*inputImg,
+		double							**ycbcr,
+		const int&						width,
+		const int&						height);
+
+double Lightness(
+		const unsigned char 			*inputImg,
+		const int&						width,
+		const int&						height,
+		const int&						channel);
 
 }
 

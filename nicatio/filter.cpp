@@ -22,12 +22,13 @@ void MorphColor (
 	int sz = width*height;
 	unsigned char *r=new unsigned char[sz],*g=new unsigned char[sz],*b=new unsigned char[sz];
 	unsigned char *_r=new unsigned char[sz],*_g=new unsigned char[sz],*_b=new unsigned char[sz];
+	unsigned char *ptrInputImg = (unsigned char*) inputImg;
+	unsigned char *ptrOutputImg = (unsigned char*) outputImg;
 
 	for(int i=0; i<sz; i++){
-		int index = (i<<4) - i;
-		r[i] = inputImg[index];
-		g[i] = inputImg[index+1];
-		b[i] = inputImg[index+2];
+		r[i] = *(ptrInputImg++);
+		g[i] = *(ptrInputImg++);
+		b[i] = *(ptrInputImg++);
 	}
 
 	(*pf)(r,_r,width,height);
@@ -35,10 +36,9 @@ void MorphColor (
 	(*pf)(b,_b,width,height);
 
 	for(int i=0; i<sz; i++){
-		int index = (i<<4) - i;
-		outputImg[index]   = _r[i];
-		outputImg[index+1] = _g[i];
-		outputImg[index+2] = _b[i];
+		*(ptrOutputImg++) = _r[i];
+		*(ptrOutputImg++) = _g[i];
+		*(ptrOutputImg++) = _b[i];
 	}
 
 	delete [] r;
@@ -376,49 +376,6 @@ void Opening (
 	}
 }
 
-void DynamicClosing(
-		const unsigned char				*inputImg,
-		unsigned char					*outputImg,
-		const int&						w,
-		const int&						h,
-		const double&					alpha,
-		const double&					beta)
-{
-	int sz = w*h;
-	unsigned char **d = new unsigned char*[13];
-	for (int i=0; i<13; i++){
-		d[i] = new unsigned char[sz];
-	}
-
-	Dilation(inputImg,d[0],w,h);
-	Dilation(d[0],d[1],w,h);
-	Dilation(d[1],d[2],w,h);
-	Dilation(d[2],d[3],w,h);
-
-	Erosion(d[3],d[4],w,h);
-	Erosion(d[4],d[5],w,h);
-	Erosion(d[5],d[6],w,h);
-	Erosion(d[6],d[7],w,h);
-
-	Erosion(d[2],d[8],w,h);
-	Erosion(d[8],d[9],w,h);
-	Erosion(d[9],d[10],w,h);
-
-	Erosion(d[1],d[11],w,h);
-	Erosion(d[11],d[12],w,h);
-
-	for (int i=0; i<sz; i++){
-		if((double)d[7][i]>(double)d[12][i]*alpha) outputImg[i] = d[7][i];
-		if((double)d[7][i]>(double)d[12][i]*beta&&(double)d[7][i]<=(double)d[12][i]*alpha) outputImg[i] = d[10][i];
-		else outputImg[i] = d[12][i];
-	}
-
-	for (int i=0; i<13; i++){
-		delete [] d[i];
-	}
-	delete [] d;
-}
-
 void Threshold(
 		const unsigned char				*inputImg,
 		unsigned char					*outputImg,
@@ -429,17 +386,20 @@ void Threshold(
 		const int&						binary,
 		const int&						bg)
 {
+	unsigned char *ptrInputImg = (unsigned char*) inputImg;
+	unsigned char *ptrOutputImg = (unsigned char*) outputImg;
+
 	if (lower_limit < upper_limit) {
 		int sz = width*height;
 		if (!binary){
 			for (int i=0; i<sz; i++){
-				unsigned char temp = inputImg[i];
-				outputImg[i] = (temp>=lower_limit && temp<=upper_limit)? temp : bg;
+				unsigned char temp = *(ptrInputImg++);
+				*(ptrOutputImg++) = (temp>=lower_limit && temp<=upper_limit)? temp : bg;
 			}
 		} else {
 			for (int i=0; i<sz; i++){
-				unsigned char temp = inputImg[i];
-				outputImg[i] = (temp>=lower_limit && temp<=upper_limit)? 0xff : bg;
+				unsigned char temp = *(ptrInputImg++);
+				*(ptrOutputImg++) = (temp>=lower_limit && temp<=upper_limit)? binary : bg;
 			}
 		}
 	}
@@ -455,17 +415,19 @@ void Threshold(
 		const int&						binary,
 		const int&						bg)
 {
+	double *ptrInputImg = (double*) inputImg;
+	double *ptrOutputImg = (double*) outputImg;
+	int sz = width*height;
 	if (lower_limit < upper_limit) {
-		int sz = width*height;
 		if (!binary){
 			for (int i=0; i<sz; i++){
-				double temp = inputImg[i];
-				outputImg[i] = (unsigned char) ((temp>=lower_limit && temp<=upper_limit)? temp : bg);
+				double temp = *(ptrInputImg++);
+				*(ptrOutputImg++) = (unsigned char) ((temp>=lower_limit && temp<=upper_limit)? temp : bg);
 			}
 		} else {
 			for (int i=0; i<sz; i++){
-				double temp = inputImg[i];
-				outputImg[i] = (unsigned char) ((temp>=lower_limit && temp<=upper_limit)? binary : bg);
+				double temp = *(ptrInputImg++);
+				*(ptrOutputImg++) = (unsigned char) ((temp>=lower_limit && temp<=upper_limit)? binary : bg);
 			}
 		}
 	}
@@ -475,10 +437,17 @@ void Invert(
 		const unsigned char				*inputImg,
 		unsigned char					*outputImg,
 		const int&						width,
-		const int&						height)
+		const int&						height,
+		const int&						channel)
 {
 	int sz = width*height;
-	for (int i=0; i<sz; i++) outputImg[i] = 0xff - inputImg[i];
+	double *ptrInputImg = (double*) inputImg;
+	double *ptrOutputImg = (double*) outputImg;
+	int f = 0xff;
+	if (channel == 2) f = 0xffff;
+	if (channel == 3) f = 0xffffff;
+
+	for (int i=0; i<sz; i++) *(ptrOutputImg++) = f - *(ptrInputImg++);
 }
 
 void MedianFilter(
@@ -743,10 +712,16 @@ void Grayscale(
 		const int&						height)
 {
 	int sz = width*height;
+	unsigned char *ptrInputImg = (unsigned char*) inputImg;
+	unsigned char *ptrOutputImg = (unsigned char*) outputImg;
+
 	for( int p = 0; p < sz; p++ )
 	{
-		int index = (p<<2)-p;
-		outputImg[p] = (int) floor(0.299 * (double)inputImg[index] + 0.587 * (double)inputImg[index+1] + 0.114 * (double)inputImg[index+2] + 0.5);
+		unsigned char a = *(ptrInputImg++);
+		unsigned char b = *(ptrInputImg++);
+		unsigned char c = *(ptrInputImg++);
+
+		*(ptrOutputImg++) = (int) floor(0.299 * a + 0.587 * b + 0.114 * c + 0.5);
 	}
 }
 
@@ -759,20 +734,22 @@ void Gamma(
 {
 	int _max = 0;
 	int sz = width*height;
+	unsigned char *ptrInputImg = (unsigned char*) inputImg;
+	unsigned char *ptrOutputImg = (unsigned char*) outputImg;
+
 	for( int p = 0; p < sz; p++ ){
-		outputImg[p] = inputImg[p] & 0xff;
-		if(_max < outputImg[p]) _max = outputImg[p];
+		if(_max < *(ptrInputImg)) _max = *(ptrInputImg++);
 	}
 	if (gamma == 0.0) {
-
+		ptrInputImg = (unsigned char*) inputImg;
 		for( int p = 0; p < sz; p++ )
 		{
-			outputImg[p] = log((double) (outputImg[p] + (1>_max)?1:_max))/256;
+			*(ptrOutputImg++) = log((double) (*(ptrInputImg++) + (1>_max)?1:_max))/256;
 		}
 	} else {
 		for( int p = 0; p < sz; p++ )
 		{
-			outputImg[p] = pow((double)outputImg[p]/255,gamma)*255;
+			*(ptrOutputImg++) = pow((double) *(ptrInputImg++)/255, gamma)*255;
 		}
 	}
 }
@@ -787,16 +764,22 @@ void HistEqualize(
 	int sz = width*height;
 	int hist[256] = {0};
     int sum_of_hist[256] = {0};
+    unsigned char *ptrInputImg = (unsigned char*) inputImg;
+    unsigned char *ptrOutputImg = (unsigned char*) outputImg;
+    int *ptrHist = hist;
+    int *ptrSOH = sum_of_hist;
 
-    for(int i = 0 ; i < sz ; i++ ) hist[inputImg[i]]++;
+    for(int i = 0 ; i < sz ; i++ ) hist[*(ptrInputImg++)]++;
 
     for(int i = 0 ; i < 256 ; i++ ) {
-            sum = sum + hist[i] ;
-            sum_of_hist[i] = sum ;
+            sum = sum + *(ptrHist++) ;
+            *(ptrSOH++) = sum ;
     }
 
+    ptrInputImg = (unsigned char*) inputImg;
+
     for(int i = 0 ; i < sz ; i++ ) {
-		outputImg[i] = sum_of_hist[inputImg[i]] * (255.0/sz);
+    	*(ptrOutputImg++) = sum_of_hist[*(ptrInputImg++)] * (255.0/sz);
     }
 }
 
@@ -810,22 +793,29 @@ void HistEqualize2(
 	int sz = width*height;
 	int hist[256] = {0};
     int sum_of_hist[256] = {0};
+    unsigned char *ptrInputImg = (unsigned char*) inputImg;
+	unsigned char *ptrOutputImg = (unsigned char*) outputImg;
+	int *ptrHist = hist;
+	int *ptrSOH = sum_of_hist;
 
-    for(int i = 0 ; i < sz ; i++ ) hist[inputImg[i]]++;
+    for(int i = 0 ; i < sz ; i++ ) hist[*(ptrInputImg++)]++;
 
 	int start = 0;
 	int check = 0;
-    for(int i = 0 ; i < 255 ; i++ ) {
-            sum = sum + hist[i] ;
-            sum_of_hist[i] = sum ;
-			if (!check && sum_of_hist[i]!=0) {start=i;check++;}
+    for(int i = 0 ; i < 255 ; i++,ptrSOH++ ) {
+    	sum = sum + *(ptrHist++) ;
+    	*(ptrSOH) = sum ;
+		if (!check && *(ptrSOH)!=0) {start=i;check++;}
     }
 
-    for(int i = 0 ; i < sz ; i++ ) {
+    ptrInputImg = (unsigned char*) inputImg;
+
+
+    for(int i = 0 ; i < sz ; i++,ptrInputImg++ ) {
 		unsigned char aa;
-		if (inputImg[i] == start) aa = 0;
-		else aa = sum_of_hist[inputImg[i]-1] * (255.0/sz) ;
-		outputImg[i] = aa;
+		if (*(ptrInputImg) == start) aa = 0;
+		else aa = sum_of_hist[*(ptrInputImg)-1] * (255.0/sz) ;
+		*(ptrOutputImg++) = aa;
     }
 }
 

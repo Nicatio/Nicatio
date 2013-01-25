@@ -57,14 +57,6 @@ void Opening (
 		const int&						height,
 		const int&						iteration=1);
 
-void DynamicClosing(
-		const unsigned char				*inputImg,
-		unsigned char					*outputImg,
-		const int&						w,
-		const int&						h,
-		const double&					alpha=1.8,
-		const double&					beta=1.35);
-
 void Threshold(
 		const unsigned char				*inputImg,
 		unsigned char					*outputImg,
@@ -89,7 +81,8 @@ void Invert(
 		const unsigned char				*inputImg,
 		unsigned char					*outputImg,
 		const int&						width,
-		const int&						height);
+		const int&						height,
+		const int&						channel);
 
 void MedianFilter(
 		const unsigned char				*inputImg,

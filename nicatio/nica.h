@@ -12,6 +12,7 @@
 #include "filter.h"
 #include "face.h"
 #include "math.h"
+#include "dmqi.h"
 #include "hausdorff.h"
 
 #endif /* NICA_H_ */
