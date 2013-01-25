@@ -7,7 +7,7 @@
 
 #ifndef FILTER_H_
 #define FILTER_H_
-
+#include "core.h"
 #include "math.h"
 
 namespace nicatio {
@@ -92,12 +92,18 @@ void Invert(
 		const int&						height);
 
 void MedianFilter(
-		const unsigned char						*inputImg,
-		unsigned char							*outputImg,
-		const int&								width,
-		const int&								height);
+		const unsigned char				*inputImg,
+		unsigned char					*outputImg,
+		const int&						width,
+		const int&						height);
 
-
+void filter3x3(
+		const unsigned char				*inputImg,
+		unsigned char					*outputImg,
+		const int&						width,
+		const int&						height,
+		int								filter[][3],
+		const int&						offset = 16);
 
 }
 

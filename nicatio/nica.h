@@ -8,7 +8,7 @@
 #ifndef NICA_H_
 #define NICA_H_
 
-#include "core.h"
+
 #include "filter.h"
 #include "face.h"
 #include "math.h"

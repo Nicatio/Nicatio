@@ -479,10 +479,10 @@ void Invert(
 }
 
 void MedianFilter(
-		const unsigned char						*inputImg,
-		unsigned char							*outputImg,
-		const int&								width,
-		const int&								height)
+		const unsigned char				*inputImg,
+		unsigned char					*outputImg,
+		const int&						width,
+		const int&						height)
 {
 
 	int p;
@@ -575,6 +575,124 @@ void MedianFilter(
 	outputImg[p] = Median(temparr,4);
 
 	delete [] temparr;
+}
+
+void filter3x3(
+		const unsigned char				*inputImg,
+		unsigned char					*outputImg,
+		const int&						width,
+		const int&						height,
+		int								filter[][3],
+		const int&						offset)
+{
+
+	int p;
+	int sz = width*height;
+	int gaussianFilter[3][3] = {{1, 2, 1},{2,4,2},{1,2,1}};
+	if (!filter) {
+		filter = gaussianFilter;
+	}
+	int a = filter[0][0]+filter[0][1]+filter[0][2]+filter[1][0]+filter[1][1]+filter[1][2]+filter[2][0]+filter[2][1]+filter[2][2];
+	int b = filter[0][1]+filter[0][2]+filter[1][1]+filter[1][2]+filter[2][1]+filter[2][2];
+	int c = filter[0][0]+filter[0][1]+filter[1][0]+filter[1][1]+filter[2][0]+filter[2][1];
+	int d = filter[1][0]+filter[1][1]+filter[1][2]+filter[2][0]+filter[2][1]+filter[2][2];
+	int e = filter[0][0]+filter[0][1]+filter[0][2]+filter[1][0]+filter[1][1]+filter[1][2];
+	int f = filter[1][1]+filter[1][2]+filter[2][1]+filter[2][2];
+	int g = filter[1][0]+filter[1][1]+filter[2][0]+filter[2][1];
+	int h = filter[0][1]+filter[0][2]+filter[1][1]+filter[1][2];
+	int i = filter[0][0]+filter[0][1]+filter[1][0]+filter[1][1];
+
+	for(int y = 1; y < height-1; y++ ) {
+		for(int x = 1; x < width-1; x++ ) {
+			p = x+y*width;
+			int r = ((((inputImg[p-width-1] *filter[0][0]) +
+			  			(inputImg[p-width]  *filter[0][1]) +
+						(inputImg[p-width+1]*filter[0][2]) +
+						(inputImg[p-1]      *filter[1][0]) +
+						(inputImg[p]        *filter[1][1]) +
+						(inputImg[p+1]      *filter[1][2]) +
+						(inputImg[p+width-1]*filter[2][0]) +
+						(inputImg[p+width]  *filter[2][1]) +
+						(inputImg[p+width+1]*filter[2][2])) / a) + offset);
+			if(r<0) r=0;
+			if(r>255) r=255;
+			outputImg[p] = (unsigned char)r;
+		}
+		p = y*width;
+		int r = ((((inputImg[p-width]  *filter[0][1]) +
+					(inputImg[p-width+1]*filter[0][2]) +
+					(inputImg[p]        *filter[1][1]) +
+					(inputImg[p+1]      *filter[1][2]) +
+					(inputImg[p+width]  *filter[2][1]) +
+					(inputImg[p+width+1]*filter[2][2])) / b) + offset);
+		if(r<0) r=0;
+		if(r>255) r=255;
+		outputImg[p] = (unsigned char)r;
+		p = width-1+y*width;
+		r = ((((inputImg[p-width-1] *filter[0][0]) +
+			  		(inputImg[p-width]  *filter[0][1]) +
+					(inputImg[p-1]      *filter[1][0]) +
+					(inputImg[p]        *filter[1][1]) +
+					(inputImg[p+width-1]*filter[2][0]) +
+					(inputImg[p+width]  *filter[2][1]) ) / c) + offset);
+		if(r<0) r=0;
+		if(r>255) r=255;
+		outputImg[p] = (unsigned char)r;
+	}
+	for(int x = 1; x < width-1; x++ ) {
+		p = x;
+		int r = ((((inputImg[p-1]      *filter[1][0]) +
+					(inputImg[p]        *filter[1][1]) +
+					(inputImg[p+1]      *filter[1][2]) +
+					(inputImg[p+width-1]*filter[2][0]) +
+					(inputImg[p+width]  *filter[2][1]) +
+					(inputImg[p+width+1]*filter[2][2])) / d) + offset);
+		if(r<0) r=0;
+		if(r>255) r=255;
+		outputImg[p] = (unsigned char)r;
+		p = x+(height-1)*width;
+		r = ((((inputImg[p-width-1] *filter[0][0]) +
+			  			(inputImg[p-width]  *filter[0][1]) +
+						(inputImg[p-width+1]*filter[0][2]) +
+						(inputImg[p-1]      *filter[1][0]) +
+						(inputImg[p]        *filter[1][1]) +
+						(inputImg[p+1]      *filter[1][2])) / e) + offset);
+		if(r<0) r=0;
+		if(r>255) r=255;
+		outputImg[p] = (unsigned char)r;
+	}
+	p = 0;
+	int r = ((((inputImg[p]        *filter[1][1]) +
+				(inputImg[p+1]      *filter[1][2]) +
+				(inputImg[p+width]  *filter[2][1]) +
+				(inputImg[p+width+1]*filter[2][2])) / f) + offset);
+	if(r<0) r=0;
+	if(r>255) r=255;
+	outputImg[p] = (unsigned char)r;
+	p = width-1;
+	r = ((((inputImg[p-1]        *filter[1][0]) +
+				(inputImg[p]      *filter[1][1]) +
+				(inputImg[p+width-1]  *filter[2][0]) +
+				(inputImg[p+width]*filter[2][1])) / g) + offset);
+	if(r<0) r=0;
+	if(r>255) r=255;
+	outputImg[p] = (unsigned char)r;
+	p = (height-1)*width;
+	r = ((((inputImg[p-width] *filter[0][1]) +
+			  	(inputImg[p-width+1]  *filter[0][2]) +
+				(inputImg[p]      *filter[1][1]) +
+				(inputImg[p+1]        *filter[1][2])) / h) + offset);
+	if(r<0) r=0;
+	if(r>255) r=255;
+	outputImg[p] = (unsigned char)r;
+		p = sz-1;
+	r = ((((inputImg[p-width-1] *filter[0][0]) +
+			  	(inputImg[p-width]  *filter[0][1]) +
+				(inputImg[p-1]      *filter[1][0]) +
+				(inputImg[p]        *filter[1][1])) / i) + offset);
+	if(r<0) r=0;
+	if(r>255) r=255;
+	outputImg[p] = (unsigned char)r;
 }
 
 
