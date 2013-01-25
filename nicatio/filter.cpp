@@ -23,9 +23,10 @@ void MorphColor (
 	unsigned char *_r=new unsigned char[sz],*_g=new unsigned char[sz],*_b=new unsigned char[sz];
 
 	for(int i=0; i<sz; i++){
-		r[i] = inputImg[i*3];
-		g[i] = inputImg[i*3+1];
-		b[i] = inputImg[i*3+2];
+		int index = (i<<4) - i;
+		r[i] = inputImg[index];
+		g[i] = inputImg[index+1];
+		b[i] = inputImg[index+2];
 	}
 
 	(*pf)(r,_r,width,height);
@@ -33,9 +34,10 @@ void MorphColor (
 	(*pf)(b,_b,width,height);
 
 	for(int i=0; i<sz; i++){
-		outputImg[i*3]   = _r[i];
-		outputImg[i*3+1] = _g[i];
-		outputImg[i*3+2] = _b[i];
+		int index = (i<<4) - i;
+		outputImg[index]   = _r[i];
+		outputImg[index+1] = _g[i];
+		outputImg[index+2] = _b[i];
 	}
 
 	delete [] r;
@@ -695,6 +697,57 @@ void filter3x3(
 	outputImg[p] = (unsigned char)r;
 }
 
+void filter3x3Color (
+		const unsigned char				*inputImg,
+		unsigned char					*outputImg,
+		const int&						width,
+		const int&						height,
+		int								filter[][3],
+		const int&						offset)
+{
+	int sz = width*height;
+	unsigned char *r=new unsigned char[sz],*g=new unsigned char[sz],*b=new unsigned char[sz];
+	unsigned char *_r=new unsigned char[sz],*_g=new unsigned char[sz],*_b=new unsigned char[sz];
+
+	for(int i=0; i<sz; i++){
+		int index = (i<<2) - i;
+		r[i] = inputImg[index];
+		g[i] = inputImg[index+1];
+		b[i] = inputImg[index+2];
+	}
+
+	filter3x3(r,_r,width,height,filter,offset);
+	filter3x3(g,_g,width,height,filter,offset);
+	filter3x3(b,_b,width,height,filter,offset);
+
+	for(int i=0; i<sz; i++){
+		int index = (i<<2) - i;
+		outputImg[index]   = _r[i];
+		outputImg[index+1] = _g[i];
+		outputImg[index+2] = _b[i];
+	}
+
+	delete [] r;
+	delete [] g;
+	delete [] b;
+	delete [] _r;
+	delete [] _g;
+	delete [] _b;
+}
+
+void Grayscale(
+		const unsigned char				*inputImg,
+		unsigned char					*outputImg,
+		const int&						width,
+		const int&						height)
+{
+	int sz = width*height;
+	for( int p = 0; p < sz; p++ )
+	{
+		int index = (p<<2)-p;
+		outputImg[p] = (int) (0.299 * (double)inputImg[index] + 0.587 * (double)inputImg[index+1] + 0.114 * (double)inputImg[index+2] + 0.5);
+	}
+}
 
 
 }

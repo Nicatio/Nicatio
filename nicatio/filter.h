@@ -103,7 +103,21 @@ void filter3x3(
 		const int&						width,
 		const int&						height,
 		int								filter[][3],
-		const int&						offset = 16);
+		const int&						offset = 0);
+
+void filter3x3Color(
+		const unsigned char				*inputImg,
+		unsigned char					*outputImg,
+		const int&						width,
+		const int&						height,
+		int								filter[][3],
+		const int&						offset = 0);
+
+void Grayscale(
+		const unsigned char				*inputImg,
+		unsigned char					*outputImg,
+		const int&						width,
+		const int&						height);
 
 }
 
