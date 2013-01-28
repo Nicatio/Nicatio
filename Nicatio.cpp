@@ -2,7 +2,8 @@
 #include <fstream>
 #include "cv.h"
 #include "highgui.h"
-#include "nicatio/nica.h"
+#include "nicatio/nicatio.h"
+#include "cvnica/cvnica.h"
 
 using namespace cv;
 using namespace std;
@@ -27,34 +28,42 @@ int main(int argc, char* argv[] ){
 	    }
 
 	    for (unsigned int i = 0;i < files.size();i++) {
-	    	int iter = 1;
+	    //for (unsigned int i = 0;i < 1;i++) {
+	    	//int iter = 1;
 	        cout << files[i] << endl;
 	    	Mat _image;
 	    	_image = imread( dir+"\\"+files[i], -1 );
 	    	Size size =  _image.size();
 
-	    	Mat _image_6(size,CV_8UC1);
-	    	Mat _image6(size,CV_8UC1);
-	    	Mat _image7(size,CV_8UC1);
-	    	Mat _image8(size,CV_8UC1);
-	    	Mat _image9(size,CV_8UC1);
-	    	Mat _image9_(size,CV_8UC1);
-	    	Mat _image10(size,CV_8UC1);
-	    	Mat _image10_(size,CV_8UC1);
-	    	Mat _image11(size,CV_8UC1);
-	    	nicatio::Grayscale(_image.data,_image_6.data,_image.cols,_image.rows);
+	    	Mat _gray(size,CV_8UC1);
+	    	Mat _dmqi_o(size,CV_8UC1);
+	    	Mat _deno1(size,CV_8UC1);
+	    	Mat _dmqi(size,CV_8UC1);
+	    	nicatio::Grayscale(_image.data, _gray.data,_image.cols,_image.rows);
+	    	//cvNica::Denoise(_gray,_deno2);
+	    	nicatio::Denoise( _gray.data,_deno1.data,_image.cols,_image.rows);
+	    	nicatio::DynamicMorphQuotImage( _gray.data,_dmqi_o.data,_image.cols,_image.rows, 0);
+			cvNica::DynamicMorphQuotImage(_deno1,_dmqi);
+
+//
+//	    	namedWindow( "a", CV_WINDOW_AUTOSIZE );
+//	    	imshow( "a", _dmqi_o );
+//	    	namedWindow( "b", CV_WINDOW_AUTOSIZE );
+//	    	imshow( "b", _dmqi );
+//			waitKey(0);
+
 	    	//nicatio::filter3x3(_image_6.data,_image6.data,_image.cols,_image.rows,NULL);
 	    	//nicatio::Denoise(_image_6.data,_image7.data,_image.cols,_image.rows);
 	    	//nicatio::DynamicClosing(_image7.data,_image8.data,_image.cols,_image.rows);
-	    	for (int j=0;j<iter;j++){
-	    		nicatio::DynamicMorphQuotImage(_image_6.data,_image9_.data,_image.cols,_image.rows, 0);
-	    		//nicatio::DynamicMorphQuotImage_revision(_image_6.data,_image9.data,_image.cols,_image.rows, 0);
-	    		//nicatio::Threshold(_image9.data,_image10.data,0,185,_image.cols,_image.rows,0,0xff);
-	    		//nicatio::Threshold(_image9_.data,_image10_.data,0,185,_image.cols,_image.rows,0,0xff);
-	    		//nicatio::MedianFilter(_image10_.data,_image11.data,_image.cols,_image.rows);
-	    		//cout<<j<<endl;
-	    	}
-			imwrite("E:\\yalebDB\\new\\"+files[i]+"_processed.bmp",_image9_);
+//	    	for (int j=0;j<iter;j++){
+//	    		nicatio::DynamicMorphQuotImage( _gray.data,_image9_.data,_image.cols,_image.rows, 0);
+//	    		//nicatio::DynamicMorphQuotImage_revision(_image_6.data,_image9.data,_image.cols,_image.rows, 0);
+//	    		//nicatio::Threshold(_image9.data,_image10.data,0,185,_image.cols,_image.rows,0,0xff);
+//	    		//nicatio::Threshold(_image9_.data,_image10_.data,0,185,_image.cols,_image.rows,0,0xff);
+//	    		//nicatio::MedianFilter(_image10_.data,_image11.data,_image.cols,_image.rows);
+//	    		//cout<<j<<endl;
+//	    	}
+			imwrite("E:\\yalebDB\\new2\\"+files[i]+"_processed.bmp",_dmqi);
 
 
 	    }

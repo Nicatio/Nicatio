@@ -1,4 +1,5 @@
-Nicatio.d Nicatio.o: ../Nicatio.cpp C:\opencv2.4.3\include\opencv/cv.h \
+cvnica/cvdmqi.d cvnica/cvdmqi.o: ../cvnica/cvdmqi.cpp ../cvnica/cvdmqi.h \
+ C:\opencv2.4.3\include\opencv/cv.h \
  C:\opencv2.4.3\include\opencv/opencv2/core/core_c.h \
  C:\opencv2.4.3\include\opencv/opencv2/core/types_c.h \
  C:\opencv2.4.3\include\opencv/opencv2/core/core.hpp \
@@ -54,11 +55,9 @@ Nicatio.d Nicatio.o: ../Nicatio.cpp C:\opencv2.4.3\include\opencv/cv.h \
  C:\opencv2.4.3\include\opencv/highgui.h \
  C:\opencv2.4.3\include\opencv/opencv2/highgui/highgui_c.h \
  C:\opencv2.4.3\include\opencv/opencv2/highgui/highgui.hpp \
- C:\opencv2.4.3\include\opencv/opencv2/highgui/highgui_c.h \
- ../nicatio/nicatio.h ../nicatio/filter.h ../nicatio/core.h \
- ../nicatio/math.h ../nicatio/face.h ../nicatio/dmqi.h \
- ../nicatio/hausdorff.h ../nicatio/io.h ../cvnica/cvnica.h \
- ../cvnica/cvdmqi.h
+ C:\opencv2.4.3\include\opencv/opencv2/highgui/highgui_c.h
+
+../cvnica/cvdmqi.h:
 
 C:\opencv2.4.3\include\opencv/cv.h:
 
@@ -173,23 +172,3 @@ C:\opencv2.4.3\include\opencv/opencv2/highgui/highgui_c.h:
 C:\opencv2.4.3\include\opencv/opencv2/highgui/highgui.hpp:
 
 C:\opencv2.4.3\include\opencv/opencv2/highgui/highgui_c.h:
-
-../nicatio/nicatio.h:
-
-../nicatio/filter.h:
-
-../nicatio/core.h:
-
-../nicatio/math.h:
-
-../nicatio/face.h:
-
-../nicatio/dmqi.h:
-
-../nicatio/hausdorff.h:
-
-../nicatio/io.h:
-
-../cvnica/cvnica.h:
-
-../cvnica/cvdmqi.h:
