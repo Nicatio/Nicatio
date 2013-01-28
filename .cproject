@@ -27,7 +27,7 @@
 								<option id="gnu.cpp.compiler.option.include.paths.433155256" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;C:\opencv2.4.3\include\opencv&quot;"/>
 								</option>
-								<option id="gnu.cpp.compiler.option.optimization.level.955231778" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.option.optimization.level.955231778" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" value="gnu.cpp.compiler.optimization.level.most" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.debugging.level.1895154542" name="Debug Level" superClass="gnu.cpp.compiler.option.debugging.level" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.cygwin.657053479" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input.cygwin"/>
 							</tool>
@@ -58,7 +58,7 @@
 									<listOptionValue builtIn="false" value="libopencv_ts"/>
 									<listOptionValue builtIn="false" value="libopencv_videostab"/>
 								</option>
-								<option id="gnu.cpp.link.option.paths.2135198884" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
+								<option id="gnu.cpp.link.option.paths.2135198884" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
 									<listOptionValue builtIn="false" value="&quot;C:\opencv2.4.3\lib&quot;"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.1435246682" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
@@ -153,8 +153,12 @@
 			<resource resourceType="PROJECT" workspacePath="/Nicatio"/>
 		</configuration>
 	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 	<storageModule moduleId="scannerConfiguration">
 		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cygwin.exe.debug.359018201;cdt.managedbuild.config.gnu.cygwin.exe.debug.359018201.;cdt.managedbuild.tool.gnu.c.compiler.cygwin.base.1403301595;cdt.managedbuild.tool.gnu.c.compiler.input.cygwin.2014320270">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCWinManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cygwin.exe.release.58038927;cdt.managedbuild.config.gnu.cygwin.exe.release.58038927.;cdt.managedbuild.tool.gnu.c.compiler.cygwin.exe.release.901396920;cdt.managedbuild.tool.gnu.c.compiler.input.cygwin.782467672">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCWinManagedMakePerProjectProfileC"/>
 		</scannerConfigBuildInfo>
@@ -177,6 +181,8 @@
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cygwin.exe.debug.359018201;cdt.managedbuild.config.gnu.cygwin.exe.debug.359018201.;cdt.managedbuild.tool.gnu.c.compiler.cygwin.exe.debug.1046028805;cdt.managedbuild.tool.gnu.c.compiler.input.cygwin.1220373219">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCWinManagedMakePerProjectProfileC"/>
 		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cygwin.exe.debug.359018201;cdt.managedbuild.config.gnu.cygwin.exe.debug.359018201.;cdt.managedbuild.tool.gnu.cpp.compiler.cygwin.base.1674273773;cdt.managedbuild.tool.gnu.cpp.compiler.input.cygwin.657053479">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCWinManagedMakePerProjectProfileCPP"/>
+		</scannerConfigBuildInfo>
 	</storageModule>
-	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 </cproject>

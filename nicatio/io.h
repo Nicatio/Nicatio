@@ -20,13 +20,17 @@ using namespace std;
 
 namespace nicatio {
 
+
+
+
 int getdir (
 		string 							dir,
 		vector<string> 					&files);
 int getdirType (
 		string 							dir,
 		string 							type,
-		vector<string> 					&files);
+		vector<string> 					&files,
+		const int&						abLoca);
 
 
 }
