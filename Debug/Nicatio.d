@@ -57,7 +57,7 @@ Nicatio.d Nicatio.o: ../Nicatio.cpp C:\opencv2.4.3\include\opencv/cv.h \
  C:\opencv2.4.3\include\opencv/opencv2/highgui/highgui_c.h \
  ../nicatio/nica.h ../nicatio/filter.h ../nicatio/core.h \
  ../nicatio/math.h ../nicatio/face.h ../nicatio/dmqi.h \
- ../nicatio/hausdorff.h
+ ../nicatio/hausdorff.h ../nicatio/io.h
 
 C:\opencv2.4.3\include\opencv/cv.h:
 
@@ -186,3 +186,5 @@ C:\opencv2.4.3\include\opencv/opencv2/highgui/highgui_c.h:
 ../nicatio/dmqi.h:
 
 ../nicatio/hausdorff.h:
+
+../nicatio/io.h:

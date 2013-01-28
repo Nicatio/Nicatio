@@ -7,7 +7,7 @@
 
 #include "dmqi.h"
 
-
+using namespace std;
 namespace nicatio {
 
 void DynamicMorphQuotImage(
@@ -98,14 +98,18 @@ void Reflectance(
 		const int&						w,
 		const int&						h)
 {
+
 	int sz = w*h;
     unsigned char *ptrDeno = (unsigned char*) deno;
 	unsigned char *ptrCloseDeno = (unsigned char*) closedeno;
 	unsigned char *ptrOutputImg = (unsigned char*) outputImg;
-	for(int i=0; i<sz; i++){
-		double a = (double)(*(ptrDeno++))/((double)(*(ptrCloseDeno++))+0.0001);
-		if (a>2) a=2/a;
-		int b = a * 128.0;
+
+	for(int i=0; i<sz; i++,ptrDeno++,ptrCloseDeno++){
+		unsigned char k = (*(ptrDeno));
+		unsigned char l = (*(ptrCloseDeno));
+
+		double a = (double)k/((double)l+0.0001);
+		int b = a * 255.0;
 		*(ptrOutputImg++) = b;
 	}
 }
@@ -121,19 +125,34 @@ void Reflectance_revision(
     unsigned char *ptrDeno = (unsigned char*) deno;
 	unsigned char *ptrCloseDeno = (unsigned char*) closedeno;
 	unsigned char *ptrOutputImg = (unsigned char*) outputImg;
+//	for(int i=0; i<sz; i++,ptrDeno++,ptrCloseDeno++){
+//		double a = 255 /((double)(*(ptrCloseDeno)&0xff)+0.0001 +255-  (double)(*(ptrDeno)&0xff));
+//
+//		if (a>2) a=2/a;
+//		int b = a * 128.0;
+//		*(ptrOutputImg++) = b;
+//	}
+	ofstream fout;
+	fout.open("dtxt.txt",ios::out | ios::binary);
 	for(int i=0; i<sz; i++,ptrDeno++,ptrCloseDeno++){
-		//double a = 255 /((double)(*(ptrCloseDeno++)&0xff)+0.0001 +255-  (double)(*(ptrDeno++)&0xff));
-		double a;
-		if (*(ptrDeno)<255)
-			a = 50 /(  (double)(*(ptrDeno)));
-		else
-			a = (double)(*(ptrDeno))/((double)(*(ptrCloseDeno))+0.0001);
+		unsigned char k = (*(ptrDeno));
+		unsigned char l = (*(ptrCloseDeno));
+
+		double a = (double)(k+1)/((double)l+1+0.0001);
+		//double a = 15 /((double)l+0.0001 +15-  (double)k);
+		if (!k && !l) a = 0;
+		//if ((k-l)<2 && (k-l)>-2) a = 1;
 
 
-		if (a>2) a=2/a;
-		int b = a * 128.0;
+
+
+		int b = a * 255.0;
+		fout<<(double)k<<"/"<<(double)l<<" = "<<b<<"\r\n";
+		//fout<<15<<"/"<<((double)l+0.0001 +15-  (double)k)<<" = "<<b<<"\r\n";
 		*(ptrOutputImg++) = b;
 	}
+	fout.close();
+
 }
 
 void Denoise(

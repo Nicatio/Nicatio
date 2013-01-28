@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include "cv.h"
 #include "highgui.h"
 #include "nicatio/nica.h"
@@ -6,23 +7,43 @@
 using namespace cv;
 using namespace std;
 
-int main(int argc, char** argv ){
+int main(int argc, char* argv[] ){
 
 	int e;
 
 	if (argv[1]==NULL) {
 
-		cout<< "No image data1 \n" <<endl;
+		cout<< "Error: Invalid file location \n" <<endl;
 		return -1;
 	}
+
+
+	string dir = string(argv[1]);
+	    vector<string> files = vector<string>();
+
+	    nicatio::getdirType(dir,"bmp",files);
+
+	    for (unsigned int i = 0;i < files.size();i++) {
+	        cout << files[i] << endl;
+	    }
+
+
+//	if (argv[2]==NULL) {
+//
+//		cout<< "Error: Invalid file name \n" <<endl;
+//		return -1;
+//	}
+//
+//	ofstream fin;
+//
+//
+//	fin.open(strcat(argv[1],argv[2]),ios::out | ios::binary);
+//
+//	fin<<"afdfasdf";
+//	fin.close();
+
 	Mat _image, _image2, _image3;
 	_image = imread( argv[1], -1 );
-
-	if( argc != 2 || !_image.data )
-	{
-		cout<< "No image data2 \n" <<endl;
-		return -1;
-	}
 
 	/*
 	int dilation_size = 1;
@@ -69,6 +90,7 @@ int main(int argc, char** argv ){
 //	namedWindow( "c", CV_WINDOW_AUTOSIZE );
 //	imshow( "c", _image5 );
 
+	Mat _image_6(size,CV_8UC1);
 	Mat _image6(size,CV_8UC1);
 	Mat _image7(size,CV_8UC1);
 	Mat _image8(size,CV_8UC1);
@@ -76,21 +98,24 @@ int main(int argc, char** argv ){
 	Mat _image9_(size,CV_8UC1);
 	Mat _image10(size,CV_8UC1);
 	Mat _image10_(size,CV_8UC1);
-	nicatio::Grayscale(_image.data,_image6.data,_image.cols,_image.rows);
+	Mat _image11(size,CV_8UC1);
+	nicatio::Grayscale(_image.data,_image_6.data,_image.cols,_image.rows);
+	nicatio::filter3x3(_image_6.data,_image6.data,_image.cols,_image.rows,NULL);
 	nicatio::Denoise(_image6.data,_image7.data,_image.cols,_image.rows);
 	nicatio::DynamicClosing(_image7.data,_image8.data,_image.cols,_image.rows);
 	for (int j=0;j<iter;j++){
-		nicatio::DynamicMorphQuotImage(_image6.data,_image9_.data,_image.cols,_image.rows, 2);
-		nicatio::DynamicMorphQuotImage_revision(_image6.data,_image9.data,_image.cols,_image.rows, 2);
-		nicatio::Threshold(_image9.data,_image10.data,0,58,_image.cols,_image.rows,0xff,0x00);
-		nicatio::Threshold(_image9_.data,_image10_.data,0,58,_image.cols,_image.rows,0xff,0x00);
+		nicatio::DynamicMorphQuotImage(_image6.data,_image9_.data,_image.cols,_image.rows, 0);
+		nicatio::DynamicMorphQuotImage_revision(_image6.data,_image9.data,_image.cols,_image.rows, 0);
+		nicatio::Threshold(_image9.data,_image10.data,0,185,_image.cols,_image.rows,0,0xff);
+		nicatio::Threshold(_image9_.data,_image10_.data,0,185,_image.cols,_image.rows,0,0xff);
+		nicatio::MedianFilter(_image10_.data,_image11.data,_image.cols,_image.rows);
 		cout<<j<<endl;
 	}
 
 	namedWindow( "e", CV_WINDOW_AUTOSIZE );
 	imshow( "e", _image9_ );
 	namedWindow( "f", CV_WINDOW_AUTOSIZE );
-	imshow( "f", _image10_ );
+	imshow( "f", _image11 );
 	namedWindow( "g", CV_WINDOW_AUTOSIZE );
 	imshow( "g", _image9 );
 	namedWindow( "h", CV_WINDOW_AUTOSIZE );

@@ -8,6 +8,8 @@
 #ifndef DMQI_H_
 #define DMQI_H_
 
+
+#include <fstream>
 #include <math.h>
 #include "filter.h"
 

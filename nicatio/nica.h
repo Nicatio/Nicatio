@@ -14,5 +14,6 @@
 #include "math.h"
 #include "dmqi.h"
 #include "hausdorff.h"
+#include "io.h"
 
 #endif /* NICA_H_ */

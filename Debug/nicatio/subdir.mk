@@ -8,6 +8,7 @@ CPP_SRCS += \
 ../nicatio/face.cpp \
 ../nicatio/filter.cpp \
 ../nicatio/hausdorff.cpp \
+../nicatio/io.cpp \
 ../nicatio/math.cpp 
 
 OBJS += \
@@ -15,6 +16,7 @@ OBJS += \
 ./nicatio/face.o \
 ./nicatio/filter.o \
 ./nicatio/hausdorff.o \
+./nicatio/io.o \
 ./nicatio/math.o 
 
 CPP_DEPS += \
@@ -22,6 +24,7 @@ CPP_DEPS += \
 ./nicatio/face.d \
 ./nicatio/filter.d \
 ./nicatio/hausdorff.d \
+./nicatio/io.d \
 ./nicatio/math.d 
 
 
