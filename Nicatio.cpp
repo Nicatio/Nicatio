@@ -35,15 +35,38 @@ int main(int argc, char* argv[] ){
 	    	_image = imread( dir+"\\"+files[i], -1 );
 	    	Size size =  _image.size();
 
+	    	for(int df=1;df<=9;df++){
+	    		_image.col(0).copyTo(_image.col(df));
+	    	}
+
+
+//	    	_image.col(1).setTo(_image.col(0));
+//	    	_image.col(2).setTo(_image.col(0));
+//	    	_image.col(3).setTo(_image.col(0));
+//	    	_image.col(4).setTo(_image.col(0));
+//	    	_image.col(5).setTo(_image.col(0));
+//	    	_image.col(6).setTo(_image.col(0));
+//	    	_image.col(7).setTo(_image.col(0));
+//	    	_image.col(8).setTo(_image.col(0));
+//	    	_image.col(9).setTo(_image.col(0));
+
+
+
 	    	Mat _gray(size,CV_8UC1);
+	    	Mat _histeq(size,CV_8UC1);
+	    	Mat _histeq2(size,CV_8UC1);
 	    	Mat _dmqi_o(size,CV_8UC1);
 	    	Mat _deno1(size,CV_8UC1);
 	    	Mat _dmqi(size,CV_8UC1);
 	    	nicatio::Grayscale(_image.data, _gray.data,_image.cols,_image.rows);
+	    	//nicatio::HistEqualize2(_gray.data,_histeq.data,_image.cols,_image.rows);
 	    	//cvNica::Denoise(_gray,_deno2);
 	    	nicatio::Denoise( _gray.data,_deno1.data,_image.cols,_image.rows);
-	    	nicatio::DynamicMorphQuotImage( _gray.data,_dmqi_o.data,_image.cols,_image.rows, 0);
+	    	nicatio::DynamicMorphQuotImage( _histeq.data,_dmqi_o.data,_image.cols,_image.rows, 0);
 			cvNica::DynamicMorphQuotImage(_deno1,_dmqi);
+			//nicatio::HistEqualize2(_dmqi.data,_histeq2.data,_image.cols,_image.rows);
+
+			equalizeHist(_dmqi,_histeq2);
 
 //
 //	    	namedWindow( "a", CV_WINDOW_AUTOSIZE );
@@ -63,7 +86,8 @@ int main(int argc, char* argv[] ){
 //	    		//nicatio::MedianFilter(_image10_.data,_image11.data,_image.cols,_image.rows);
 //	    		//cout<<j<<endl;
 //	    	}
-			imwrite("E:\\yalebDB\\new2\\"+files[i]+"_processed.bmp",_dmqi);
+			//imwrite("E:\\yalebDB\\new4\\"+files[i]+"_processed.bmp",_dmqi);
+			imwrite("E:\\yalebDB\\new4\\"+files[i]+"_processed.bmp",_histeq2);
 
 
 	    }

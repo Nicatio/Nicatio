@@ -30,8 +30,7 @@ void Reflectance(
 	Mat deno = _deno.getMat();
 	Mat closedeno = _closedeno.getMat();
 	deno.convertTo(deno, CV_32F);
-	closedeno.convertTo(closedeno, CV_32F);
-	closedeno = closedeno+0.0001;
+	closedeno.convertTo(closedeno, CV_32F, 1,0.0001);
 	deno /= closedeno;
 	deno*=255.0;
 	deno.convertTo(_dst,CV_8UC1);
