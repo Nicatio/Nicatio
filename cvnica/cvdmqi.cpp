@@ -9,6 +9,85 @@
 
 namespace cvNica {
 
+void lineHistEqualize(
+		InputArray 						_src,
+		OutputArray						_dst)
+{
+	Mat src = _src.getMat();
+	_dst.create(src.size(),src.type());
+	Mat dst = _dst.getMat();
+	int cols = src.cols;
+	for (int i=0; i<cols; i++){
+		equalizeHist(src.col(i),dst.col(i));
+	}
+}
+
+void lineHistEqualize2(
+		InputArray 						_src,
+		OutputArray						_dst)
+{
+	Mat src = _src.getMat();
+	_dst.create(src.size(),src.type());
+	Mat dst = _dst.getMat();
+
+	Mat rowHistEqResult = Mat(src.size(),src.type());
+	Mat colHistEqResult = Mat(src.size(),src.type());
+
+//	double *rowMin = new double[src.rows];
+//	double *rowMax = new double[src.rows];
+//	double *colMin = new double[src.cols];
+//	double *colMax = new double[src.cols];
+	double *rowDiff = new double[src.cols];
+	double *colDiff = new double[src.cols];
+
+	double *ptrRowDiff = rowDiff;
+	double *ptrColDiff = colDiff;
+
+	unsigned char *ptrSrc = src.data;
+	unsigned char *ptrDst = dst.data;
+	unsigned char *ptrColHistEqResult = colHistEqResult.data;
+	unsigned char *ptrRowHistEqResult = rowHistEqResult.data;
+
+	int cols = src.cols;
+	int rows = src.rows;
+	int sz = cols*rows;
+	int gamma = 2;
+	for (int i=0; i<cols; i++,ptrColDiff++){
+		double _min,_max;
+		Mat temp = src.col(i);
+		minMaxLoc(temp,&_min,&_max);
+		*(ptrColDiff) = _max - _min;
+		equalizeHist(temp,colHistEqResult.col(i));
+
+	}
+	for (int i=0; i<rows; i++,ptrRowDiff++){
+		double _min,_max;
+		Mat temp = src.row(i);
+		minMaxLoc(temp,&_min,&_max);
+		*(ptrRowDiff) = _max - _min;
+		equalizeHist(temp,rowHistEqResult.row(i));
+	}
+
+	ptrRowDiff = rowDiff-1;
+	ptrColDiff = colDiff;
+
+	for (int i=0; i<sz; i++,ptrDst++,ptrColHistEqResult++,ptrRowHistEqResult++,ptrColDiff++){
+		if(i%cols==0) {
+			ptrColDiff = colDiff;
+			ptrRowDiff++;
+		}
+		double a = *(ptrColDiff);
+		double b = *(ptrRowDiff);
+		*(ptrDst) =  (*(ptrColHistEqResult) * a + *(ptrRowHistEqResult) * b + *(ptrSrc))/(a+b+1);
+		//*(ptrDst) =  (*(ptrColHistEqResult) * (a) + *(ptrSrc))/(a+255);
+		//*(ptrDst) =  (*(ptrColHistEqResult) > *(ptrRowHistEqResult)) ? *(ptrRowHistEqResult) : *(ptrColHistEqResult);
+	}
+
+
+}
+
+
+
 void DynamicMorphQuotImage(
 		InputArray 						_src,
 		OutputArray						_dst,

@@ -9,6 +9,8 @@
 #define CVNICA_H_
 
 #include "cvdmqi.h"
+#include "GuidedFilter.h"
+#include "AdaptiveManifoldFilter.h"
 
 
 #endif /* CVNICA_H_ */

@@ -15,6 +15,14 @@ using namespace cv;
 
 namespace cvNica {
 
+void lineHistEqualize(
+		InputArray 						_src,
+		OutputArray						_dst);
+
+void lineHistEqualize2(
+		InputArray 						_src,
+		OutputArray						_dst);
+
 void DynamicMorphQuotImage(
 		InputArray 						_src,
 		OutputArray						_dst,

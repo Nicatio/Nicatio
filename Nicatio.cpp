@@ -8,9 +8,156 @@
 using namespace cv;
 using namespace std;
 
+#define ENHANCE
+#define FEATHERING
+#define FLASH
+#define SMOOTHING
+
+
 int main(int argc, char* argv[] ){
 
-	int e=0;
+//	CGuidedFilter guidedfilter;
+//
+//		Mat l, p, q;
+//		vector< Mat > l_split, p_split, q_split;
+//
+//		double t = 0.0;
+//
+//		int r = 0;
+//		double eps = 0.0;
+//
+//	#ifdef ENHANCE
+//		t = (double)getTickCount();
+//
+//		cout << "guided filtering(enhance) start" << endl;
+//
+//		l = imread(".\\img_enhancement\\tulips.bmp", CV_LOAD_IMAGE_COLOR);
+//		p = l;
+//
+//		r = 16;
+//		eps = pow(0.1, 2);
+//
+//		split(Mat::zeros(l.rows, l.cols, CV_8UC3), q_split);
+//		split(l, l_split);
+//		split(p, p_split);
+//
+//		for (int i = 0; i < 3; i++)
+//		{
+//			q_split[i] = guidedfilter.filtering(l_split[i], p_split[i], r, eps);
+//		}
+//
+//		merge(q_split, q);
+//
+//		Mat sub = l - q;
+//		Mat l_enhanced = sub.mul(5) + q;
+//
+//		resize(l, l, Size(l.cols/2, l.rows/2));
+//		resize(q, q, Size(q.cols/2, q.rows/2));
+//		resize(l_enhanced, l_enhanced, Size(l_enhanced.cols/2, l_enhanced.rows/2));
+//		namedWindow( "tulips", CV_WINDOW_AUTOSIZE );
+//		namedWindow( "reference", CV_WINDOW_AUTOSIZE );
+//		namedWindow( "enhanced", CV_WINDOW_AUTOSIZE );
+//		imshow("tulips", l);
+//		imshow("reference", q);
+//		imshow("enhanced", l_enhanced);
+//
+//		t = ((double)getTickCount() - t)/getTickFrequency();
+//		cout << "guided filtering(enhance) finish.\nelapsed time : " << t << " sec" << endl;
+//	#endif
+//
+//	#ifdef FEATHERING
+//		t = (double)getTickCount();
+//
+//		cout << "guided filtering(feathering) start" << endl;
+//
+//		l = imread(".\\img_feathering\\toy.bmp", CV_LOAD_IMAGE_COLOR);
+//		p = imread(".\\img_feathering\\toy-mask.bmp", CV_LOAD_IMAGE_GRAYSCALE);
+//
+//		r = 60;
+//		eps = pow(10.0, -6);
+//
+//		q = guidedfilter.filtering(l, p, r, eps);
+//
+//
+//		namedWindow( "toy", CV_WINDOW_AUTOSIZE );
+//		namedWindow( "mask", CV_WINDOW_AUTOSIZE );
+//		namedWindow( "feather", CV_WINDOW_AUTOSIZE );
+//
+//		imshow("toy", l);
+//		imshow("mask", p);
+//		imshow("feather", q);
+//
+//		t = ((double)getTickCount() - t)/getTickFrequency();
+//		cout << "guided filtering(feathering) finish.\nelapsed time : " << t << " sec" << endl;
+//	#endif
+//
+//	#ifdef FLASH
+//		t = (double)getTickCount();
+//
+//		cout << "guided filtering(flash) start" << endl;
+//
+//		l = imread(".\\img_flash\\cave-flash.bmp", CV_LOAD_IMAGE_COLOR);
+//		p = imread(".\\img_flash\\cave-noflash.bmp", CV_LOAD_IMAGE_COLOR);
+//
+//		r = 8;
+//		eps = pow(0.02, 2);
+//
+//		split(Mat::zeros(l.rows, l.cols, CV_8UC3), q_split);
+//		split(l, l_split);
+//		split(p, p_split);
+//
+//		for (int i = 0; i < 3; i++)
+//		{
+//			q_split[i] = guidedfilter.filtering(l_split[i], p_split[i], r, eps);
+//		}
+//
+//		merge(q_split, q);
+//
+//
+//		namedWindow( "flash", CV_WINDOW_AUTOSIZE );
+//		namedWindow( "no flash", CV_WINDOW_AUTOSIZE );
+//		namedWindow( "adjustment", CV_WINDOW_AUTOSIZE );
+//
+//		imshow("flash", l);
+//		imshow("no flash", p);
+//		imshow("adjustment", q);
+//
+//		t = ((double)getTickCount() - t)/getTickFrequency();
+//		cout << "guided filtering(flash) finish.\nelapsed time : " << t << " sec" << endl;
+//	#endif
+//
+//	#ifdef SMOOTHING
+//		t = (double)getTickCount();
+//
+//		cout << "guided filtering(smoothing) start" << endl;
+//
+//		l = imread(".\\img_smoothing\\cat.bmp", CV_LOAD_IMAGE_GRAYSCALE);
+//		p = l;
+//
+//		r = 4;
+//		eps = pow(0.2, 2);		// try eps = 0.1^2, 0.2^2, 0.4^2
+//
+//		q = guidedfilter.filtering(l, p, r, eps);
+//
+//		namedWindow( "cat", CV_WINDOW_AUTOSIZE );
+//		namedWindow( "smoothed", CV_WINDOW_AUTOSIZE );
+//		imshow("cat", l);
+//		imshow("smoothed", q);
+//
+//		t = ((double)getTickCount() - t)/getTickFrequency();
+//		cout << "guided filtering(smoothing) finish.\nelapsed time : " << t << " sec" << endl;
+//	#endif
+//
+//		waitKey(0);
+//
+//		return 0;
+
+
+
+
+
+
+	//int e=0;
 
 	if (argv[1]==NULL) {
 
@@ -26,6 +173,11 @@ int main(int argc, char* argv[] ){
 			cout<< "Error: Invalid file location \n" <<endl;
 			return -1;
 	    }
+	    Mat _image1;
+	   	_image1 = imread( dir+"\\"+files[0], -1 );
+	   	Size size1 =  _image1.size();
+	   	Mat _gray1(size1,CV_8UC1);
+	   	nicatio::Grayscale(_image1.data, _gray1.data,_image1.cols,_image1.rows);
 
 	    for (unsigned int i = 0;i < files.size();i++) {
 	    //for (unsigned int i = 0;i < 1;i++) {
@@ -35,9 +187,11 @@ int main(int argc, char* argv[] ){
 	    	_image = imread( dir+"\\"+files[i], -1 );
 	    	Size size =  _image.size();
 
-	    	for(int df=1;df<=9;df++){
-	    		_image.col(0).copyTo(_image.col(df));
-	    	}
+
+//	    	for(int df=1;df<=9;df++){
+//	    		_image.col(0).copyTo(_image.col(df));
+//	    		_image.row(0).copyTo(_image.row(df));
+//	    	}
 
 
 //	    	_image.col(1).setTo(_image.col(0));
@@ -52,23 +206,100 @@ int main(int argc, char* argv[] ){
 
 
 
+
+
+
 	    	Mat _gray(size,CV_8UC1);
 	    	Mat _histeq(size,CV_8UC1);
 	    	Mat _histeq2(size,CV_8UC1);
 	    	Mat _dmqi_o(size,CV_8UC1);
 	    	Mat _deno1(size,CV_8UC1);
+	    	Mat _deno2(size,CV_8UC1);
 	    	Mat _dmqi(size,CV_8UC1);
 	    	nicatio::Grayscale(_image.data, _gray.data,_image.cols,_image.rows);
 	    	//nicatio::HistEqualize2(_gray.data,_histeq.data,_image.cols,_image.rows);
 	    	//cvNica::Denoise(_gray,_deno2);
-	    	nicatio::Denoise( _gray.data,_deno1.data,_image.cols,_image.rows);
-	    	nicatio::DynamicMorphQuotImage( _histeq.data,_dmqi_o.data,_image.cols,_image.rows, 0);
-			cvNica::DynamicMorphQuotImage(_deno1,_dmqi);
+	    	//nicatio::Denoise( _gray.data,_deno1.data,_image.cols,_image.rows);
+	    	//nicatio::DynamicMorphQuotImage( _histeq.data,_dmqi_o.data,_image.cols,_image.rows, 0);
+
 			//nicatio::HistEqualize2(_dmqi.data,_histeq2.data,_image.cols,_image.rows);
 
-			equalizeHist(_dmqi,_histeq2);
 
+
+
+
+//			vector< Mat > l_split, p_split, q_split;
+//			l = _image;
+//			p = l;
 //
+//			r = 16;
+//			eps = pow(0.1, 2);
+//
+//			split(Mat::zeros(l.rows, l.cols, CV_8UC3), q_split);
+//			split(l, l_split);
+//			split(p, p_split);
+//
+//			for (int i = 0; i < 3; i++)
+//			{
+//				q_split[i] = guidedfilter.filtering(l_split[i], p_split[i], r, eps);
+//			}
+//
+//			merge(q_split, q);
+//
+//			Mat sub = l - q;
+//			Mat l_enhanced = sub.mul(5) + q;
+
+
+			//resize(l, l, Size(l.cols/2, l.rows/2));
+			//resize(q, q, Size(q.cols/2, q.rows/2));
+			//resize(l_enhanced, l_enhanced, Size(l_enhanced.cols/2, l_enhanced.rows/2));
+//			namedWindow( "tulips", CV_WINDOW_AUTOSIZE );
+//			namedWindow( "reference", CV_WINDOW_AUTOSIZE );
+//			namedWindow( "enhanced", CV_WINDOW_AUTOSIZE );
+//			imshow("tulips", l);
+//			imshow("reference", q);
+//			imshow("enhanced", l_enhanced);
+
+
+
+
+
+
+	    	//GaussianBlur(_gray,_gray,Size(5,5),0.0,0.0);
+			cvNica::lineHistEqualize2(_gray,_deno1);
+	    	//Canny(_gray,_deno1,0.4,70);
+			nicatio::Denoise( _gray.data,_deno2.data,_image.cols,_image.rows);
+
+
+			//equalizeHist(_histeq2,_histeq2);
+			//equalizeHist(_dmqi,_histeq2);
+
+
+			CGuidedFilter guidedfilter;
+
+			Mat l=_gray1, p, q;
+
+			int r = 0;
+			double eps = 0.0;
+
+			p = _gray;
+
+			r = 2;
+			eps = pow(10.0, -6);
+
+
+			q = guidedfilter.filtering(l, p, r, eps);
+
+			Mat sub = l - q;
+			Mat l_enhanced = sub.mul(5) + q;
+
+
+			cvNica::Reflectance(_gray,q,_deno1);
+			equalizeHist(_deno1,_deno1);
+//
+
+			cvNica::DynamicMorphQuotImage(q,_histeq2);
+			equalizeHist(_histeq2,_histeq2);
 //	    	namedWindow( "a", CV_WINDOW_AUTOSIZE );
 //	    	imshow( "a", _dmqi_o );
 //	    	namedWindow( "b", CV_WINDOW_AUTOSIZE );
@@ -87,10 +318,27 @@ int main(int argc, char* argv[] ){
 //	    		//cout<<j<<endl;
 //	    	}
 			//imwrite("E:\\yalebDB\\new4\\"+files[i]+"_processed.bmp",_dmqi);
-			imwrite("E:\\yalebDB\\new4\\"+files[i]+"_processed.bmp",_histeq2);
+			//imwrite("E:\\yalebDB\\new4\\"+files[i]+"_processed1.bmp",_gray);
+			//imwrite("E:\\yalebDB\\new4\\"+files[i]+"_processed2.bmp",q);
+			//imwrite("E:\\yalebDB\\new4\\"+files[i]+"_processed3.bmp",_deno1);
+			//imwrite("E:\\yalebDB\\new4\\"+files[i]+"_processed.bmp",q);
+			imwrite("E:\\yalebDB\\new4\\"+files[i]+"_processed4.bmp",_histeq2);
 
 
 	    }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 //	if (argv[2]==NULL) {
@@ -186,5 +434,6 @@ int main(int argc, char* argv[] ){
 //	namedWindow( "h", CV_WINDOW_AUTOSIZE );
 //	imshow( "h", _image10 );
 //	waitKey(0);
-	return e;
+//	return e;
+	return 0;
 }

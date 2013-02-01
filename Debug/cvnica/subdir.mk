@@ -4,12 +4,18 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
+../cvnica/AdaptiveManifoldFilter.cpp \
+../cvnica/GuidedFilter.cpp \
 ../cvnica/cvdmqi.cpp 
 
 OBJS += \
+./cvnica/AdaptiveManifoldFilter.o \
+./cvnica/GuidedFilter.o \
 ./cvnica/cvdmqi.o 
 
 CPP_DEPS += \
+./cvnica/AdaptiveManifoldFilter.d \
+./cvnica/GuidedFilter.d \
 ./cvnica/cvdmqi.d 
 
 
