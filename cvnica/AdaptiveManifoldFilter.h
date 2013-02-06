@@ -22,6 +22,9 @@ public:
 	~AdaptiveManifoldFilter(void);
 
 	Mat minPixelDistToManifoldSquared;
+	Mat sumWKiPsiBlur;
+	Mat sumWKiPsiBlur0;
+	int treeNodesVisited;
 
 	void computeEigenvector(
 			InputArray	 					_XX,
@@ -40,6 +43,7 @@ public:
 			const int 						currentTreeLevel,
 			const int 						treeHeight,
 			const int 						numPcaIterations);
+
 	void RFFilter(
 			InputArray						_img,
 			InputArray						_img0,
@@ -47,6 +51,17 @@ public:
 			const double					sigmaS,
 			const double					sigmaR,
 			InputArray						_jointImage=NULL);
+
+	void TransformedDomainRecursiveFilter_Horizontal(
+			InputArray						_Fin,
+			InputArray						_dHdx,
+			const double					sigmaHi,
+			OutputArray						_Fout);
+
+	void hFilter(
+			InputArray						_Fin,
+			const double					sigma,
+			OutputArray						_Fout);
 };
 
 };
