@@ -10,6 +10,7 @@
 
 #include "cv.h"
 #include "vector"
+#include "limits"
 
 using namespace cv;
 
@@ -25,6 +26,20 @@ public:
 	Mat sumWKiPsiBlur;
 	Mat sumWKiPsiBlur0;
 	int treeNodesVisited;
+	void process(
+			InputArray						_Fin,
+			OutputArray						_Fout,
+			const double					sigmaS,
+			const double					sigmaR,
+			InputArray						_FJoint,
+			int 							treeHeight=0,
+			int 							numPcaIterations=0);
+
+	void computeManifoldTreeHeight(
+			const double					sigmaS,
+			const double					sigmaR,
+			int&							Height);//,
+			//int								K);
 
 	void computeEigenvector(
 			InputArray	 					_XX,
@@ -46,21 +61,25 @@ public:
 
 	void RFFilter(
 			InputArray						_img,
-			InputArray						_img0,
 			OutputArray						_F,
 			const double					sigmaS,
 			const double					sigmaR,
-			InputArray						_jointImage=NULL);
+			InputArray						_jointImage);
 
 	void TransformedDomainRecursiveFilter_Horizontal(
 			InputArray						_Fin,
 			InputArray						_dHdx,
 			const double					sigmaHi,
-			OutputArray						_Fout);
+			OutputArray						_Fout,
+			const int						secondPhaseShift=0);
 
 	void hFilter(
 			InputArray						_Fin,
 			const double					sigma,
+			OutputArray						_Fout);
+
+	void channelSum(
+			InputArray						_Fin,
 			OutputArray						_Fout);
 };
 

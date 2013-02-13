@@ -157,175 +157,217 @@ int main(int argc, char* argv[] ){
 
 
 
+
+
+		    Mat _image1;
+		   	_image1 = imread(argv[1], -1 );
+
+		   	double sigmaS = 24;
+		   	double sigmaR = 0.2;
+
+		   	cvNica::AdaptiveManifoldFilter amf;
+
+		   	Mat result;
+		   	Mat empty;
+
+		   	amf.process(_image1,result,sigmaS,sigmaR,empty);
+
+
+
+
+
+
+
+
+
+
+
+//// location ::::::::::::: E:\yalebDB\
+
+
 	//int e=0;
 
-	if (argv[1]==NULL) {
-
-		cout<< "Error: Invalid file location \n" <<endl;
-		return -1;
-	}
-
-
-	string dir = string(argv[1]);
-	    vector<string> files = vector<string>();
-
-	    if (nicatio::getdirType(dir,"bmp",files,0)) {
-			cout<< "Error: Invalid file location \n" <<endl;
-			return -1;
-	    }
-	    Mat _image1;
-	   	_image1 = imread( dir+"\\"+files[0], -1 );
-	   	Size size1 =  _image1.size();
-	   	Mat _gray1(size1,CV_8UC1);
-	   	nicatio::Grayscale(_image1.data, _gray1.data,_image1.cols,_image1.rows);
-
-	    for (unsigned int i = 0;i < files.size();i++) {
-	    //for (unsigned int i = 0;i < 1;i++) {
-	    	//int iter = 1;
-	        cout << files[i] << endl;
-	    	Mat _image;
-	    	_image = imread( dir+"\\"+files[i], -1 );
-	    	Size size =  _image.size();
-
-
-//	    	for(int df=1;df<=9;df++){
-//	    		_image.col(0).copyTo(_image.col(df));
-//	    		_image.row(0).copyTo(_image.row(df));
-//	    	}
-
-
-//	    	_image.col(1).setTo(_image.col(0));
-//	    	_image.col(2).setTo(_image.col(0));
-//	    	_image.col(3).setTo(_image.col(0));
-//	    	_image.col(4).setTo(_image.col(0));
-//	    	_image.col(5).setTo(_image.col(0));
-//	    	_image.col(6).setTo(_image.col(0));
-//	    	_image.col(7).setTo(_image.col(0));
-//	    	_image.col(8).setTo(_image.col(0));
-//	    	_image.col(9).setTo(_image.col(0));
-
-
-
-
-
-
-	    	Mat _gray(size,CV_8UC1);
-	    	Mat _histeq(size,CV_8UC1);
-	    	Mat _histeq2(size,CV_8UC1);
-	    	Mat _dmqi_o(size,CV_8UC1);
-	    	Mat _deno1(size,CV_8UC1);
-	    	Mat _deno2(size,CV_8UC1);
-	    	Mat _dmqi(size,CV_8UC1);
-	    	nicatio::Grayscale(_image.data, _gray.data,_image.cols,_image.rows);
-	    	//nicatio::HistEqualize2(_gray.data,_histeq.data,_image.cols,_image.rows);
-	    	//cvNica::Denoise(_gray,_deno2);
-	    	//nicatio::Denoise( _gray.data,_deno1.data,_image.cols,_image.rows);
-	    	//nicatio::DynamicMorphQuotImage( _histeq.data,_dmqi_o.data,_image.cols,_image.rows, 0);
-
-			//nicatio::HistEqualize2(_dmqi.data,_histeq2.data,_image.cols,_image.rows);
-
-
-
-
-
-//			vector< Mat > l_split, p_split, q_split;
-//			l = _image;
-//			p = l;
+//	if (argv[1]==NULL) {
 //
-//			r = 16;
-//			eps = pow(0.1, 2);
+//		cout<< "Error: Invalid file location \n" <<endl;
+//		return -1;
+//	}
 //
-//			split(Mat::zeros(l.rows, l.cols, CV_8UC3), q_split);
-//			split(l, l_split);
-//			split(p, p_split);
 //
-//			for (int i = 0; i < 3; i++)
-//			{
-//				q_split[i] = guidedfilter.filtering(l_split[i], p_split[i], r, eps);
-//			}
+//	string dir = string(argv[1]);
+//	    vector<string> files = vector<string>();
 //
-//			merge(q_split, q);
+//	    if (nicatio::getdirType(dir,"bmp",files,0)) {
+//			cout<< "Error: Invalid file location \n" <<endl;
+//			return -1;
+//	    }
+//	    Mat _image1;
+//	   	_image1 = imread( dir+"\\"+files[0], -1 );
+//
+//	   	double sigmaS = 24;
+//	   	double sigmaR = 0.2;
+//
+//	   	cvNica::AdaptiveManifoldFilter amf;
+//
+//	   	Mat result;
+//
+//	   	amf.process(_image1,result,sigmaS,sigmaR);
+//
+//
+//
+//
+//
+//	   	Size size1 =  _image1.size();
+//	   	Mat _gray1(size1,CV_8UC1);
+//	   	nicatio::Grayscale(_image1.data, _gray1.data,_image1.cols,_image1.rows);
+//
+//	    for (unsigned int i = 0;i < files.size();i++) {
+//	    //for (unsigned int i = 0;i < 1;i++) {
+//	    	//int iter = 1;
+//	        cout << files[i] << endl;
+//	    	Mat _image;
+//	    	_image = imread( dir+"\\"+files[i], -1 );
+//	    	Size size =  _image.size();
+//
+//
+////	    	for(int df=1;df<=9;df++){
+////	    		_image.col(0).copyTo(_image.col(df));
+////	    		_image.row(0).copyTo(_image.row(df));
+////	    	}
+//
+//
+////	    	_image.col(1).setTo(_image.col(0));
+////	    	_image.col(2).setTo(_image.col(0));
+////	    	_image.col(3).setTo(_image.col(0));
+////	    	_image.col(4).setTo(_image.col(0));
+////	    	_image.col(5).setTo(_image.col(0));
+////	    	_image.col(6).setTo(_image.col(0));
+////	    	_image.col(7).setTo(_image.col(0));
+////	    	_image.col(8).setTo(_image.col(0));
+////	    	_image.col(9).setTo(_image.col(0));
+//
+//
+//
+//
+//
+//
+//	    	Mat _gray(size,CV_8UC1);
+//	    	Mat _histeq(size,CV_8UC1);
+//	    	Mat _histeq2(size,CV_8UC1);
+//	    	Mat _dmqi_o(size,CV_8UC1);
+//	    	Mat _deno1(size,CV_8UC1);
+//	    	Mat _deno2(size,CV_8UC1);
+//	    	Mat _dmqi(size,CV_8UC1);
+//	    	nicatio::Grayscale(_image.data, _gray.data,_image.cols,_image.rows);
+//	    	//nicatio::HistEqualize2(_gray.data,_histeq.data,_image.cols,_image.rows);
+//	    	//cvNica::Denoise(_gray,_deno2);
+//	    	//nicatio::Denoise( _gray.data,_deno1.data,_image.cols,_image.rows);
+//	    	//nicatio::DynamicMorphQuotImage( _histeq.data,_dmqi_o.data,_image.cols,_image.rows, 0);
+//
+//			//nicatio::HistEqualize2(_dmqi.data,_histeq2.data,_image.cols,_image.rows);
+//
+//
+//
+//
+//
+////			vector< Mat > l_split, p_split, q_split;
+////			l = _image;
+////			p = l;
+////
+////			r = 16;
+////			eps = pow(0.1, 2);
+////
+////			split(Mat::zeros(l.rows, l.cols, CV_8UC3), q_split);
+////			split(l, l_split);
+////			split(p, p_split);
+////
+////			for (int i = 0; i < 3; i++)
+////			{
+////				q_split[i] = guidedfilter.filtering(l_split[i], p_split[i], r, eps);
+////			}
+////
+////			merge(q_split, q);
+////
+////			Mat sub = l - q;
+////			Mat l_enhanced = sub.mul(5) + q;
+//
+//
+//			//resize(l, l, Size(l.cols/2, l.rows/2));
+//			//resize(q, q, Size(q.cols/2, q.rows/2));
+//			//resize(l_enhanced, l_enhanced, Size(l_enhanced.cols/2, l_enhanced.rows/2));
+////			namedWindow( "tulips", CV_WINDOW_AUTOSIZE );
+////			namedWindow( "reference", CV_WINDOW_AUTOSIZE );
+////			namedWindow( "enhanced", CV_WINDOW_AUTOSIZE );
+////			imshow("tulips", l);
+////			imshow("reference", q);
+////			imshow("enhanced", l_enhanced);
+//
+//
+//
+//
+//
+//
+//	    	//GaussianBlur(_gray,_gray,Size(5,5),0.0,0.0);
+//			cvNica::lineHistEqualize2(_gray,_deno1);
+//	    	//Canny(_gray,_deno1,0.4,70);
+//			nicatio::Denoise( _gray.data,_deno2.data,_image.cols,_image.rows);
+//
+//
+//			//equalizeHist(_histeq2,_histeq2);
+//			//equalizeHist(_dmqi,_histeq2);
+//
+//
+//			CGuidedFilter guidedfilter;
+//
+//			Mat l=_gray1, p, q;
+//
+//			int r = 0;
+//			double eps = 0.0;
+//
+//			p = _gray;
+//
+//			r = 2;
+//			eps = pow(10.0, -6);
+//
+//
+//			q = guidedfilter.filtering(l, p, r, eps);
 //
 //			Mat sub = l - q;
 //			Mat l_enhanced = sub.mul(5) + q;
-
-
-			//resize(l, l, Size(l.cols/2, l.rows/2));
-			//resize(q, q, Size(q.cols/2, q.rows/2));
-			//resize(l_enhanced, l_enhanced, Size(l_enhanced.cols/2, l_enhanced.rows/2));
-//			namedWindow( "tulips", CV_WINDOW_AUTOSIZE );
-//			namedWindow( "reference", CV_WINDOW_AUTOSIZE );
-//			namedWindow( "enhanced", CV_WINDOW_AUTOSIZE );
-//			imshow("tulips", l);
-//			imshow("reference", q);
-//			imshow("enhanced", l_enhanced);
-
-
-
-
-
-
-	    	//GaussianBlur(_gray,_gray,Size(5,5),0.0,0.0);
-			cvNica::lineHistEqualize2(_gray,_deno1);
-	    	//Canny(_gray,_deno1,0.4,70);
-			nicatio::Denoise( _gray.data,_deno2.data,_image.cols,_image.rows);
-
-
-			//equalizeHist(_histeq2,_histeq2);
-			//equalizeHist(_dmqi,_histeq2);
-
-
-			CGuidedFilter guidedfilter;
-
-			Mat l=_gray1, p, q;
-
-			int r = 0;
-			double eps = 0.0;
-
-			p = _gray;
-
-			r = 2;
-			eps = pow(10.0, -6);
-
-
-			q = guidedfilter.filtering(l, p, r, eps);
-
-			Mat sub = l - q;
-			Mat l_enhanced = sub.mul(5) + q;
-
-
-			cvNica::Reflectance(_gray,q,_deno1);
-			equalizeHist(_deno1,_deno1);
 //
-
-			cvNica::DynamicMorphQuotImage(q,_histeq2);
-			equalizeHist(_histeq2,_histeq2);
-//	    	namedWindow( "a", CV_WINDOW_AUTOSIZE );
-//	    	imshow( "a", _dmqi_o );
-//	    	namedWindow( "b", CV_WINDOW_AUTOSIZE );
-//	    	imshow( "b", _dmqi );
-//			waitKey(0);
-
-	    	//nicatio::filter3x3(_image_6.data,_image6.data,_image.cols,_image.rows,NULL);
-	    	//nicatio::Denoise(_image_6.data,_image7.data,_image.cols,_image.rows);
-	    	//nicatio::DynamicClosing(_image7.data,_image8.data,_image.cols,_image.rows);
-//	    	for (int j=0;j<iter;j++){
-//	    		nicatio::DynamicMorphQuotImage( _gray.data,_image9_.data,_image.cols,_image.rows, 0);
-//	    		//nicatio::DynamicMorphQuotImage_revision(_image_6.data,_image9.data,_image.cols,_image.rows, 0);
-//	    		//nicatio::Threshold(_image9.data,_image10.data,0,185,_image.cols,_image.rows,0,0xff);
-//	    		//nicatio::Threshold(_image9_.data,_image10_.data,0,185,_image.cols,_image.rows,0,0xff);
-//	    		//nicatio::MedianFilter(_image10_.data,_image11.data,_image.cols,_image.rows);
-//	    		//cout<<j<<endl;
-//	    	}
-			//imwrite("E:\\yalebDB\\new4\\"+files[i]+"_processed.bmp",_dmqi);
-			//imwrite("E:\\yalebDB\\new4\\"+files[i]+"_processed1.bmp",_gray);
-			//imwrite("E:\\yalebDB\\new4\\"+files[i]+"_processed2.bmp",q);
-			//imwrite("E:\\yalebDB\\new4\\"+files[i]+"_processed3.bmp",_deno1);
-			//imwrite("E:\\yalebDB\\new4\\"+files[i]+"_processed.bmp",q);
-			imwrite("E:\\yalebDB\\new4\\"+files[i]+"_processed4.bmp",_histeq2);
-
-
-	    }
+//
+//			cvNica::Reflectance(_gray,q,_deno1);
+//			equalizeHist(_deno1,_deno1);
+////
+//
+//			cvNica::DynamicMorphQuotImage(q,_histeq2);
+//			equalizeHist(_histeq2,_histeq2);
+////	    	namedWindow( "a", CV_WINDOW_AUTOSIZE );
+////	    	imshow( "a", _dmqi_o );
+////	    	namedWindow( "b", CV_WINDOW_AUTOSIZE );
+////	    	imshow( "b", _dmqi );
+////			waitKey(0);
+//
+//	    	//nicatio::filter3x3(_image_6.data,_image6.data,_image.cols,_image.rows,NULL);
+//	    	//nicatio::Denoise(_image_6.data,_image7.data,_image.cols,_image.rows);
+//	    	//nicatio::DynamicClosing(_image7.data,_image8.data,_image.cols,_image.rows);
+////	    	for (int j=0;j<iter;j++){
+////	    		nicatio::DynamicMorphQuotImage( _gray.data,_image9_.data,_image.cols,_image.rows, 0);
+////	    		//nicatio::DynamicMorphQuotImage_revision(_image_6.data,_image9.data,_image.cols,_image.rows, 0);
+////	    		//nicatio::Threshold(_image9.data,_image10.data,0,185,_image.cols,_image.rows,0,0xff);
+////	    		//nicatio::Threshold(_image9_.data,_image10_.data,0,185,_image.cols,_image.rows,0,0xff);
+////	    		//nicatio::MedianFilter(_image10_.data,_image11.data,_image.cols,_image.rows);
+////	    		//cout<<j<<endl;
+////	    	}
+//			//imwrite("E:\\yalebDB\\new4\\"+files[i]+"_processed.bmp",_dmqi);
+//			//imwrite("E:\\yalebDB\\new4\\"+files[i]+"_processed1.bmp",_gray);
+//			//imwrite("E:\\yalebDB\\new4\\"+files[i]+"_processed2.bmp",q);
+//			//imwrite("E:\\yalebDB\\new4\\"+files[i]+"_processed3.bmp",_deno1);
+//			//imwrite("E:\\yalebDB\\new4\\"+files[i]+"_processed.bmp",q);
+//			imwrite("E:\\yalebDB\\new4\\"+files[i]+"_processed4.bmp",_histeq2);
+//
+//
+//	    }
 
 
 
