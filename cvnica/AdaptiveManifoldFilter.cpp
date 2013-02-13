@@ -35,7 +35,6 @@ void AdaptiveManifoldFilter::process(
 		int 							_numPcaIterations)
 {
 	Mat Fin = _Fin.getMat();
-	Mat Fout = _Fout.getMat();
 	Mat FJoint;
 	Fin.convertTo(Fin,CV_32FC3);
 	Fin /= 255;
@@ -68,35 +67,57 @@ void AdaptiveManifoldFilter::process(
 	Mat cluster1;
 
 	hFilter(FJoint,sigmaS,eta1);
-	cluster1 = Mat::zeros(Fin.size(),CV_32FC1);
-	add(cluster1,1,cluster1);
+	cluster1 = Mat::zeros(Fin.size(),CV_8UC1);
+	add(cluster1,255,cluster1);
 
 	int currentTreeLevel = 1;
+	Mat empty;
+	buildManifoldsAndPerformFiltering(Fin, FJoint, empty, eta1, cluster1, sigmaS, sigmaR, currentTreeLevel, treeHeight, numPcaIterations);
 
-	buildManifoldsAndPerformFiltering(Fin, FJoint, Fout, eta1, cluster1, sigmaS, sigmaR, currentTreeLevel, treeHeight, numPcaIterations);
+	Mat tildeGSplit[3],tildeG;
+	Mat sumWKiPsiBlurSplit[3];
 
+	split(sumWKiPsiBlur,sumWKiPsiBlurSplit);
 
-	float *ptr = (float*) sumWKiPsiBlur0.data;
-	for (int i=0; i<40; i++){
-		std::cout<<" sumWKiPsiBlur0"<<i<<": "<<*(ptr++)<<std::endl;
+	for (int i=0; i<3; i++){
+		divide (sumWKiPsiBlurSplit[i],sumWKiPsiBlur0,tildeGSplit[i]);
 	}
+	merge (tildeGSplit,3,tildeG);
 
-	ptr = (float*) sumWKiPsiBlur.data;
-	for (int i=0; i<40; i++){
-		std::cout<<" sumWKiPsiBlur"<<i<<": "<<*(ptr++)<<std::endl;
-	}
 
-	Mat tildeG;
-
-	divide(sumWKiPsiBlur,sumWKiPsiBlur0,tildeG);
+	//divide(sumWKiPsiBlur,sumWKiPsiBlur0,tildeG);
 
 	Mat alpha;
 
 	minPixelDistToManifoldSquared *= (-0.5) / (sigmaR * sigmaR);
 	exp(minPixelDistToManifoldSquared,alpha);
 
-	alpha *= tildeG - Fin;
-	Fout = Fin + alpha;
+
+	Mat tildeGvsFinDiff = tildeG - Fin;
+	Mat tildeGvsFinDiffSplit[3];
+
+	Mat __Fout, __FoutSplit[3];
+	Mat FinSplit[3];
+
+	split (Fin,FinSplit);
+
+	split (tildeGvsFinDiff,tildeGvsFinDiffSplit);
+
+	for (int i = 0; i<3; i++) {
+		__FoutSplit[i] = FinSplit[i] + tildeGvsFinDiffSplit[i].mul(alpha);
+	}
+
+	merge (__FoutSplit,3,__Fout);
+
+	_Fout.create(_Fin.size(),_Fin.type());
+	Mat Fout = _Fout.getMat();
+	__Fout *= 255;
+	Mat ___Fout;
+	__Fout.convertTo(___Fout,_Fin.type());
+
+
+	___Fout.copyTo(Fout);
+
 
 }
 
@@ -110,7 +131,6 @@ void AdaptiveManifoldFilter::computeManifoldTreeHeight(
 	double Lr = 1 - sigmaR;
 	int temp = (int)ceil(Hs*Lr);
 	Height = (2<temp)?temp:2;
-	//K = pow(2,Height)-1;
 }
 
 void AdaptiveManifoldFilter::computeEigenvector(
@@ -123,11 +143,6 @@ void AdaptiveManifoldFilter::computeEigenvector(
 	_p.create(_randVec.size(),_randVec.type());
 	Mat p = _p.getMat();
 	Mat randVec = _randVec.getMat();
-
-	float *ptr = (float*) randVec.data;
-									for (int i=0; i<X.channels(); i++){
-										std::cout<<" randvec"<<i<<": "<<*(ptr++)<<std::endl;
-									}
 
 	int xch = X.channels();
 	Mat t;// = Mat(X.size(),X.type());
@@ -154,18 +169,11 @@ void AdaptiveManifoldFilter::computeEigenvector(
 		}
 		merge(tSplit,3,t);
 		reduce (t,t,0,CV_REDUCE_SUM);
-		ptr = (float*) t.data;
-			for (int i=0; i<3; i++){
-				std::cout<<" t"<<i<<": "<<*(ptr++)<<std::endl;
-			}
 	}
 	divide(t,norm(t),__p);
 	//p = t / norm(t);
 	__p.copyTo(p);
-	ptr = (float*) p.data;
-	for (int i=0; i<12; i++){
-		std::cout<<" t"<<i<<": "<<*(ptr++)<<std::endl;
-	}
+
 }
 
 void AdaptiveManifoldFilter::buildManifoldsAndPerformFiltering(
@@ -180,6 +188,9 @@ void AdaptiveManifoldFilter::buildManifoldsAndPerformFiltering(
 		const int 						treeHeight,
 		const int 						numPcaIterations)
 {
+	float *ptr;
+
+
 	Mat f = _f.getMat();
 	Mat fJoint = _fJoint.getMat();
 	Mat etaK = _etaK.getMat();
@@ -263,7 +274,7 @@ void AdaptiveManifoldFilter::buildManifoldsAndPerformFiltering(
 	resize(wKiPsiBlur,wKiPsiBlur,imageSize);
 	resize(wKiPsiBlur0,wKiPsiBlur0,imageSize);
 
-	float *ptr;
+
 
 	sumWKiPsiBlur += wKiMerge.mul(wKiPsiBlur);
 	sumWKiPsiBlur0 += wKi.mul(wKiPsiBlur0);
@@ -272,10 +283,6 @@ void AdaptiveManifoldFilter::buildManifoldsAndPerformFiltering(
 
 	if (currentTreeLevel < treeHeight) {
 		X = X.reshape( 3,imageSize.width*imageSize.height);
-
-//		Mat zeros = Mat::zeros(1,X.channels(), CV_32FC1);
-//		Mat ones =  Mat::zeros(1,X.channels(), CV_32FC1);
-//		add(ones,1,ones);
 
 		int xch = X.channels();
 		Mat randvecArr[xch];
@@ -289,18 +296,9 @@ void AdaptiveManifoldFilter::buildManifoldsAndPerformFiltering(
 		int fromto[] = {0,0,1,1,2,2};
 		mixChannels (&randvec,1,randvecArr,3,fromto,3);
 
-		//randu(randvec,zeros,ones);
-
-
-
-
 		Mat v1;
 		computeEigenvector(X,numPcaIterations,randvec,v1);
 
-		ptr = (float*) v1.data;
-								for (int i=0; i<X.channels(); i++){
-									std::cout<<" randvec"<<i<<": "<<*(ptr++)<<std::endl;
-								}
 		Mat Xsplit[xch];
 		Mat v1split[xch];
 		Mat dotsplit[xch];
@@ -318,24 +316,21 @@ void AdaptiveManifoldFilter::buildManifoldsAndPerformFiltering(
 		channelSum(dot,dot);
 		dot = dot.reshape(0,jointSize.height);
 
-		ptr = (float*) dot.data;
-		for (int i=0; i<X.channels(); i++){
-			std::cout<<" randvec"<<i<<": "<<*(ptr++)<<std::endl;
-		}
+		Mat _clusterMinus, clusterMinus;
+		Mat _clusterPlus,  clusterPlus;
+		compare(dot,0,_clusterMinus,CMP_LT);
+		compare(dot,0,_clusterPlus,CMP_GE);
+		_clusterMinus /= 255;
+		_clusterPlus /=  255;
 
 
-		Mat clusterMinus;
-		Mat clusterPlus;
-		compare(dot,0,clusterMinus,CMP_LT);
-		compare(dot,0,clusterPlus,CMP_GE);
+		bitwise_and(_clusterMinus,clusterK,_clusterMinus);
+		bitwise_and(_clusterPlus,clusterK,_clusterPlus);
 
-		clusterMinus.convertTo(clusterMinus,clusterK.type());
-		clusterPlus.convertTo(clusterPlus,clusterK.type());
-//		int aaa = clusterMinus.type();
-//		int bbb = clusterK.type();
 
-		bitwise_and(clusterMinus,clusterK,clusterMinus);
-		bitwise_and(clusterPlus,clusterK,clusterPlus);
+		_clusterMinus.convertTo(clusterMinus,CV_32FC1);
+		_clusterPlus.convertTo(clusterPlus,CV_32FC1);
+
 
 		Mat theta = 1 - wKi;
 		int fJointChannel = fJoint.channels();
@@ -392,17 +387,8 @@ void AdaptiveManifoldFilter::buildManifoldsAndPerformFiltering(
 
 		merge(etaPlusSplit,3,etaPlus);
 
-		ptr = (float*) etaMinus.data;
-		for (int i=0; i<12; i++){
-			std::cout<<" etaMinus"<<i<<": "<<*(ptr++)<<std::endl;
-		}
-		ptr = (float*) etaPlus.data;
-		for (int i=0; i<12; i++){
-			std::cout<<" etaPlus"<<i<<": "<<*(ptr++)<<std::endl;
-		}
-
-		buildManifoldsAndPerformFiltering(f,fJoint,f,etaMinus,clusterMinus,sigmaS,sigmaR,currentTreeLevel+1,treeHeight,numPcaIterations);
-		buildManifoldsAndPerformFiltering(f,fJoint,f,etaPlus, clusterPlus, sigmaS,sigmaR,currentTreeLevel+1,treeHeight,numPcaIterations);
+		buildManifoldsAndPerformFiltering(f,fJoint,f,etaMinus,_clusterMinus,sigmaS,sigmaR,currentTreeLevel+1,treeHeight,numPcaIterations);
+		buildManifoldsAndPerformFiltering(f,fJoint,f,etaPlus, _clusterPlus, sigmaS,sigmaR,currentTreeLevel+1,treeHeight,numPcaIterations);
 	}
 
 }
@@ -425,27 +411,11 @@ void AdaptiveManifoldFilter::RFFilter(
 		if (I.size() != J.size()) {std::cout<<"error"<<std::endl;return;}
 	}
 
-	//I.convertTo(I,CV_32F);
-	//J.convertTo(J,CV_32F);
-
-
-
 	Mat dlcdx;
 	Mat dlcdy;
 	float KernelRaw[2] = {1.0f, -1.0f};
 	Mat dxKernel = Mat(1,2,CV_32F,KernelRaw);
 	Mat dyKernel = Mat(2,1,CV_32F,KernelRaw);
-
-//	float test[4] = {1.0f, 2.0f, 3.0f, 4.0f};
-//
-//	Mat testMat = Mat(1,4,CV_32F,test);
-//	Mat testMat2;
-//	filter2D(testMat,testMat2,-1,dxKernel);
-//
-//	ptr = (float*) testMat2.data;
-//		for (int i=0; i<10; i++){
-//			std::cout<<" dlcdx"<<i<<": "<<*(ptr++)<<std::endl;
-//		}
 
 	filter2D(J,dlcdx,-1,dxKernel);
 	filter2D(J,dlcdy,-1,dyKernel);
@@ -478,9 +448,7 @@ void AdaptiveManifoldFilter::RFFilter(
 	for (int i=0; i<N; i++)
 	{
 		double sigmaHi = sigmaH * sqrt(3) * pow(2.0, (N -i -1)) / sqrt(pow(4.0,N)-1);
-
 		TransformedDomainRecursiveFilter_Horizontal (F,dHdx,sigmaHi,F,1);
-
 		transpose(F,F);
 		TransformedDomainRecursiveFilter_Horizontal (F,dVdy,sigmaHi,F,1);
 		transpose(F,F);
@@ -532,25 +500,11 @@ void AdaptiveManifoldFilter::TransformedDomainRecursiveFilter_Horizontal(
 			*(ptrV) = pow (a,*(ptrV));
 		}
 	}
-//
-//	float *ptr = (float*) V.data;
-//		for (int i=0; i<1200; i++){
-//			std::cout<<" V"<<i<<": "<<*(ptr++)<<std::endl;
-//		}
-
 
 	for (int i = 1; i<Vcol ; i++){
 		F.col(i) += V.col(i).mul(F.col(i-1)-F.col(i));
 	}
 
-//	ptr = (float*) F.data;
-//			for (int i=0; i<1200; i++){
-//				std::cout<<" F2"<<i<<": "<<*(ptr++)<<std::endl;
-//			}
-//			ptr = (float*) V.data;
-//					for (int i=0; i<1200; i++){
-//						std::cout<<" V"<<i<<": "<<*(ptr++)<<std::endl;
-//					}
 	if (secondPhaseShift) {
 		for (int i = (Vcol-2); i>=0 ; i--){
 			F.col(i) += V.col(i+1).mul(F.col(i+1)-F.col(i));
@@ -560,11 +514,6 @@ void AdaptiveManifoldFilter::TransformedDomainRecursiveFilter_Horizontal(
 			F.col(i) += V.col(i).mul(F.col(i+1)-F.col(i));
 		}
 	}
-
-//	ptr = (float*) F.data;
-//			for (int i=0; i<1200; i++){
-//				std::cout<<" F3"<<i<<": "<<*(ptr++)<<std::endl;
-//			}
 
 	F.copyTo(Fout);
 
@@ -581,8 +530,7 @@ void AdaptiveManifoldFilter::hFilter(
 	Mat Fout,FoutTemp;
 	Fout = _Fout.getMat();
 	Fout.copyTo(FoutTemp);
-	//Mat FinOnes = Mat::zeros(Fin.size(),Fin.type());
-	//add(FinOnes,1,FinOnes);
+
 	Mat FinOnes = Mat::zeros(Fin.size(),CV_32FC1);
 	add(FinOnes,1,FinOnes);
 	TransformedDomainRecursiveFilter_Horizontal(Fin,FinOnes,sigma,FoutTemp);
@@ -593,10 +541,6 @@ void AdaptiveManifoldFilter::hFilter(
 	TransformedDomainRecursiveFilter_Horizontal(FoutTemp,FinOnes,sigma,FoutTemp);
 	transpose(FoutTemp,FoutTemp);
 
-//	float *ptr = (float*) FoutTemp.data;
-//	for (int i=0; i<10; i++){
-//		std::cout<<i<<": "<<*(ptr++)<<std::endl;
-//	}
 	FoutTemp.copyTo(Fout);
 }
 
