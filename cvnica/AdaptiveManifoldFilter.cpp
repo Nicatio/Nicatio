@@ -36,9 +36,11 @@ void AdaptiveManifoldFilter::process(
 {
 	Mat Fin = _Fin.getMat();
 	Mat FJoint;
+	int type = (Fin.type() == CV_8UC1)? CV_32FC1:CV_32FC3;
+	int FinChannel = Fin.channels();
 	Fin.convertTo(Fin,CV_32FC3);
 	Fin /= 255;
-	sumWKiPsiBlur = Mat::zeros(Fin.size(),CV_32FC3);
+	sumWKiPsiBlur = Mat::zeros(Fin.size(),type);
 	sumWKiPsiBlur0 = Mat::zeros(Fin.size(),CV_32FC1);
 	minPixelDistToManifoldSquared = Mat::zeros(Fin.size(),CV_32FC1);
 	minPixelDistToManifoldSquared += std::numeric_limits<double>::infinity();
@@ -54,7 +56,7 @@ void AdaptiveManifoldFilter::process(
 		FJoint = _FJoint.getMat();
 	}
 
-	FJoint.convertTo(FJoint,CV_32FC3);
+	FJoint.convertTo(FJoint,type);
 
 
 	if(!numPcaIterations) {
@@ -74,15 +76,15 @@ void AdaptiveManifoldFilter::process(
 	Mat empty;
 	buildManifoldsAndPerformFiltering(Fin, FJoint, empty, eta1, cluster1, sigmaS, sigmaR, currentTreeLevel, treeHeight, numPcaIterations);
 
-	Mat tildeGSplit[3],tildeG;
-	Mat sumWKiPsiBlurSplit[3];
+	Mat tildeGSplit[FinChannel],tildeG;
+	Mat sumWKiPsiBlurSplit[FinChannel];
 
 	split(sumWKiPsiBlur,sumWKiPsiBlurSplit);
 
-	for (int i=0; i<3; i++){
+	for (int i=0; i<FinChannel; i++){
 		divide (sumWKiPsiBlurSplit[i],sumWKiPsiBlur0,tildeGSplit[i]);
 	}
-	merge (tildeGSplit,3,tildeG);
+	merge (tildeGSplit,FinChannel,tildeG);
 
 
 	//divide(sumWKiPsiBlur,sumWKiPsiBlur0,tildeG);
@@ -94,20 +96,20 @@ void AdaptiveManifoldFilter::process(
 
 
 	Mat tildeGvsFinDiff = tildeG - Fin;
-	Mat tildeGvsFinDiffSplit[3];
+	Mat tildeGvsFinDiffSplit[FinChannel];
 
-	Mat __Fout, __FoutSplit[3];
-	Mat FinSplit[3];
+	Mat __Fout, __FoutSplit[FinChannel];
+	Mat FinSplit[FinChannel];
 
 	split (Fin,FinSplit);
 
 	split (tildeGvsFinDiff,tildeGvsFinDiffSplit);
 
-	for (int i = 0; i<3; i++) {
+	for (int i = 0; i<FinChannel; i++) {
 		__FoutSplit[i] = FinSplit[i] + tildeGvsFinDiffSplit[i].mul(alpha);
 	}
 
-	merge (__FoutSplit,3,__Fout);
+	merge (__FoutSplit,FinChannel,__Fout);
 
 	_Fout.create(_Fin.size(),_Fin.type());
 	Mat Fout = _Fout.getMat();
@@ -161,13 +163,13 @@ void AdaptiveManifoldFilter::computeEigenvector(
 		for (int j=0; j<xch; j++){
 			dotsSplit[j] = XSplit[j]*randVecSplit[j];
 		}
-		merge(dotsSplit,3,dots);
-		channelSum(dots,dots);
+		merge(dotsSplit,xch,dots);
+		if (xch>1) channelSum(dots,dots);
 		split(t,tSplit);
 		for (int j=0; j<xch; j++){
 			tSplit[j] = dots.mul(XSplit[j]);
 		}
-		merge(tSplit,3,t);
+		merge(tSplit,xch,t);
 		reduce (t,t,0,CV_REDUCE_SUM);
 	}
 	divide(t,norm(t),__p);
@@ -188,9 +190,6 @@ void AdaptiveManifoldFilter::buildManifoldsAndPerformFiltering(
 		const int 						treeHeight,
 		const int 						numPcaIterations)
 {
-	float *ptr;
-
-
 	Mat f = _f.getMat();
 	Mat fJoint = _fJoint.getMat();
 	Mat etaK = _etaK.getMat();
@@ -198,15 +197,17 @@ void AdaptiveManifoldFilter::buildManifoldsAndPerformFiltering(
 	_fOut.create(f.size(),f.type());
 	Mat fOut = _fOut.getMat();
 
+	//int type = (f.type() == CV_8UC1 || f.type() == CV_32FC1 )? CV_32FC1:CV_32FC3;
+	int isRGB = (f.type() == CV_8UC3 || f.type() == CV_32FC3 );
+
 	double sigmaROverSqrt2 = sigmaR/sqrt(2);
 	double oneOverSigmaROverSqrt2Square = 1/sigmaROverSqrt2/sigmaROverSqrt2;
 	double df = min(sigmaS/4.0,256*sigmaR);
+
 	df = floorToPowerOfTwo(df);
 	df = max(1.0,df);
 	Size imageSize = f.size();
 	Size jointSize = fJoint.size();
-	int dRimage = f.channels();
-	int dRjoint = fJoint.channels();
 	Mat X;
 	Mat pixelDistToManifoldSquared;
 	Mat gaussianDistanceWeights;
@@ -223,21 +224,23 @@ void AdaptiveManifoldFilter::buildManifoldsAndPerformFiltering(
 
 	pow(X,2.0,pixelDistToManifoldSquared);
 
-	channelSum(pixelDistToManifoldSquared,pixelDistToManifoldSquared);
+	if(isRGB) channelSum(pixelDistToManifoldSquared,pixelDistToManifoldSquared);
 	gaussianDistanceWeights = pixelDistToManifoldSquared * oneOverSigmaROverSqrt2Square * -0.5;
 	exp(gaussianDistanceWeights,gaussianDistanceWeights);
 
-	Mat fTemp[3];
-	split(f,fTemp);
 
-	fTemp[0] = fTemp[0].mul(gaussianDistanceWeights);
-	fTemp[1] = fTemp[1].mul(gaussianDistanceWeights);
-	fTemp[2] = fTemp[2].mul(gaussianDistanceWeights);
-
-	merge(fTemp,3,psiSplat);
+	if(isRGB) {
+		Mat fTemp[3];
+		split(f,fTemp);
+		fTemp[0] = fTemp[0].mul(gaussianDistanceWeights);
+		fTemp[1] = fTemp[1].mul(gaussianDistanceWeights);
+		fTemp[2] = fTemp[2].mul(gaussianDistanceWeights);
+		merge(fTemp,3,psiSplat);
+	} else {
+		psiSplat = f.mul(gaussianDistanceWeights);
+	}
 
 	gaussianDistanceWeights.copyTo(psiSplat0);
-
 	minPixelDistToManifoldSquared = min(minPixelDistToManifoldSquared,pixelDistToManifoldSquared);
 
 	Mat blurredProjectedValues;
@@ -245,7 +248,6 @@ void AdaptiveManifoldFilter::buildManifoldsAndPerformFiltering(
 	Mat wKiPsiBlurArr[4];
 	Mat wKiPsiBlur,wKiPsiBlur0;
 	Mat emptyMat;
-
 
 
 	Mat psiSplatConcat;
@@ -256,48 +258,57 @@ void AdaptiveManifoldFilter::buildManifoldsAndPerformFiltering(
 	RFFilter(psiSplatConcat,wKiPsiBlurTemp,sigmaS/df,sigmaROverSqrt2,etaK);
 
 	split(wKiPsiBlurTemp,wKiPsiBlurArr);
-	merge(wKiPsiBlurArr,3,wKiPsiBlur);
-	wKiPsiBlurArr[3].copyTo(wKiPsiBlur0);
-
-
+	if(isRGB) {
+		merge(wKiPsiBlurArr,3,wKiPsiBlur);
+		wKiPsiBlurArr[3].copyTo(wKiPsiBlur0);
+	} else {
+		wKiPsiBlurArr[0].copyTo(wKiPsiBlur);
+		wKiPsiBlurArr[1].copyTo(wKiPsiBlur0);
+	}
 
 	Mat wKi;
 	gaussianDistanceWeights.copyTo(wKi);
+	if(isRGB) {
+		Mat wKiArr[3] = {wKi,wKi,wKi};
+		Mat wKiMerge;
 
-	Mat wKiArr[3] = {wKi,wKi,wKi};
-	Mat wKiMerge;
+		merge(wKiArr,3,wKiMerge);
 
-	merge(wKiArr,3,wKiMerge);
+		resize(wKiPsiBlur,wKiPsiBlur,imageSize);
+		resize(wKiPsiBlur0,wKiPsiBlur0,imageSize);
 
-
-
-	resize(wKiPsiBlur,wKiPsiBlur,imageSize);
-	resize(wKiPsiBlur0,wKiPsiBlur0,imageSize);
-
-
-
-	sumWKiPsiBlur += wKiMerge.mul(wKiPsiBlur);
-	sumWKiPsiBlur0 += wKi.mul(wKiPsiBlur0);
+		sumWKiPsiBlur += wKiMerge.mul(wKiPsiBlur);
+		sumWKiPsiBlur0 += wKi.mul(wKiPsiBlur0);
+	} else {
+		resize(wKiPsiBlur,wKiPsiBlur,imageSize);
+				resize(wKiPsiBlur0,wKiPsiBlur0,imageSize);
+		sumWKiPsiBlur += wKi.mul(wKiPsiBlur);
+		sumWKiPsiBlur0 += wKi.mul(wKiPsiBlur0);
+	}
 
 	treeNodesVisited++;
 
 	if (currentTreeLevel < treeHeight) {
-		X = X.reshape( 3,imageSize.width*imageSize.height);
+		//if(isRGB)
+		 X = X.reshape( 0,imageSize.width*imageSize.height);
+		//else X = X.reshape( ,imageSize.width*imageSize.height);
 
 		int xch = X.channels();
-		Mat randvecArr[xch];
-
-		for (int i=0; i<xch; i++) {
-			randvecArr[i] = Mat(1,1,CV_32FC1);
-			randu(randvecArr[i],Scalar(-0.5),Scalar(0.5));
-		}
-
-		Mat randvec(1,1,CV_32FC3);
-		int fromto[] = {0,0,1,1,2,2};
-		mixChannels (&randvec,1,randvecArr,3,fromto,3);
 
 		Mat v1;
-		computeEigenvector(X,numPcaIterations,randvec,v1);
+		if(isRGB) {
+			Mat randvecArr[xch];
+			Mat randvec(1,1,CV_32FC3);;
+			for (int i=0; i<xch; i++) {
+				randvecArr[i] = Mat(1,1,CV_32FC1);
+				randu(randvecArr[i],Scalar(-0.5),Scalar(0.5));
+			}
+			int fromto[] = {0,0,1,1,2,2};
+			mixChannels (&randvec,1,randvecArr,3,fromto,3);
+			computeEigenvector(X,numPcaIterations,randvec,v1);
+		} else {
+			v1=Mat::ones(1,1,CV_32FC1);
+		}
 
 		Mat Xsplit[xch];
 		Mat v1split[xch];
@@ -312,8 +323,8 @@ void AdaptiveManifoldFilter::buildManifoldsAndPerformFiltering(
 		}
 
 
-		merge (dotsplit,3,dot);
-		channelSum(dot,dot);
+		merge (dotsplit,xch,dot);
+		if (isRGB) channelSum(dot,dot);
 		dot = dot.reshape(0,jointSize.height);
 
 		Mat _clusterMinus, clusterMinus;
@@ -347,7 +358,7 @@ void AdaptiveManifoldFilter::buildManifoldsAndPerformFiltering(
 			etaMinusSplit[i] = _etaMinus.mul(fJointSplit[i]);
 		}
 
-		merge(etaMinusSplit,3,etaMinus);
+		merge(etaMinusSplit,fJointChannel,etaMinus);
 
 		resize(_etaMinus,_etaMinus,Size(0,0),1.0/df,1.0/df);
 		resize(etaMinus,etaMinus,Size(0,0),1.0/df,1.0/df);
@@ -361,7 +372,7 @@ void AdaptiveManifoldFilter::buildManifoldsAndPerformFiltering(
 			divide(etaMinusSplit[i],_etaMinus,etaMinusSplit[i]);
 		}
 
-		merge(etaMinusSplit,3,etaMinus);
+		merge(etaMinusSplit,fJointChannel,etaMinus);
 
 		Mat _etaPlus = clusterPlus.mul(theta);
 		Mat etaPlus;
@@ -371,7 +382,7 @@ void AdaptiveManifoldFilter::buildManifoldsAndPerformFiltering(
 			etaPlusSplit[i] = _etaPlus.mul(fJointSplit[i]);
 		}
 
-		merge(etaPlusSplit,3,etaPlus);
+		merge(etaPlusSplit,fJointChannel,etaPlus);
 
 		resize(_etaPlus,_etaPlus,Size(0,0),1.0/df,1.0/df);
 		resize(etaPlus,etaPlus,Size(0,0),1.0/df,1.0/df);
@@ -385,7 +396,7 @@ void AdaptiveManifoldFilter::buildManifoldsAndPerformFiltering(
 			divide(etaPlusSplit[i],_etaPlus,etaPlusSplit[i]);
 		}
 
-		merge(etaPlusSplit,3,etaPlus);
+		merge(etaPlusSplit,fJointChannel,etaPlus);
 
 		buildManifoldsAndPerformFiltering(f,fJoint,f,etaMinus,_clusterMinus,sigmaS,sigmaR,currentTreeLevel+1,treeHeight,numPcaIterations);
 		buildManifoldsAndPerformFiltering(f,fJoint,f,etaPlus, _clusterPlus, sigmaS,sigmaR,currentTreeLevel+1,treeHeight,numPcaIterations);
@@ -423,8 +434,11 @@ void AdaptiveManifoldFilter::RFFilter(
 	pow(dlcdx,2.0,dlcdx);
 	pow(dlcdy,2.0,dlcdy);
 
-	channelSum(dlcdx,dlcdx);
-	channelSum(dlcdy,dlcdy);
+	if (I.channels() !=2) {
+		channelSum(dlcdx,dlcdx);
+		channelSum(dlcdy,dlcdy);
+	}
+
 
 	dlcdx.col(0) *= 0;
 	dlcdy.row(0) *= 0;
