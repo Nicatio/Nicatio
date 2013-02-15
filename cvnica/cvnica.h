@@ -11,6 +11,7 @@
 #include "cvdmqi.h"
 #include "GuidedFilter.h"
 #include "AdaptiveManifoldFilter.h"
+#include "FaceRecognition.h"
 
 
 #endif /* CVNICA_H_ */

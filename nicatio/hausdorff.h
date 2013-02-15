@@ -13,7 +13,7 @@
 namespace nicatio {
 
 void DistTransform(
-		UINT							**A,
+		unsigned int					**A,
 		const int&						w,
 		const int&						h);
 
