@@ -187,7 +187,7 @@ int main(int argc, char* argv[] ){
 		fr.Recognition(dir,"pgm",DB_YALEB,METHOD_CORR);
 		cout<<"1 "<<fr.getAccuracy()<<" "<<endl;
 		cout<<"2 "<<fr.getAccuracyIncludingBadImages()<<" "<<endl;
-		cout<<"3 "<<fr.getAccuracyIncludingBadImages2()<<" "<<endl;
+		fr.getAccuracyIncludingBadImagesSubset();
 
 		FileStorage abcd("dix.xml",FileStorage::WRITE);
 		abcd << "frRecognitionResult" << fr.RecognitionResult;

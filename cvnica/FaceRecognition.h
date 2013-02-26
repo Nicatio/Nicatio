@@ -70,6 +70,13 @@ public:
 			const int						criterion);
 	float getAccuracy();
 	float getAccuracyIncludingBadImages();
+	vector<float> getAccuracyIncludingBadImagesSubset();
+	void getBadImageInfo (
+			vector<string>						files,
+			const int							subsetCount=0);
+	int getCorrects();
+	int getBadImages();
+	int getFiles();
 	Mat RecognitionScore;
 	Mat RecognitionResult;
 	Mat RecognitionPositionX;
@@ -81,14 +88,21 @@ private:
 	int nRefImageOrder;
 	int nTestImageOrder;
 	int nSearchRadius;
+	int nCorrect;
+	int nFiles;
+	int nBadImages;
+	vector<int> nCorrectSubset;
+	vector<int> nImagesSubset;
+	vector<int> nBadImagesSubset;
 	string DirectoryLocation;
-
 	vector<Mat> refImage;
 	void _Recognition(
 			vector<Mat>						referenceImage,
 			vector<string>					files,
 			int								DBname,
 			int								criterion);
+	vector<int> vectorStretch(
+			vector<int>							input);
 };
 
 };
