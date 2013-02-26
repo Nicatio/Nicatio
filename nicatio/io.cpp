@@ -10,23 +10,20 @@
 using namespace std;
 
 namespace nicatio {
-class StringTokenizer
+
+vector<string> StringTokenizer::getTokens(const string& str, const string& delimiters)
 {
-public:
-	static vector<string> getTokens(const string& str, const string& delimiters = " ")
+	string::size_type lastPos = str.find_first_not_of(delimiters, 0);
+	string::size_type pos     = str.find_first_of(delimiters, lastPos);
+	vector<string> tokens;
+	while (string::npos != pos || string::npos != lastPos)
 	{
-		string::size_type lastPos = str.find_first_not_of(delimiters, 0);
-		string::size_type pos     = str.find_first_of(delimiters, lastPos);
-		vector<string> tokens;
-		while (string::npos != pos || string::npos != lastPos)
-		{
-			tokens.push_back(str.substr(lastPos, pos - lastPos));
-			lastPos = str.find_first_not_of(delimiters, pos);
-			pos = str.find_first_of(delimiters, lastPos);
-		}
-		return tokens;
+		tokens.push_back(str.substr(lastPos, pos - lastPos));
+		lastPos = str.find_first_not_of(delimiters, pos);
+		pos = str.find_first_of(delimiters, lastPos);
 	}
-};
+	return tokens;
+}
 
 int getdir (
 		string 							dir,

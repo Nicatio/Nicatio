@@ -19,7 +19,11 @@
 using namespace std;
 
 namespace nicatio {
-
+class StringTokenizer
+{
+public:
+	static vector<string> getTokens(const string& str, const string& delimiters = " ");
+};
 
 
 
