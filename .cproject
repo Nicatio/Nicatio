@@ -25,7 +25,7 @@
 							<tool id="cdt.managedbuild.tool.gnu.archiver.cygwin.base.375938098" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.cygwin.base"/>
 							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.cygwin.base.1674273773" name="Cygwin C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.cygwin.base">
 								<option id="gnu.cpp.compiler.option.include.paths.433155256" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;C:\opencv2.4.3\include\opencv&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;C:\cygwin\home\HDSP\opencv2.4.3\include\opencv&quot;"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.optimization.level.955231778" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.debugging.level.1895154542" name="Debug Level" superClass="gnu.cpp.compiler.option.debugging.level" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
@@ -59,7 +59,7 @@
 									<listOptionValue builtIn="false" value="libopencv_videostab"/>
 								</option>
 								<option id="gnu.cpp.link.option.paths.2135198884" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
-									<listOptionValue builtIn="false" value="&quot;C:\opencv2.4.3\lib&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;C:\cygwin\home\HDSP\opencv2.4.3\lib&quot;"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.1435246682" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>

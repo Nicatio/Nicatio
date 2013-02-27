@@ -45,7 +45,7 @@ all: Nicatio.exe
 Nicatio.exe: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: Cygwin C++ Linker'
-	g++ -L"C:\opencv2.4.3\lib" -o "Nicatio.exe" $(OBJS) $(USER_OBJS) $(LIBS)
+	g++ -L"C:\cygwin\home\HDSP\opencv2.4.3\lib" -o "Nicatio.exe" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
