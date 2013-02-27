@@ -1,4 +1,10 @@
 /Debug
-*.stackdump
 /.settings
+/ipch
+*.stackdump
 .cproject
+*.sdf
+*.sln
+*.suo
+*.filters
+*.vcxproj*

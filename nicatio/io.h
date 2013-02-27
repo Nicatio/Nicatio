@@ -9,7 +9,13 @@
 #define IO_H_
 
 #include <sys/types.h>
-#include <dirent.h>
+#if defined (__GNUC__)
+		// There is also __GNUG__ macro which is equivalent with (__GNUC__ && __cplusplus)
+		#include <dirent.h>
+#else
+		#include "../dirent/dirent.h"
+#endif
+
 #include <errno.h>
 #include "vector"
 #include "string"

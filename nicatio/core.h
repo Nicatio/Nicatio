@@ -9,7 +9,4 @@
 #define CORE_H_
 #include <math.h>
 
-#define UINT unsigned int
-
-
 #endif /* CORE_H_ */
