@@ -2,7 +2,7 @@
  * dmqi.cpp
  *
  *  Created on: 2013. 1. 25.
- *      Author: HDSP
+ *      Author: Nicatio
  */
 
 #include "dmqi.h"

@@ -2,7 +2,7 @@
  * io.h
  *
  *  Created on: 2013. 1. 28.
- *      Author: HDSP
+ *      Author: Nicatio
  */
 
 #ifndef IO_H_

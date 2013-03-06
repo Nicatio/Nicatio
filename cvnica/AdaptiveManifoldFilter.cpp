@@ -2,7 +2,7 @@
  * AdaptiveManifoldFilter.cpp
  *
  *  Created on: 2013. 2. 1.
- *      Author: HDSP
+ *      Author: Nicatio
  */
 
 #include "AdaptiveManifoldFilter.h"

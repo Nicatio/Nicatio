@@ -2,7 +2,7 @@
  * core.h
  *
  *  Created on: 2013. 1. 23.
- *      Author: HDSP
+ *      Author: Nicatio
  */
 
 #ifndef CORE_H_

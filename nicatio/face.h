@@ -2,7 +2,7 @@
  * face.h
  *
  *  Created on: 2013. 1. 24.
- *      Author: HDSP
+ *      Author: Nicatio
  */
 
 #ifndef FACE_H_

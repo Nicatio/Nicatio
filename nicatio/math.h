@@ -2,7 +2,7 @@
  * math.h
  *
  *  Created on: 2013. 1. 24.
- *      Author: HDSP
+ *      Author: Nicatio
  */
 
 #ifndef MATH_H_

@@ -352,6 +352,7 @@ _wopendir(
                     default:
                         /* Directory name doesn't end in path separator */
                         *p++ = '\\';
+                        break;
                     }
                 }
                 *p++ = '*';

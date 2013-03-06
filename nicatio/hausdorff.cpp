@@ -2,7 +2,7 @@
  * hausdorff.cpp
  *
  *  Created on: 2013. 1. 25.
- *      Author: HDSP
+ *      Author: Nicatio
  */
 
 #include "hausdorff.h"

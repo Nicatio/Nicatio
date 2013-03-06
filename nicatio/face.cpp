@@ -2,7 +2,7 @@
  * face.cpp
  *
  *  Created on: 2013. 1. 24.
- *      Author: HDSP
+ *      Author: Nicatio
  */
 
 #include "face.h"

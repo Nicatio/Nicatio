@@ -2,7 +2,7 @@
  * AdaptiveManifoldFilter.h
  *
  *  Created on: 2013. 2. 1.
- *      Author: HDSP
+ *      Author: Nicatio
  */
 
 #ifndef ADAPTIVEMANIFOLDFILTER_H_

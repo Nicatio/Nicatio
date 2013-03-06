@@ -2,7 +2,7 @@
  * FaceRecognition.cpp
  *
  *  Created on: 2013. 2. 15.
- *      Author: HDSP
+ *      Author: Nicatio
  */
 
 
@@ -55,8 +55,8 @@ FaceRecognition::FaceRecognition(
 		for (;;) {
 			string str;
 			getline(read,str);
-			if(str[0]=='*') continue;
-			else if(str[0]=='#') break;
+			if(str.c_str()[0]=='*') continue;
+			else if(str.c_str()[0]=='#') break;
 			else {
 				vector<string> tokens = nicatio::StringTokenizer::getTokens(str,"=");
 				if(tokens.size()<2) continue;
@@ -73,7 +73,7 @@ FaceRecognition::FaceRecognition(
 			getline(read,str);
 			if(str=="") break;
 			vector<string> tokens = nicatio::StringTokenizer::getTokens(str,"\n\r");
-			imread( dir+"\\"+tokens[0], -1 ).copyTo(refImage[i]);
+			imread( dir+"/"+tokens[0], -1 ).copyTo(refImage[i]);
 		}
 	}
 }
@@ -130,7 +130,7 @@ void FaceRecognition::getScoreTestImageBased(
 	upper = searchRadius>>1;
 	lower = (searchRadius%2)? (-upper):(-upper+1);
 	float max=-2;
-	char maxSubjectIndex = 0;
+	ushort maxSubjectIndex = 0;
 	Mat inputB32; inputB.convertTo(inputB32,CV_32F);
 	Mat inputBB32; multiply (inputB32,inputB32,inputBB32);
 
@@ -236,7 +236,7 @@ void FaceRecognition::getScoreTestImageBased(
 			maxSubjectIndex = j;
 		}
 	}
-	RecognitionResult.at<char>(nFileIndex,0) = maxSubjectIndex;
+	RecognitionResult.at<ushort>(nFileIndex,0) = maxSubjectIndex;
 
 }
 
@@ -363,7 +363,7 @@ void FaceRecognition::_Recognition(
 	RecognitionScore = Mat(nFiles,nTotalReferenceImages,CV_32FC1);
 	RecognitionPositionX = Mat(nFiles,nTotalReferenceImages,CV_8SC1);
 	RecognitionPositionY = Mat(nFiles,nTotalReferenceImages,CV_8SC1);
-	RecognitionResult = Mat(nFiles,1,CV_8SC1);
+	RecognitionResult = Mat(nFiles,1,CV_16UC1);
 
 	if(DBname == DB_YALEB) {
 		int nis[5] = {7,12,12,14,19};
@@ -373,7 +373,7 @@ void FaceRecognition::_Recognition(
 
 	for (int i = 0; i < nFiles; i++) {
 		cout << files[i] << endl;
-		Mat testImage = imread( DirectoryLocation+"\\"+files[i], -1 );
+		Mat testImage = imread( DirectoryLocation+"/"+files[i], -1 );
 		double t=(double)getTickCount();
 		getScoreTestImageBased(referenceImage, testImage, i, nSearchRadius, criterion);
 		t = ((double)getTickCount() - t)/getTickFrequency();
@@ -441,13 +441,13 @@ float FaceRecognition::getAccuracy()
 	if (!nTestImageOrder) {
 		if (!nRefImageOrder) {
 			for (int i=0; i<h; i++) {
-				if ((RecognitionResult.at<char>(i,0)/nRefImagesPerSubject) == ((i/nTestImagesPerSubject)%nSubject)) {
+				if ((RecognitionResult.at<ushort>(i,0)/nRefImagesPerSubject) == ((i/nTestImagesPerSubject)%nSubject)) {
 					correctCounter++;
 				}
 			}
 		} else {
 			for (int i=0; i<h; i++) {
-				if (RecognitionResult.at<char>(i,0)%nSubject == ((i/nTestImagesPerSubject)%nSubject)) {
+				if (RecognitionResult.at<ushort>(i,0)%nSubject == ((i/nTestImagesPerSubject)%nSubject)) {
 					correctCounter++;
 				}
 			}
@@ -455,13 +455,13 @@ float FaceRecognition::getAccuracy()
 	} else {
 		if (!nRefImageOrder) {
 			for (int i=0; i<h; i++) {
-				if ((RecognitionResult.at<char>(i,0)/nRefImagesPerSubject) == (i%nSubject)) {
+				if ((RecognitionResult.at<ushort>(i,0)/nRefImagesPerSubject) == (i%nSubject)) {
 					correctCounter++;
 				}
 			}
 		} else {
 			for (int i=0; i<h; i++) {
-				if (RecognitionResult.at<char>(i,0)%nSubject == (i%nSubject)) {
+				if (RecognitionResult.at<ushort>(i,0)%nSubject == (i%nSubject)) {
 					correctCounter++;
 				}
 			}
@@ -482,12 +482,12 @@ float FaceRecognition::getAccuracyIncludingBadImages()
 	int h = RecognitionResult.size().height;
 	int nTestImagesPerSubject = h/nSubject;
 	int correctCounter=0;
-	uchar *ptr_rr = RecognitionResult.data;
+	ushort *ptr_rr = (ushort*)RecognitionResult.data;
 	uchar *ptr_bi = BadImage.data;
 	if (!nTestImageOrder) {
 		if (!nRefImageOrder) {
 			for (int i=0; i<h; i++,ptr_rr++,ptr_bi++) {
-				if ((*(ptr_rr)/nRefImagesPerSubject) == ((i/nTestImagesPerSubject)%nSubject) && !*(ptr_bi)) {
+				if (*(ptr_rr)/nRefImagesPerSubject == ((i/nTestImagesPerSubject)%nSubject) && !*(ptr_bi)) {
 					correctCounter++;
 				}
 			}
@@ -501,7 +501,7 @@ float FaceRecognition::getAccuracyIncludingBadImages()
 	} else {
 		if (!nRefImageOrder) {
 			for (int i=0; i<h; i++,ptr_rr++,ptr_bi++) {
-				if ((*(ptr_rr)/nRefImagesPerSubject) == (i%nSubject) && !*(ptr_bi)) {
+				if (*(ptr_rr)/nRefImagesPerSubject == (i%nSubject) && !*(ptr_bi)) {
 					correctCounter++;
 				}
 			}
@@ -514,6 +514,8 @@ float FaceRecognition::getAccuracyIncludingBadImages()
 		}
 	}
 	nCorrect = correctCounter;
+	cout<<"(h-nBadImages): "<<(h-nBadImages)<<endl;
+	cout<<"correctCounter: "<<correctCounter<<endl;
 	return (float)correctCounter/(h-nBadImages);
 }
 
@@ -529,38 +531,47 @@ vector<float> FaceRecognition::getAccuracyIncludingBadImagesSubset()
 	int h = RecognitionResult.size().height;
 	int nTestImagesPerSubject = h/nSubject;
 	int correctCounter=0;
-	uchar *ptr_rr = RecognitionResult.data;
+	ushort *ptr_rr = (ushort*)RecognitionResult.data;
 	uchar *ptr_bi = BadImage.data;
-	vector<int> indicator = vectorStretch(nImagesSubset);
+	int subsetIndicator[64] = {0, 1, 2, 4, 1, 2, 0, 0,
+								0, 1, 1, 1, 1, 2, 1, 2,
+								2, 3, 2, 2, 3, 3, 3, 3,
+								3, 3, 4, 4, 4, 4, 4, 4,
+								4, 4, 4, 0, 0, 0, 1, 1,
+								1, 1, 2, 1, 2, 2, 3, 2,
+								2, 3, 3, 3, 3, 3, 3, 4,
+								4, 4, 4, 4, 4, 4, 4, 4};
+	vector<int> indicator;
+	indicator.assign(subsetIndicator,subsetIndicator+64);
 	if (!nTestImageOrder) {
 		if (!nRefImageOrder) {
 			for (int i=0; i<h; i++,ptr_rr++,ptr_bi++) {
-				if ((*(ptr_rr)/nRefImagesPerSubject) == ((i/nTestImagesPerSubject)%nSubject) && !*(ptr_bi)) {
+				if (*(ptr_rr)/nRefImagesPerSubject == ((i/nTestImagesPerSubject)%nSubject) && !*(ptr_bi)) {
 					correctCounter++;
-					nCorrectSubset[indicator[((i/nTestImagesPerSubject)%nSubject)]]++;
+					nCorrectSubset[indicator[(i%nTestImagesPerSubject)]]++;
 				}
 			}
 		} else {
 			for (int i=0; i<h; i++,ptr_rr++,ptr_bi++) {
 				if (*(ptr_rr)%nSubject == ((i/nTestImagesPerSubject)%nSubject) && !*(ptr_bi)) {
 					correctCounter++;
-					nCorrectSubset[indicator[((i/nTestImagesPerSubject)%nSubject)]]++;
+					nCorrectSubset[indicator[(i%nTestImagesPerSubject)]]++;
 				}
 			}
 		}
 	} else {
 		if (!nRefImageOrder) {
 			for (int i=0; i<h; i++,ptr_rr++,ptr_bi++) {
-				if ((*(ptr_rr)/nRefImagesPerSubject) == (i%nSubject) && !*(ptr_bi)) {
+				if (*(ptr_rr)/nRefImagesPerSubject == (i%nSubject) && !*(ptr_bi)) {
 					correctCounter++;
-					nCorrectSubset[indicator[(i%nSubject)]]++;
+					nCorrectSubset[indicator[(i/nTestImagesPerSubject)]]++;
 				}
 			}
 		} else {
 			for (int i=0; i<h; i++,ptr_rr++,ptr_bi++) {
 				if (*(ptr_rr)%nSubject == (i%nSubject) && !*(ptr_bi)) {
 					correctCounter++;
-					nCorrectSubset[indicator[(i%nSubject)]]++;
+					nCorrectSubset[indicator[(i/nTestImagesPerSubject)]]++;
 				}
 			}
 		}
@@ -568,8 +579,8 @@ vector<float> FaceRecognition::getAccuracyIncludingBadImagesSubset()
 	nCorrect = correctCounter;
 
 	for (int i=0; i<nImagesSubsetSize; i++){
-		nCorrectSubsetAccuracy[i] = (double)nCorrectSubset[i]/(nImagesSubset[i]*nSubject);
-		cout<<"df"<<nCorrectSubsetAccuracy[i]<<endl;
+		nCorrectSubsetAccuracy[i] = (double)nCorrectSubset[i]/(nImagesSubset[i]*nSubject-nBadImagesSubset[i]);
+		cout<<"# "<<nCorrectSubsetAccuracy[i]<<", "<<nCorrectSubset[i]<<", "<<(nImagesSubset[i]*nSubject-nBadImagesSubset[i])<<endl;
 	}
 
 	return nCorrectSubsetAccuracy;
@@ -583,7 +594,16 @@ void FaceRecognition::getBadImageInfo (
 	uchar *ptr_bb = BadImage.data;
 	if (subsetCount){
 		if (nImagesSubset.empty()) return;
-		vector<int> indicator = vectorStretch(nImagesSubset);
+		int subsetIndicator[64] = {0, 1, 2, 4, 1, 2, 0, 0,
+									0, 1, 1, 1, 1, 2, 1, 2,
+									2, 3, 2, 2, 3, 3, 3, 3,
+									3, 3, 4, 4, 4, 4, 4, 4,
+									4, 4, 4, 0, 0, 0, 1, 1,
+									1, 1, 2, 1, 2, 2, 3, 2,
+									2, 3, 3, 3, 3, 3, 3, 4,
+									4, 4, 4, 4, 4, 4, 4, 4};
+		vector<int> indicator;
+		indicator.assign(subsetIndicator,subsetIndicator+64);
 		nBadImagesSubset.assign(nImagesSubset.size(),0);
 		int nTestImagesPerSubject = files.size()/nSubject;
 		for (int i = 0; i < nFiles; i++,ptr_bb++) {

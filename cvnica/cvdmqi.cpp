@@ -2,7 +2,7 @@
  * dmqi.cpp
  *
  *  Created on: 2013. 1. 28.
- *      Author: HDSP
+ *      Author: Nicatio
  */
 
 #include "cvdmqi.h"
@@ -37,7 +37,7 @@ void lineHistEqualize2(
 //	double *rowMax = new double[src.rows];
 //	double *colMin = new double[src.cols];
 //	double *colMax = new double[src.cols];
-	double *rowDiff = new double[src.cols];
+	double *rowDiff = new double[src.rows];
 	double *colDiff = new double[src.cols];
 
 	double *ptrRowDiff = rowDiff;
@@ -82,7 +82,8 @@ void lineHistEqualize2(
 		//*(ptrDst) =  (*(ptrColHistEqResult) * (a) + *(ptrSrc))/(a+255);
 		//*(ptrDst) =  (*(ptrColHistEqResult) > *(ptrRowHistEqResult)) ? *(ptrRowHistEqResult) : *(ptrColHistEqResult);
 	}
-
+	delete [] rowDiff;
+	delete [] colDiff;
 
 }
 

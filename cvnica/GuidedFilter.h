@@ -2,7 +2,7 @@
  * guidedFilter.h
  *
  *  Created on: 2013. 1. 31.
- *      Author: HDSP
+ *      Author: Nicatio
  */
 
 #ifndef GUIDEDFILTER_H_

@@ -2,7 +2,7 @@
  * cvnica.h
  *
  *  Created on: 2013. 1. 28.
- *      Author: HDSP
+ *      Author: Nicatio
  */
 
 #ifndef CVNICA_H_
@@ -12,6 +12,6 @@
 #include "GuidedFilter.h"
 #include "AdaptiveManifoldFilter.h"
 #include "FaceRecognition.h"
-
+#include "cvDoG.h"
 
 #endif /* CVNICA_H_ */

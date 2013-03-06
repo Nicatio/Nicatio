@@ -2,7 +2,7 @@
  * guidedFilter.cpp
  *
  *  Created on: 2013. 1. 31.
- *      Author: HDSP
+ *      Author: Nicatio
  */
 
 

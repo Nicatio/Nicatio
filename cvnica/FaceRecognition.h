@@ -2,7 +2,7 @@
  * FaceRecognition.h
  *
  *  Created on: 2013. 2. 15.
- *      Author: HDSP
+ *      Author: Nicatio
  */
 
 #ifndef FACERECOGNITION_H_

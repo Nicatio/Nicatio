@@ -163,13 +163,13 @@ int main(int argc, char* argv[] ){
 
 		vector<string> files = vector<string>();
 
-		if (nicatio::getdirType(dir,"bmp",files,0)) {
+		if (nicatio::getdirType(dir,"pgm",files,0)) {
 			cout<< "Error: Invalid file location \n" <<endl;
 			return -1;
 		}
 
-		Mat temp1 =  imread( dir+"\\"+files[0], -1 );
-		cout<<dir+"\\"+files[0]<<endl;
+		Mat temp1 =  imread( dir+"/"+files[0], -1 );
+		cout<<dir+"/"+files[0]<<endl;
 
 		//namedWindow( "a", CV_WINDOW_AUTOSIZE );
 		//imshow( "a", temp1 );
@@ -256,52 +256,153 @@ int main(int argc, char* argv[] ){
 
 
 
+			cout << files[i] <<"\r"<< endl;
+			Mat _image1;
+			_image1 = imread( dir+"/"+files[i], -1 );
+			Size size = _image1.size();
+			Mat _deno1(size,CV_8UC1);
+			Mat _deno2;
+			Mat _dmqi(size,CV_8UC1);
+			Mat _histeq(size,CV_8UC1);
+			nicatio::Denoise( _image1.data,_deno1.data,_image1.cols,_image1.rows);
+			cvNica::lineHistEqualize2(_deno1,_deno2);
+			imwrite(dir+"\\new9\\"+files[i]+".bmp",_deno2);
+//			unsigned found = files[i].rfind("bad");
+//			if (found!=std::string::npos) {
+//				vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
+//				imwrite(dir+"\\new9\\"+tokens[0]+".pgm",_deno2);
+//				rename( string(dir+"\\new9\\"+tokens[0]+".pgm").c_str() , string(dir+"\\new9\\"+tokens[0]+".pgm.bad").c_str() );
+//
+//			} else {
+//
+//				imwrite(dir+"\\new9\\"+files[i],_deno2);
+//
+//			}
+
+
+
+
+
+
+//			cout << files[i] <<"\r"<< endl;
+//			Mat _image1;
+//			_image1 = imread( dir+"\\"+files[i], -1 );
+//			Size size = _image1.size();
+//			Mat _deno1(size,CV_8UC1);
+//			Mat _deno2(size,CV_8UC1);
+//			Mat _dmqi(size,CV_8UC1);
+//			Mat _histeq(size,CV_8UC1);
+//			nicatio::Denoise( _image1.data,_deno1.data,_image1.cols,_image1.rows);
+//			nicatio::DynamicMorphQuotImage( _deno1.data,_dmqi.data,_image1.cols,_image1.rows, 0);
+//			nicatio::HistEqualize2(_dmqi.data,_histeq.data,_image1.cols,_image1.rows);
+//			unsigned found = files[i].rfind("bad");
+//			if (found!=std::string::npos) {
+//				vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
+//				imwrite(dir+"\\new6\\"+tokens[0]+".pgm",_histeq);
+//				rename( string(dir+"\\new6\\"+tokens[0]+".pgm").c_str() , string(dir+"\\new6\\"+tokens[0]+".pgm.bad").c_str() );
+//
+//			} else {
+//
+//				imwrite(dir+"\\new6\\"+files[i],_histeq);
+//
+//			}
+
+
+
+
+
+//			cout << files[i] <<"\r"<< endl;
+//			Mat _image1;
+//			_image1 = imread( dir+"\\"+files[i], -1 );
+//			Size size = _image1.size();
+//			Mat _deno1(size,CV_8UC1);
+//			Mat _deno2(size,CV_8UC1);
+//			Mat _dmqi(size,CV_8UC1);
+//			Mat _histeq(size,CV_8UC1);
+//			nicatio::Denoise( _image1.data,_deno1.data,_image1.cols,_image1.rows);
+//			nicatio::DynamicMorphQuotImage( _deno1.data,_dmqi.data,_image1.cols,_image1.rows, 0);
+//			nicatio::HistEqualize2(_dmqi.data,_histeq.data,_image1.cols,_image1.rows);
+//
+//
+//
+//			double sigmaS = 24;
+//			double sigmaR = 0.2;
+//			cvNica::AdaptiveManifoldFilter amf;
+//			Mat result;
+//			Mat result2;
+//			Mat result3(size,CV_8UC1);
+//			Mat empty;
+//
+//			Mat dmqiRGB[3] = {_histeq,_histeq,_histeq};
+//
+//			merge(dmqiRGB,3,result);
+//
+//			amf.process(result,result2,sigmaS,sigmaR,empty);
+//
+//			nicatio::Grayscale(result2.data, result3.data,_image1.cols,_image1.rows);
+//
+//			unsigned found = files[i].rfind("bad");
+//			if (found!=std::string::npos) {
+//				vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
+//				imwrite(dir+"\\new8\\"+tokens[0]+".pgm",result3);
+//				rename( string(dir+"\\new8\\"+tokens[0]+".pgm").c_str() , string(dir+"\\new8\\"+tokens[0]+".pgm.bad").c_str() );
+//
+//			} else {
+//
+//				imwrite(dir+"\\new8\\"+files[i],result3);
+//
+//			}
+
+
+
+
+
 /////////////////////////
 
-			cout << files[i] << endl;
-			Mat _image1;
-			_image1 = imread( dir+"\\"+files[i], -1 );
-
-			Size size = _image1.size();
-			Mat dmqi(size,CV_8UC3);
-			Mat _gray(size,CV_8UC1);
-			nicatio::Grayscale(_image1.data, _gray.data,_image1.cols,_image1.rows);
-			Mat _histeq(size,CV_8UC1);
-			Mat _histeq2(size,CV_8UC1);
-			Mat _dmqi_o(size,CV_8UC1);
-			Mat _deno1(size,CV_8UC1);
-			Mat _deno2(size,CV_8UC1);
-			Mat _dmqi(size,CV_8UC1);
-
-			double sigmaS = 24;
-			double sigmaR = 0.2;
-			double sigmaR2 = 0.4;
-			cvNica::AdaptiveManifoldFilter amf;
-			Mat result;
-			Mat result2(_image1.size(),CV_8UC1);
-
-			Mat empty;
-			double t = (double)getTickCount();
-
-			amf.process(_image1,result,sigmaS,sigmaR,empty);
-
-			t = ((double)getTickCount() - t)/getTickFrequency();
-			cout << "filtering finish.\nelapsed time : " << t << " sec" << endl;
-		   	nicatio::Grayscale(result.data, result2.data,result.cols,result.rows);
-						cvNica::Reflectance(_gray,result2,_deno1);
-						nicatio::DynamicMorphQuotImage( _deno1.data,_deno1.data,_image1.cols,_image1.rows, 0);
-						equalizeHist(_deno1,_deno1);
-									Mat dfdf;
-								   	Mat dmqiRGB[3] = {_deno1,_deno1,_deno1};
-
-								   	merge(dmqiRGB,3,dfdf);
-						amf.process(dfdf,_deno2,sigmaS,sigmaR2,empty);
-						//equalizeHist(_deno2,_deno2);
-
-			//namedWindow( "a", CV_WINDOW_AUTOSIZE );
-			//imshow( "a", result );
-			imwrite(dir+"\\new5\\"+files[i]+"_processed.bmp",result);
-			//waitKey(0);
+//			cout << files[i] << endl;
+//			Mat _image1;
+//			_image1 = imread( dir+"\\"+files[i], -1 );
+//
+//			Size size = _image1.size();
+//			Mat dmqi(size,CV_8UC3);
+//			Mat _gray(size,CV_8UC1);
+//			nicatio::Grayscale(_image1.data, _gray.data,_image1.cols,_image1.rows);
+//			Mat _histeq(size,CV_8UC1);
+//			Mat _histeq2(size,CV_8UC1);
+//			Mat _dmqi_o(size,CV_8UC1);
+//			Mat _deno1(size,CV_8UC1);
+//			Mat _deno2(size,CV_8UC1);
+//			Mat _dmqi(size,CV_8UC1);
+//
+//			double sigmaS = 24;
+//			double sigmaR = 0.2;
+//			double sigmaR2 = 0.4;
+//			cvNica::AdaptiveManifoldFilter amf;
+//			Mat result;
+//			Mat result2(_image1.size(),CV_8UC1);
+//
+//			Mat empty;
+//			double t = (double)getTickCount();
+//
+//			amf.process(_image1,result,sigmaS,sigmaR,empty);
+//
+//			t = ((double)getTickCount() - t)/getTickFrequency();
+//			cout << "filtering finish.\nelapsed time : " << t << " sec" << endl;
+//		   	nicatio::Grayscale(result.data, result2.data,result.cols,result.rows);
+//						cvNica::Reflectance(_gray,result2,_deno1);
+//						nicatio::DynamicMorphQuotImage( _deno1.data,_deno1.data,_image1.cols,_image1.rows, 0);
+//						equalizeHist(_deno1,_deno1);
+//									Mat dfdf;
+//								   	Mat dmqiRGB[3] = {_deno1,_deno1,_deno1};
+//
+//								   	merge(dmqiRGB,3,dfdf);
+//						amf.process(dfdf,_deno2,sigmaS,sigmaR2,empty);
+//						//equalizeHist(_deno2,_deno2);
+//
+//			//namedWindow( "a", CV_WINDOW_AUTOSIZE );
+//			//imshow( "a", result );
+//			imwrite(dir+"\\new5\\"+files[i]+"_processed.bmp",result);
+//			//waitKey(0);
 		}
 
 

@@ -2,11 +2,11 @@
  * nica.h
  *
  *  Created on: 2013. 1. 23.
- *      Author: HDSP
+ *      Author: Nicatio
  */
 
-#ifndef NICA_H_
-#define NICA_H_
+#ifndef NICATIO_H_
+#define NICATIO_H_
 
 
 #include "filter.h"
@@ -15,5 +15,6 @@
 #include "dmqi.h"
 #include "hausdorff.h"
 #include "io.h"
+#include "DifferenceOfGaussian.h"
 
-#endif /* NICA_H_ */
+#endif /* NICATIO_H_ */

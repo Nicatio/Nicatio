@@ -2,7 +2,7 @@
  * dmqi.h
  *
  *  Created on: 2013. 1. 28.
- *      Author: HDSP
+ *      Author: Nicatio
  */
 
 #ifndef CVDMQI_H_

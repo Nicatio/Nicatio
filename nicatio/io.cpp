@@ -2,7 +2,7 @@
  * io.cpp
  *
  *  Created on: 2013. 1. 28.
- *      Author: HDSP
+ *      Author: Nicatio
  */
 
 #include "io.h"
