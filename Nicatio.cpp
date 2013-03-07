@@ -8,149 +8,155 @@
 using namespace cv;
 using namespace std;
 
-#define ENHANCE
-#define FEATHERING
-#define FLASH
-#define SMOOTHING
+//#define GF
+//#define ENHANCE
+//#define FEATHERING
+//#define FLASH
+//#define SMOOTHING
 
+//#define FR
+//#define LINEHISTEQUALIZE
+//#define DOG
+//#define DMQIDOG
+//#define DOGDMQI
+//#define DMQICONTRASTSHIFT
 
 int main(int argc, char* argv[] ){
 
-//	CGuidedFilter guidedfilter;
-//
-//		Mat l, p, q;
-//		vector< Mat > l_split, p_split, q_split;
-//
-//		double t = 0.0;
-//
-//		int r = 0;
-//		double eps = 0.0;
-//
-//	#ifdef ENHANCE
-//		t = (double)getTickCount();
-//
-//		cout << "guided filtering(enhance) start" << endl;
-//
-//		l = imread(".\\img_enhancement\\tulips.bmp", CV_LOAD_IMAGE_COLOR);
-//		p = l;
-//
-//		r = 16;
-//		eps = pow(0.1, 2);
-//
-//		split(Mat::zeros(l.rows, l.cols, CV_8UC3), q_split);
-//		split(l, l_split);
-//		split(p, p_split);
-//
-//		for (int i = 0; i < 3; i++)
-//		{
-//			q_split[i] = guidedfilter.filtering(l_split[i], p_split[i], r, eps);
-//		}
-//
-//		merge(q_split, q);
-//
-//		Mat sub = l - q;
-//		Mat l_enhanced = sub.mul(5) + q;
-//
-//		resize(l, l, Size(l.cols/2, l.rows/2));
-//		resize(q, q, Size(q.cols/2, q.rows/2));
-//		resize(l_enhanced, l_enhanced, Size(l_enhanced.cols/2, l_enhanced.rows/2));
-//		namedWindow( "tulips", CV_WINDOW_AUTOSIZE );
-//		namedWindow( "reference", CV_WINDOW_AUTOSIZE );
-//		namedWindow( "enhanced", CV_WINDOW_AUTOSIZE );
-//		imshow("tulips", l);
-//		imshow("reference", q);
-//		imshow("enhanced", l_enhanced);
-//
-//		t = ((double)getTickCount() - t)/getTickFrequency();
-//		cout << "guided filtering(enhance) finish.\nelapsed time : " << t << " sec" << endl;
-//	#endif
-//
-//	#ifdef FEATHERING
-//		t = (double)getTickCount();
-//
-//		cout << "guided filtering(feathering) start" << endl;
-//
-//		l = imread(".\\img_feathering\\toy.bmp", CV_LOAD_IMAGE_COLOR);
-//		p = imread(".\\img_feathering\\toy-mask.bmp", CV_LOAD_IMAGE_GRAYSCALE);
-//
-//		r = 60;
-//		eps = pow(10.0, -6);
-//
-//		q = guidedfilter.filtering(l, p, r, eps);
-//
-//
-//		namedWindow( "toy", CV_WINDOW_AUTOSIZE );
-//		namedWindow( "mask", CV_WINDOW_AUTOSIZE );
-//		namedWindow( "feather", CV_WINDOW_AUTOSIZE );
-//
-//		imshow("toy", l);
-//		imshow("mask", p);
-//		imshow("feather", q);
-//
-//		t = ((double)getTickCount() - t)/getTickFrequency();
-//		cout << "guided filtering(feathering) finish.\nelapsed time : " << t << " sec" << endl;
-//	#endif
-//
-//	#ifdef FLASH
-//		t = (double)getTickCount();
-//
-//		cout << "guided filtering(flash) start" << endl;
-//
-//		l = imread(".\\img_flash\\cave-flash.bmp", CV_LOAD_IMAGE_COLOR);
-//		p = imread(".\\img_flash\\cave-noflash.bmp", CV_LOAD_IMAGE_COLOR);
-//
-//		r = 8;
-//		eps = pow(0.02, 2);
-//
-//		split(Mat::zeros(l.rows, l.cols, CV_8UC3), q_split);
-//		split(l, l_split);
-//		split(p, p_split);
-//
-//		for (int i = 0; i < 3; i++)
-//		{
-//			q_split[i] = guidedfilter.filtering(l_split[i], p_split[i], r, eps);
-//		}
-//
-//		merge(q_split, q);
-//
-//
-//		namedWindow( "flash", CV_WINDOW_AUTOSIZE );
-//		namedWindow( "no flash", CV_WINDOW_AUTOSIZE );
-//		namedWindow( "adjustment", CV_WINDOW_AUTOSIZE );
-//
-//		imshow("flash", l);
-//		imshow("no flash", p);
-//		imshow("adjustment", q);
-//
-//		t = ((double)getTickCount() - t)/getTickFrequency();
-//		cout << "guided filtering(flash) finish.\nelapsed time : " << t << " sec" << endl;
-//	#endif
-//
-//	#ifdef SMOOTHING
-//		t = (double)getTickCount();
-//
-//		cout << "guided filtering(smoothing) start" << endl;
-//
-//		l = imread(".\\img_smoothing\\cat.bmp", CV_LOAD_IMAGE_GRAYSCALE);
-//		p = l;
-//
-//		r = 4;
-//		eps = pow(0.2, 2);		// try eps = 0.1^2, 0.2^2, 0.4^2
-//
-//		q = guidedfilter.filtering(l, p, r, eps);
-//
-//		namedWindow( "cat", CV_WINDOW_AUTOSIZE );
-//		namedWindow( "smoothed", CV_WINDOW_AUTOSIZE );
-//		imshow("cat", l);
-//		imshow("smoothed", q);
-//
-//		t = ((double)getTickCount() - t)/getTickFrequency();
-//		cout << "guided filtering(smoothing) finish.\nelapsed time : " << t << " sec" << endl;
-//	#endif
-//
-//		waitKey(0);
-//
-//		return 0;
+	#ifdef GF
+	CGuidedFilter guidedfilter;
+
+		Mat l, p, q;
+		vector< Mat > l_split, p_split, q_split;
+
+		double t = 0.0;
+
+		int r = 0;
+		double eps = 0.0;
+
+	#endif
+	#ifdef ENHANCE
+		t = (double)getTickCount();
+
+		cout << "guided filtering(enhance) start" << endl;
+
+		l = imread(".\\img_enhancement\\tulips.bmp", CV_LOAD_IMAGE_COLOR);
+		p = l;
+
+		r = 16;
+		eps = pow(0.1, 2);
+
+		split(Mat::zeros(l.rows, l.cols, CV_8UC3), q_split);
+		split(l, l_split);
+		split(p, p_split);
+
+		for (int i = 0; i < 3; i++)
+		{
+			q_split[i] = guidedfilter.filtering(l_split[i], p_split[i], r, eps);
+		}
+
+		merge(q_split, q);
+
+		Mat sub = l - q;
+		Mat l_enhanced = sub.mul(5) + q;
+
+		resize(l, l, Size(l.cols/2, l.rows/2));
+		resize(q, q, Size(q.cols/2, q.rows/2));
+		resize(l_enhanced, l_enhanced, Size(l_enhanced.cols/2, l_enhanced.rows/2));
+		namedWindow( "tulips", CV_WINDOW_AUTOSIZE );
+		namedWindow( "reference", CV_WINDOW_AUTOSIZE );
+		namedWindow( "enhanced", CV_WINDOW_AUTOSIZE );
+		imshow("tulips", l);
+		imshow("reference", q);
+		imshow("enhanced", l_enhanced);
+
+		t = ((double)getTickCount() - t)/getTickFrequency();
+		cout << "guided filtering(enhance) finish.\nelapsed time : " << t << " sec" << endl;
+	#endif
+
+	#ifdef FEATHERING
+		t = (double)getTickCount();
+
+		cout << "guided filtering(feathering) start" << endl;
+
+		l = imread(".\\img_feathering\\toy.bmp", CV_LOAD_IMAGE_COLOR);
+		p = imread(".\\img_feathering\\toy-mask.bmp", CV_LOAD_IMAGE_GRAYSCALE);
+
+		r = 60;
+		eps = pow(10.0, -6);
+
+		q = guidedfilter.filtering(l, p, r, eps);
+
+
+		namedWindow( "toy", CV_WINDOW_AUTOSIZE );
+		namedWindow( "mask", CV_WINDOW_AUTOSIZE );
+		namedWindow( "feather", CV_WINDOW_AUTOSIZE );
+
+		imshow("toy", l);
+		imshow("mask", p);
+		imshow("feather", q);
+
+		t = ((double)getTickCount() - t)/getTickFrequency();
+		cout << "guided filtering(feathering) finish.\nelapsed time : " << t << " sec" << endl;
+	#endif
+
+	#ifdef FLASH
+		t = (double)getTickCount();
+
+		cout << "guided filtering(flash) start" << endl;
+
+		l = imread(".\\img_flash\\cave-flash.bmp", CV_LOAD_IMAGE_COLOR);
+		p = imread(".\\img_flash\\cave-noflash.bmp", CV_LOAD_IMAGE_COLOR);
+
+		r = 8;
+		eps = pow(0.02, 2);
+
+		split(Mat::zeros(l.rows, l.cols, CV_8UC3), q_split);
+		split(l, l_split);
+		split(p, p_split);
+
+		for (int i = 0; i < 3; i++)
+		{
+			q_split[i] = guidedfilter.filtering(l_split[i], p_split[i], r, eps);
+		}
+
+		merge(q_split, q);
+
+
+		namedWindow( "flash", CV_WINDOW_AUTOSIZE );
+		namedWindow( "no flash", CV_WINDOW_AUTOSIZE );
+		namedWindow( "adjustment", CV_WINDOW_AUTOSIZE );
+
+		imshow("flash", l);
+		imshow("no flash", p);
+		imshow("adjustment", q);
+
+		t = ((double)getTickCount() - t)/getTickFrequency();
+		cout << "guided filtering(flash) finish.\nelapsed time : " << t << " sec" << endl;
+	#endif
+
+	#ifdef SMOOTHING
+		t = (double)getTickCount();
+
+		cout << "guided filtering(smoothing) start" << endl;
+
+		l = imread(".\\img_smoothing\\cat.bmp", CV_LOAD_IMAGE_GRAYSCALE);
+		p = l;
+
+		r = 4;
+		eps = pow(0.2, 2);		// try eps = 0.1^2, 0.2^2, 0.4^2
+
+		q = guidedfilter.filtering(l, p, r, eps);
+
+		namedWindow( "cat", CV_WINDOW_AUTOSIZE );
+		namedWindow( "smoothed", CV_WINDOW_AUTOSIZE );
+		imshow("cat", l);
+		imshow("smoothed", q);
+
+		t = ((double)getTickCount() - t)/getTickFrequency();
+		cout << "guided filtering(smoothing) finish.\nelapsed time : " << t << " sec" << endl;
+	#endif
+
 
 
 
@@ -171,10 +177,6 @@ int main(int argc, char* argv[] ){
 		Mat temp1 =  imread( dir+"/"+files[0], -1 );
 		cout<<dir+"/"+files[0]<<endl;
 
-		//namedWindow( "a", CV_WINDOW_AUTOSIZE );
-		//imshow( "a", temp1 );
-		//waitKey(0);
-
 
 		Size s = temp1.size();
 		//nicatio::Grayscale(temp2.data, temp2_.data, temp2.cols, temp2.rows);
@@ -183,15 +185,17 @@ int main(int argc, char* argv[] ){
 		//cvNica::FaceRecognition fr(1,ad);
 		//fr.Recognition(dir,"pgm",METHOD_CORR);
 
-//		cvNica::FaceRecognition fr(dir,refLocation);
-//		fr.Recognition(dir,"pgm",DB_YALEB,METHOD_CORR);
-//		cout<<"1 "<<fr.getAccuracy()<<" "<<endl;
-//		cout<<"2 "<<fr.getAccuracyIncludingBadImages()<<" "<<endl;
-//		fr.getAccuracyIncludingBadImagesSubset();
-//
-//		FileStorage abcd("dix.xml",FileStorage::WRITE);
-//		abcd << "frRecognitionResult" << fr.RecognitionResult;
-//		abcd.release();
+#ifdef FR
+		cvNica::FaceRecognition fr(dir,refLocation);
+		fr.Recognition(dir,"pgm",DB_YALEB,METHOD_CORR);
+		cout<<"1 "<<fr.getAccuracy()<<" "<<endl;
+		cout<<"2 "<<fr.getAccuracyIncludingBadImages()<<" "<<endl;
+		fr.getAccuracyIncludingBadImagesSubset();
+
+		FileStorage abcd("dix.xml",FileStorage::WRITE);
+		abcd << "frRecognitionResult" << fr.RecognitionResult;
+		abcd.release();
+#endif
 
 		for (unsigned int i = 0;i < files.size();i++) {
 //		//for (unsigned int i = 0;i < 1;i++) {
@@ -255,7 +259,7 @@ int main(int argc, char* argv[] ){
 
 
 
-
+#ifdef LINEHISTEQUALIZE
 			cout << files[i] <<"\r"<< endl;
 			Mat _image1;
 			_image1 = imread( dir+"/"+files[i], -1 );
@@ -278,35 +282,108 @@ int main(int argc, char* argv[] ){
 //				imwrite(dir+"\\new9\\"+files[i],_deno2);
 //
 //			}
+#endif
+
+#ifdef DOG
+			cout << files[i] <<"\r"<< endl;
+			Mat _image1;
+			_image1 = imread( dir+"/"+files[i], -1 );
+			Mat temp2;
+			cvNica::DoG(_image1,temp2,0.2,1,-2,0,0,0,10);
+
+			unsigned found = files[i].rfind("bad");
+			if (found!=std::string::npos) {
+				vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
+				imwrite(dir+"\\dog2\\"+tokens[0]+".pgm",temp2);
+				rename( string(dir+"\\dog2\\"+tokens[0]+".pgm").c_str() , string(dir+"\\dog2\\"+tokens[0]+".pgm.bad").c_str() );
+
+			} else {
+
+				imwrite(dir+"\\dog2\\"+files[i],temp2);
+
+			}
+#endif
+
+#ifdef DMQICONTRASTSHIFT
+			cout << files[i] <<"\r"<< endl;
+			Mat _image1;
+			_image1 = imread( dir+"\\"+files[i], -1 );
+			Size size = _image1.size();
+			Mat _deno1(size,CV_8UC1);
+			Mat _deno2(size,CV_8UC1);
+			Mat _dmqi(size,CV_8UC1);
+			Mat _histeq(size,CV_8UC1);
+			nicatio::Denoise( _image1.data,_deno1.data,_image1.cols,_image1.rows);
+			nicatio::DynamicMorphQuotImage( _deno1.data,_dmqi.data,_image1.cols,_image1.rows, 0);
+			nicatio::HistEqualize2(_dmqi.data,_histeq.data,_image1.cols,_image1.rows);
+			cvNica::ContrastShifting(_histeq, _deno2, 246);
+			unsigned found = files[i].rfind("bad");
+			if (found!=std::string::npos) {
+				vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
+				imwrite(dir+"\\dmqicontshift\\"+tokens[0]+".pgm",_deno2);
+				rename( string(dir+"\\dmqicontshift\\"+tokens[0]+".pgm").c_str() , string(dir+"\\dmqicontshift\\"+tokens[0]+".pgm.bad").c_str() );
+
+			} else {
+
+				imwrite(dir+"\\dmqicontshift\\"+files[i],_deno2);
+
+			}
+#endif
 
 
 
 
+#ifdef DMQIDOG
+			cout << files[i] <<"\r"<< endl;
+			Mat _image1;
+			_image1 = imread( dir+"\\"+files[i], -1 );
+			Size size = _image1.size();
+			Mat _deno1(size,CV_8UC1);
+			Mat _deno2(size,CV_8UC1);
+			Mat _dmqi(size,CV_8UC1);
+			Mat _histeq(size,CV_8UC1);
+			nicatio::Denoise( _image1.data,_deno1.data,_image1.cols,_image1.rows);
+			nicatio::DynamicMorphQuotImage( _deno1.data,_dmqi.data,_image1.cols,_image1.rows, 0);
+			nicatio::HistEqualize2(_dmqi.data,_histeq.data,_image1.cols,_image1.rows);
+			cvNica::DoG(_histeq,_deno2,0.2,1,-2,0,0,0,10);
+			unsigned found = files[i].rfind("bad");
+			if (found!=std::string::npos) {
+				vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
+				imwrite(dir+"\\dmqidog\\"+tokens[0]+".pgm",_deno2);
+				rename( string(dir+"\\dmqidog\\"+tokens[0]+".pgm").c_str() , string(dir+"\\dmqidog\\"+tokens[0]+".pgm.bad").c_str() );
 
+			} else {
 
-//			cout << files[i] <<"\r"<< endl;
-//			Mat _image1;
-//			_image1 = imread( dir+"\\"+files[i], -1 );
-//			Size size = _image1.size();
-//			Mat _deno1(size,CV_8UC1);
-//			Mat _deno2(size,CV_8UC1);
-//			Mat _dmqi(size,CV_8UC1);
-//			Mat _histeq(size,CV_8UC1);
-//			nicatio::Denoise( _image1.data,_deno1.data,_image1.cols,_image1.rows);
-//			nicatio::DynamicMorphQuotImage( _deno1.data,_dmqi.data,_image1.cols,_image1.rows, 0);
-//			nicatio::HistEqualize2(_dmqi.data,_histeq.data,_image1.cols,_image1.rows);
-//			unsigned found = files[i].rfind("bad");
-//			if (found!=std::string::npos) {
-//				vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
-//				imwrite(dir+"\\new6\\"+tokens[0]+".pgm",_histeq);
-//				rename( string(dir+"\\new6\\"+tokens[0]+".pgm").c_str() , string(dir+"\\new6\\"+tokens[0]+".pgm.bad").c_str() );
-//
-//			} else {
-//
-//				imwrite(dir+"\\new6\\"+files[i],_histeq);
-//
-//			}
+				imwrite(dir+"\\dmqidog\\"+files[i],_deno2);
 
+			}
+#endif
+
+#ifdef DOGDMQI
+			cout << files[i] <<"\r"<< endl;
+			Mat _image1;
+			_image1 = imread( dir+"\\"+files[i], -1 );
+			Size size = _image1.size();
+			Mat _deno1(size,CV_8UC1);
+			Mat _deno2(size,CV_8UC1);
+			Mat _dmqi(size,CV_8UC1);
+			Mat _histeq(size,CV_8UC1);
+			cvNica::DoG(_image1,_deno2,0.2,1,-2,0,0,0,10);
+			nicatio::Denoise( _deno2.data,_deno1.data,_image1.cols,_image1.rows);
+			nicatio::DynamicMorphQuotImage( _deno1.data,_dmqi.data,_image1.cols,_image1.rows, 0);
+			nicatio::HistEqualize2(_dmqi.data,_histeq.data,_image1.cols,_image1.rows);
+			unsigned found = files[i].rfind("bad");
+			if (found!=std::string::npos) {
+				vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
+				imwrite(dir+"\\dogdmqi\\"+tokens[0]+".pgm",_histeq);
+				rename( string(dir+"\\dogdmqi\\"+tokens[0]+".pgm").c_str() , string(dir+"\\dogdmqi\\"+tokens[0]+".pgm.bad").c_str() );
+
+			} else {
+
+				imwrite(dir+"\\dogdmqi\\"+files[i],_histeq);
+
+			}
+#endif
 
 
 

@@ -170,30 +170,30 @@ void FaceRecognition::getScoreTestImageBased(
 	}
 
 
+	if (criterion == METHOD_CORR){
+		for (int j = 0; j < nTotalReferenceImages; j++,ptr_rpx++,ptr_rpy++,ptr_rs++){
+			float maxCorrCoef = -1;
+			int posX = 0;
+			int posY = 0;
 
-	for (int j = 0; j < nTotalReferenceImages; j++,ptr_rpx++,ptr_rpy++,ptr_rs++){
-		float maxCorrCoef = -1;
-		int posX = 0;
-		int posY = 0;
+			if(inputA[j].type() != inputB.type()) return;
+			if(inputA[j].size() != inputB.size()) return;
+			// based on offset of the reference image
 
-		if(inputA[j].type() != inputB.type()) return;
-		if(inputA[j].size() != inputB.size()) return;
-		// based on offset of the reference image
-
-		ptr_a_ = a__;
-		ptr_b_ = a__+sRsize;
-		ptr_c_ = ptr_b_+sRsize;
-		ptr_d_ = ptr_c_+sRsize;
-		ptr__a = ptr_d_+sRsize;
-		ptr__b = ptr__a+sRsize;
-		ptr_inputB_ = inputB_;
-		ptr_inputBB_ = inputB_+sRsize;
+			ptr_a_ = a__;
+			ptr_b_ = a__+sRsize;
+			ptr_c_ = ptr_b_+sRsize;
+			ptr_d_ = ptr_c_+sRsize;
+			ptr__a = ptr_d_+sRsize;
+			ptr__b = ptr__a+sRsize;
+			ptr_inputB_ = inputB_;
+			ptr_inputBB_ = inputB_+sRsize;
 
 
-		Mat inputA32; inputA[j].convertTo(inputA32,CV_32F);
-		Mat inputAA32; multiply (inputA32,inputA32,inputAA32);
+			Mat inputA32; inputA[j].convertTo(inputA32,CV_32F);
+			Mat inputAA32; multiply (inputA32,inputA32,inputAA32);
 
-		if (criterion == METHOD_CORR){
+
 			for (int i=lower; i<=upper; i++) {
 				for (int j=lower; j<=upper; j++,ptr_a_++,ptr_b_++,ptr_c_++,ptr_d_++,ptr__a++,ptr__b++,ptr_inputB_++,ptr_inputBB_++) {
 					float Asq,Bsq,Ms;
@@ -227,17 +227,18 @@ void FaceRecognition::getScoreTestImageBased(
 					}
 				}
 			}
-		}
-		*(ptr_rpx) = posX;
-		*(ptr_rpy) = posY;
-		*(ptr_rs)  = maxCorrCoef;
-		if (maxCorrCoef>max) {
-			max = maxCorrCoef;
-			maxSubjectIndex = j;
-		}
-	}
-	RecognitionResult.at<ushort>(nFileIndex,0) = maxSubjectIndex;
 
+			*(ptr_rpx) = posX;
+			*(ptr_rpy) = posY;
+			*(ptr_rs)  = maxCorrCoef;
+			if (maxCorrCoef>max) {
+				max = maxCorrCoef;
+				maxSubjectIndex = j;
+			}
+		}
+
+		RecognitionResult.at<ushort>(nFileIndex,0) = maxSubjectIndex;
+	}
 }
 
 
@@ -534,13 +535,13 @@ vector<float> FaceRecognition::getAccuracyIncludingBadImagesSubset()
 	ushort *ptr_rr = (ushort*)RecognitionResult.data;
 	uchar *ptr_bi = BadImage.data;
 	int subsetIndicator[64] = {0, 1, 2, 4, 1, 2, 0, 0,
-								0, 1, 1, 1, 1, 2, 1, 2,
-								2, 3, 2, 2, 3, 3, 3, 3,
-								3, 3, 4, 4, 4, 4, 4, 4,
-								4, 4, 4, 0, 0, 0, 1, 1,
-								1, 1, 2, 1, 2, 2, 3, 2,
-								2, 3, 3, 3, 3, 3, 3, 4,
-								4, 4, 4, 4, 4, 4, 4, 4};
+			0, 1, 1, 1, 1, 2, 1, 2,
+			2, 3, 2, 2, 3, 3, 3, 3,
+			3, 3, 4, 4, 4, 4, 4, 4,
+			4, 4, 4, 0, 0, 0, 1, 1,
+			1, 1, 2, 1, 2, 2, 3, 2,
+			2, 3, 3, 3, 3, 3, 3, 4,
+			4, 4, 4, 4, 4, 4, 4, 4};
 	vector<int> indicator;
 	indicator.assign(subsetIndicator,subsetIndicator+64);
 	if (!nTestImageOrder) {
@@ -595,13 +596,13 @@ void FaceRecognition::getBadImageInfo (
 	if (subsetCount){
 		if (nImagesSubset.empty()) return;
 		int subsetIndicator[64] = {0, 1, 2, 4, 1, 2, 0, 0,
-									0, 1, 1, 1, 1, 2, 1, 2,
-									2, 3, 2, 2, 3, 3, 3, 3,
-									3, 3, 4, 4, 4, 4, 4, 4,
-									4, 4, 4, 0, 0, 0, 1, 1,
-									1, 1, 2, 1, 2, 2, 3, 2,
-									2, 3, 3, 3, 3, 3, 3, 4,
-									4, 4, 4, 4, 4, 4, 4, 4};
+				0, 1, 1, 1, 1, 2, 1, 2,
+				2, 3, 2, 2, 3, 3, 3, 3,
+				3, 3, 4, 4, 4, 4, 4, 4,
+				4, 4, 4, 0, 0, 0, 1, 1,
+				1, 1, 2, 1, 2, 2, 3, 2,
+				2, 3, 3, 3, 3, 3, 3, 4,
+				4, 4, 4, 4, 4, 4, 4, 4};
 		vector<int> indicator;
 		indicator.assign(subsetIndicator,subsetIndicator+64);
 		nBadImagesSubset.assign(nImagesSubset.size(),0);

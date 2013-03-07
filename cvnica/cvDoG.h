@@ -10,15 +10,20 @@
 
 #include "cv.h"
 #include "highgui.h"
+#include <math.h>
+
+
+#define abs(x) (x<0)?-x:x
+
+
 
 using namespace cv;
 
 namespace cvNica {
 
-unsigned char* DoG(
-		const unsigned char 			*inputImg,
-		const int&						width,
-		const int&						height,
+void DoG(
+		InputArray 						_src,
+		OutputArray						_dst,
 		const double&					gamma,
 		const double&					sigma0,
 		const double&					sigma1,
@@ -26,17 +31,6 @@ unsigned char* DoG(
 		const int&						sy,
 		const int&						mask,
 		const double&					do_norm);
-
-bool convolve2DFast(
-		double							*in,
-		double							*out,
-		int								dataSizeX,
-		int								dataSizeY,
-		const double					*kernel,
-		int								kernelSizeX,
-		int								kernelSizeY);
-
-
 }
 
 

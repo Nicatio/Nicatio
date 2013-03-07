@@ -24,7 +24,6 @@
 #define DB_YALEB		0
 
 
-
 using namespace cv;
 
 namespace cvNica {

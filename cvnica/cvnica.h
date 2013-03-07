@@ -13,5 +13,6 @@
 #include "AdaptiveManifoldFilter.h"
 #include "FaceRecognition.h"
 #include "cvDoG.h"
+#include "cvFilter.h"
 
 #endif /* CVNICA_H_ */
