@@ -10,6 +10,7 @@
 
 #include "cv.h"
 #include "highgui.h"
+#include "cvFilter.h"
 #include <math.h>
 
 
@@ -31,6 +32,17 @@ void DoG(
 		const int&						sy,
 		const int&						mask,
 		const double&					do_norm);
+
+void BinFace(
+		InputArray 						_src,
+		OutputArray						_dst,
+		const int&						contrastMid,
+		const int&						threshold);
+
+float FaceRollAngleDetection(
+		InputArray 						_src,
+		OutputArray						_dst);
+
 }
 
 

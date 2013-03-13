@@ -19,7 +19,8 @@ using namespace std;
 //#define DOG
 //#define DMQIDOG
 //#define DOGDMQI
-//#define DMQICONTRASTSHIFT
+#define DMQICONTRASTSHIFT
+//#define BINFACE
 
 int main(int argc, char* argv[] ){
 
@@ -174,8 +175,22 @@ int main(int argc, char* argv[] ){
 			return -1;
 		}
 
-		Mat temp1 =  imread( dir+"/"+files[0], -1 );
-		cout<<dir+"/"+files[0]<<endl;
+		Mat temp1 =  imread( dir+"/"+files[64], -1 );
+		cout<<dir+"/"+files[64]<<endl;
+		Mat temp2,colortemp2;
+		vector<Vec4i> lines;
+		cvNica::BinFace(temp1,temp2,135,109);
+		cvtColor( temp2, colortemp2, CV_GRAY2BGR );
+	    HoughLinesP( temp2, lines, 1, CV_PI/180, 50, 20, 5 );
+	    for( size_t i = 0; i < lines.size(); i++ )
+	    {
+	        line( colortemp2, Point(lines[i][0], lines[i][1]),
+	            Point(lines[i][2], lines[i][3]), Scalar(0,0,255), 3, 8 );
+	    }
+
+		namedWindow( "a", CV_WINDOW_AUTOSIZE );
+		imshow( "a",colortemp2 );
+		waitKey(0);
 
 
 		Size s = temp1.size();
@@ -196,7 +211,7 @@ int main(int argc, char* argv[] ){
 		abcd << "frRecognitionResult" << fr.RecognitionResult;
 		abcd.release();
 #endif
-
+		double t = (double)getTickCount();
 		for (unsigned int i = 0;i < files.size();i++) {
 //		//for (unsigned int i = 0;i < 1;i++) {
 //			//int iter = 1;
@@ -289,19 +304,21 @@ int main(int argc, char* argv[] ){
 			Mat _image1;
 			_image1 = imread( dir+"/"+files[i], -1 );
 			Mat temp2;
+
 			cvNica::DoG(_image1,temp2,0.2,1,-2,0,0,0,10);
 
-			unsigned found = files[i].rfind("bad");
-			if (found!=std::string::npos) {
-				vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
-				imwrite(dir+"\\dog2\\"+tokens[0]+".pgm",temp2);
-				rename( string(dir+"\\dog2\\"+tokens[0]+".pgm").c_str() , string(dir+"\\dog2\\"+tokens[0]+".pgm.bad").c_str() );
 
-			} else {
-
-				imwrite(dir+"\\dog2\\"+files[i],temp2);
-
-			}
+			//unsigned found = files[i].rfind("bad");
+//			if (found!=std::string::npos) {
+//				vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
+//				imwrite(dir+"\\dog2\\"+tokens[0]+".pgm",temp2);
+//				rename( string(dir+"\\dog2\\"+tokens[0]+".pgm").c_str() , string(dir+"\\dog2\\"+tokens[0]+".pgm.bad").c_str() );
+//
+//			} else {
+//
+//				imwrite(dir+"\\dog2\\"+files[i],temp2);
+//
+//			}
 #endif
 
 #ifdef DMQICONTRASTSHIFT
@@ -316,18 +333,18 @@ int main(int argc, char* argv[] ){
 			nicatio::Denoise( _image1.data,_deno1.data,_image1.cols,_image1.rows);
 			nicatio::DynamicMorphQuotImage( _deno1.data,_dmqi.data,_image1.cols,_image1.rows, 0);
 			nicatio::HistEqualize2(_dmqi.data,_histeq.data,_image1.cols,_image1.rows);
-			cvNica::ContrastShifting(_histeq, _deno2, 246);
-			unsigned found = files[i].rfind("bad");
-			if (found!=std::string::npos) {
-				vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
-				imwrite(dir+"\\dmqicontshift\\"+tokens[0]+".pgm",_deno2);
-				rename( string(dir+"\\dmqicontshift\\"+tokens[0]+".pgm").c_str() , string(dir+"\\dmqicontshift\\"+tokens[0]+".pgm.bad").c_str() );
-
-			} else {
-
-				imwrite(dir+"\\dmqicontshift\\"+files[i],_deno2);
-
-			}
+			cvNica::IntensityShifting(_histeq, _deno2, 246);
+//			unsigned found = files[i].rfind("bad");
+//			if (found!=std::string::npos) {
+//				vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
+//				imwrite(dir+"\\dmqicontshift\\"+tokens[0]+".pgm",_deno2);
+//				rename( string(dir+"\\dmqicontshift\\"+tokens[0]+".pgm").c_str() , string(dir+"\\dmqicontshift\\"+tokens[0]+".pgm.bad").c_str() );
+//
+//			} else {
+//
+//				imwrite(dir+"\\dmqicontshift\\"+files[i],_deno2);
+//
+//			}
 #endif
 
 
@@ -385,6 +402,29 @@ int main(int argc, char* argv[] ){
 			}
 #endif
 
+#ifdef BINFACE
+			cout << files[i] <<"\r"<< endl;
+			Mat _image1;
+			_image1 = imread( dir+"\\"+files[i], -1 );
+			Size size = _image1.size();
+			Mat _deno1(size,CV_8UC1);
+			Mat _deno2(size,CV_8UC1);
+			Mat _dmqi(size,CV_8UC1);
+			Mat _histeq(size,CV_8UC1);
+			cvNica::BinFace(_image1,_deno2,135,109);
+
+			unsigned found = files[i].rfind("bad");
+			if (found!=std::string::npos) {
+				vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
+				imwrite(dir+"\\binface\\"+tokens[0]+".pgm",_deno2);
+				rename( string(dir+"\\binface\\"+tokens[0]+".pgm").c_str() , string(dir+"\\binface\\"+tokens[0]+".pgm.bad").c_str() );
+
+			} else {
+
+				imwrite(dir+"\\binface\\"+files[i],_deno2);
+
+			}
+#endif
 
 
 
@@ -481,8 +521,8 @@ int main(int argc, char* argv[] ){
 //			imwrite(dir+"\\new5\\"+files[i]+"_processed.bmp",result);
 //			//waitKey(0);
 		}
-
-
+		t = ((double)getTickCount() - t)/getTickFrequency();
+		cout << "filtering finish.\nelapsed time : " << t << " sec" << endl;
 ///////////////////////
 
 
@@ -491,7 +531,7 @@ int main(int argc, char* argv[] ){
 //
 //
 //
-////// location ::::::::::::: E:\yalebDB\
+//location ::::::::::::: E:\yalebDB\
 //
 //
 //	//int e=0;

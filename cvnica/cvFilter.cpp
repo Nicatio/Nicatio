@@ -12,7 +12,7 @@ using namespace cv;
 
 namespace cvNica {
 
-void ContrastShifting(
+void IntensityShifting(
 		InputArray 						_src,
 		OutputArray						_dst,
 		const int&						mid)

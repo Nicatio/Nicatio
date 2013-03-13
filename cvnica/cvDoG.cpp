@@ -89,6 +89,42 @@ void DoG(
 	rep.copyTo(dst);
 }
 
+void BinFace(
+		InputArray 						_src,
+		OutputArray						_dst,
+		const int&						contrastMid,
+		const int&						th)
+{
+	Mat src = _src.getMat();
+	Size srcSize = src.size();
+
+	Mat TT,CS,Th;
+	DoG(src,TT,0.2,1,-2,0,0,0,10);
+	IntensityShifting(TT,CS,contrastMid);
+	threshold(CS,Th,th,255,THRESH_BINARY_INV);
+
+	_dst.create(src.size(),src.type());
+	Mat dst = _dst.getMat();
+
+	Th.copyTo(dst);
+}
+
+float FaceRollAngleDetection(
+		InputArray 						_src,
+		OutputArray						_dst)
+{
+	Mat src = _src.getMat();
+	Size srcSize = src.size();
+	Mat srcCopy (src);
+	vector<Vec4i> lines;
+    HoughLinesP( srcCopy, lines, 1, CV_PI/180, 50, 20, 5 );
+
+    int b = lines.size();
+    float a=0;
+    return a;
+
+}
+
 
 }
 
