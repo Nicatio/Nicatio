@@ -5,6 +5,8 @@
 #include "nicatio/nicatio.h"
 #include "cvnica/cvnica.h"
 
+
+
 using namespace cv;
 using namespace std;
 
@@ -19,8 +21,10 @@ using namespace std;
 //#define DOG
 //#define DMQIDOG
 //#define DOGDMQI
-#define DMQICONTRASTSHIFT
+//#define DMQICONTRASTSHIFT
 //#define BINFACE
+
+#define ROTATEFACEANGLEDETECTION
 
 int main(int argc, char* argv[] ){
 
@@ -174,23 +178,57 @@ int main(int argc, char* argv[] ){
 			cout<< "Error: Invalid file location \n" <<endl;
 			return -1;
 		}
-
+		//cout << cos(90.0/180*PI) << endl;
+		//cout << cos(PI) << endl;
 		Mat temp1 =  imread( dir+"/"+files[64], -1 );
-		cout<<dir+"/"+files[64]<<endl;
-		Mat temp2,colortemp2;
-		vector<Vec4i> lines;
-		cvNica::BinFace(temp1,temp2,135,109);
-		cvtColor( temp2, colortemp2, CV_GRAY2BGR );
-	    HoughLinesP( temp2, lines, 1, CV_PI/180, 50, 20, 5 );
-	    for( size_t i = 0; i < lines.size(); i++ )
-	    {
-	        line( colortemp2, Point(lines[i][0], lines[i][1]),
-	            Point(lines[i][2], lines[i][3]), Scalar(0,0,255), 3, 8 );
-	    }
-
-		namedWindow( "a", CV_WINDOW_AUTOSIZE );
-		imshow( "a",colortemp2 );
-		waitKey(0);
+//
+//		Mat temp23 = cvNica::rotateImage(temp1, 66,0);
+//
+////		namedWindow( "c", CV_WINDOW_AUTOSIZE );
+////		imshow( "c",temp23 );
+////		waitKey(0);
+//
+//		cout<<dir+"/"+files[64]<<endl;
+//		Mat temp2,colortemp2;
+//		vector<Vec4i> lines;
+//		cvNica::BinFace(temp23,temp2,135,109);
+//		cvtColor( temp2, colortemp2, CV_GRAY2BGR );
+//	    HoughLinesP( temp2, lines, 1, CV_PI/180, 50, 20, 5 );
+//
+//	    vector<int> hist(36,0);
+//	    vector<float> histSum(36,0);
+//
+//	    for( size_t i = 0; i < lines.size(); i++ )
+//	    {
+//	        line( colortemp2, Point(lines[i][0], lines[i][1]),
+//	            Point(lines[i][2], lines[i][3]), Scalar(0,0,255), 3, 8 );
+//			float angle = atan2(lines[i][3]-lines[i][1],lines[i][2]-lines[i][0]);
+//	        short temp = (short)((angle + 1.5271630954950383798082294224275)/PI*36);
+//			if (temp<0) temp = 35;
+//
+//			hist[temp]++;
+//			histSum[temp]+=angle;
+//
+//
+//	       // cout<<temp<<endl;
+//	    }
+//
+//	    int max = hist[0];
+//		int maxIndex = 0;
+//	    for (short j=0;j<36;j++)
+//	    {
+//	    	if (max < hist[j]) {
+//	    		max = hist[j];
+//	    		maxIndex = j;
+//	    	}
+//	    	cout<<j<<": "<<hist[j]<<endl;
+//	    }
+//
+//	    float imageAngle = histSum[maxIndex]/hist[maxIndex]/PI*180;
+//	    cout<<"imageAngle: "<<imageAngle<<endl;
+//		namedWindow( "a", CV_WINDOW_AUTOSIZE );
+//		imshow( "a",colortemp2 );
+//		waitKey(0);
 
 
 		Size s = temp1.size();
@@ -211,6 +249,13 @@ int main(int argc, char* argv[] ){
 		abcd << "frRecognitionResult" << fr.RecognitionResult;
 		abcd.release();
 #endif
+
+
+		ofstream FileOut;
+		FileOut.open("result.txt",(ios::out));
+		int nHist = 8;
+		float offset = PI * (0.5-(float)(180.0/(float)nHist)/360.0);
+
 		double t = (double)getTickCount();
 		for (unsigned int i = 0;i < files.size();i++) {
 //		//for (unsigned int i = 0;i < 1;i++) {
@@ -272,6 +317,143 @@ int main(int argc, char* argv[] ){
 
 			//fr.getScore(temp1_,temp2_,5,METHOD_CORR);
 
+
+#ifdef ROTATEFACEANGLEDETECTION
+
+			Mat temp1 =  imread( dir+"/"+files[i], -1 );
+			//Mat temp1; resize(dtemp1,temp1,Size(0,0),2.0,2.0);
+			Mat mask =  Mat::ones(temp1.size(),CV_8U)*255;
+
+			double rotateAngle = rand() % 4500;
+			//rotateAngle -= 450;
+			rotateAngle /= 100;
+
+			//rotateAngle = 45;
+
+			Mat temp23 = cvNica::rotateImage(temp1, rotateAngle, 0, 1);
+			Mat rotated_mask = cvNica::rotateImage(mask, rotateAngle, 0);
+
+
+			Mat temp2,colortemp2,colortemp3;
+			//cvNica::BinFace(temp23,temp2,135,109);
+			cvNica::BinFaceMask(temp23,rotated_mask,temp2,temp1.size(),135,109);
+
+			//Mat temp333;
+			//cvNica::BinFace(temp1,temp333,135,109);
+
+//			namedWindow( "c", CV_WINDOW_AUTOSIZE );
+//			imshow( "c",temp333 );
+//			waitKey(0);
+//
+//			namedWindow( "d", CV_WINDOW_AUTOSIZE );
+//			imshow( "d",temp2);
+//			waitKey(0);
+
+
+
+
+			Mat output = Mat::zeros(temp2.size(), CV_8UC3);
+			std::vector < std::vector<cv::Point2i > > blobs;
+
+			vector<Vec4i> lines;
+			cvNica::FindBlobs(temp2, blobs);
+
+			// Randomy color the blobs
+
+			for(size_t m=0; m < blobs.size(); m++) {
+				unsigned char r = 0;//255 * (rand()/(1.0 + RAND_MAX));
+				unsigned char g = 0;//255 * (rand()/(1.0 + RAND_MAX));
+				unsigned char b = 0;//255 * (rand()/(1.0 + RAND_MAX));
+				if (blobs[m].size()<15) {
+					for(size_t n=0; n < blobs[m].size(); n++) {
+						int x = blobs[m][n].x;
+						int y = blobs[m][n].y;
+						temp2.at<uchar>(y,x) = b;
+
+						//output.at<Vec3b>(y,x)[0] = b;
+						//output.at<Vec3b>(y,x)[1] = g;
+						//output.at<Vec3b>(y,x)[2] = r;
+					}
+				}
+			}
+//			    namedWindow( "m", CV_WINDOW_AUTOSIZE );
+//			    imshow("m", temp2);
+//			    namedWindow( "n", CV_WINDOW_AUTOSIZE );
+//			    imshow("n", output);
+//			    waitKey(0);
+
+
+
+
+
+			cvtColor( temp2, colortemp2, CV_GRAY2BGR );
+		    HoughLinesP( temp2, lines, 1, CV_PI/180, 30, 20, 4 );
+
+		    vector<int> hist(36,0);
+		    vector<float> histSum(36,0);
+		    vector<int> histSumX(36,0);
+		    vector<int> histSumY(36,0);
+
+		    int sum = lines.size();
+		    int sumsq = 0;
+
+		    for( size_t k = 0; k < lines.size(); k++ )
+		    {
+		        line( colortemp2, Point(lines[k][0], lines[k][1]),
+		            Point(lines[k][2], lines[k][3]), Scalar(0,0,255), 1, 8 );
+				float angle = atan2(lines[k][3]-lines[k][1],lines[k][2]-lines[k][0]);
+		        short temp = (short)((angle + offset)/PI*nHist);
+				if (temp<0) temp = nHist-1;
+
+				hist[temp]++;
+				histSum[temp]+=angle;
+				histSumX[temp]+=lines[k][3]-lines[k][1];
+				histSumY[temp]+=lines[k][2]-lines[k][0];
+
+
+		        //cout<<angle<<endl;
+		    }
+		    for (short j=0;j<nHist;j++){
+		    	sumsq += hist[j]*hist[j];
+		    }
+		    double std = sqrt( ((double)sumsq/nHist) - ((double)sum/nHist)*((double)sum/nHist));
+		    int max = hist[0];
+			int maxIndex = 0;
+		    for (short j=0;j<nHist;j++)
+		    {
+		    	if (max < hist[j]) {
+		    		max = hist[j];
+		    		maxIndex = j;
+		    	}
+		    	//cout<<j<<": "<<hist[j]<<endl;
+		    }
+
+//			namedWindow( "a", CV_WINDOW_AUTOSIZE );
+//			imshow( "a",colortemp2 );
+//			waitKey(0);
+
+		    //float imageAngle = histSum[maxIndex]/hist[maxIndex]/PI*180;
+		    float imageAngle = atan2(histSumX[maxIndex],histSumY[maxIndex])/PI*180;
+
+		    if (hist[maxIndex]==0) imageAngle = 0;
+		    cout<<"imageAngle vs Actual: "<<imageAngle<<" / "<<rotateAngle<<endl;
+
+//		    imwrite(dir+"/faceRotBinRaw/"+files[i]+".bmp",temp2);
+//		    if (imageAngle<-5 || imageAngle>5) {
+//		    	Mat temp323 = cvNica::rotateImage(temp23, imageAngle, 0);
+//		    	imwrite(dir+"/faceRotFail/a/"+files[i]+".bmp",temp23);
+//		    	imwrite(dir+"/faceRotFail/"+files[i]+".bmp",colortemp2);
+//		    } else {
+//		    	Mat temp323 = cvNica::rotateImage(temp23, imageAngle, 0);
+//		    	imwrite(dir+"/faceRot/a/"+files[i]+".bmp",temp23);
+//		    	imwrite(dir+"/faceRot/"+files[i]+".bmp",colortemp2);
+//		    }
+//		    imwrite(dir+"/faceRotBin/"+files[i]+".bmp",temp2);
+		    FileOut<<imageAngle<<"\t"<<rotateAngle<<"\t"<<(((double)hist[maxIndex]-((double)sum/nHist))/std)<<endl;
+			//FileOut.write(aaa.str().c_str(),sizeof(aaa.str().c_str()));
+
+
+#endif
 
 
 #ifdef LINEHISTEQUALIZE
@@ -523,6 +705,7 @@ int main(int argc, char* argv[] ){
 		}
 		t = ((double)getTickCount() - t)/getTickFrequency();
 		cout << "filtering finish.\nelapsed time : " << t << " sec" << endl;
+		FileOut.close();
 ///////////////////////
 
 
