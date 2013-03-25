@@ -253,7 +253,7 @@ int main(int argc, char* argv[] ){
 
 		ofstream FileOut;
 		FileOut.open("result.txt",(ios::out));
-		int nHist = 8;
+		int nHist = 16;//32;
 		float offset = PI * (0.5-(float)(180.0/(float)nHist)/360.0);
 
 		double t = (double)getTickCount();
@@ -321,7 +321,9 @@ int main(int argc, char* argv[] ){
 #ifdef ROTATEFACEANGLEDETECTION
 
 			Mat temp1 =  imread( dir+"/"+files[i], -1 );
-			//Mat temp1; resize(dtemp1,temp1,Size(0,0),2.0,2.0);
+			//Mat temp1; resize(dtemp1,temp1,Size(0,0),0.5,0.5);
+			//GaussianBlur(temp1,temp1,Size(5,5),1.0);
+
 			Mat mask =  Mat::ones(temp1.size(),CV_8U)*255;
 
 			double rotateAngle = rand() % 4500;
@@ -396,7 +398,7 @@ int main(int argc, char* argv[] ){
 
 		    int sum = lines.size();
 		    int sumsq = 0;
-
+			int *t = new int[sum];
 		    for( size_t k = 0; k < lines.size(); k++ )
 		    {
 		        line( colortemp2, Point(lines[k][0], lines[k][1]),
@@ -409,6 +411,7 @@ int main(int argc, char* argv[] ){
 				histSum[temp]+=angle;
 				histSumX[temp]+=lines[k][3]-lines[k][1];
 				histSumY[temp]+=lines[k][2]-lines[k][0];
+				t[k] = temp;
 
 
 		        //cout<<angle<<endl;
@@ -419,13 +422,34 @@ int main(int argc, char* argv[] ){
 		    double std = sqrt( ((double)sumsq/nHist) - ((double)sum/nHist)*((double)sum/nHist));
 		    int max = hist[0];
 			int maxIndex = 0;
+			int peakPoints = 0;
+			int peakSumX = 0;
+			int peakSumY = 0;
 		    for (short j=0;j<nHist;j++)
 		    {
 		    	if (max < hist[j]) {
 		    		max = hist[j];
 		    		maxIndex = j;
 		    	}
-		    	//cout<<j<<": "<<hist[j]<<endl;
+		    	cout<<" "<<j<<": "<<hist[j]<<" : "<<((hist[j]-(sum/nHist))/std)<<endl;
+		    }
+		    for (short j=0;j<nHist;j++)
+		    {
+				//if ((((double)hist[j]-((double)sum/nHist))/std)>2.0 && (abs(j-maxIndex)<7)) {
+		    	if ((((double)hist[j]-((double)sum/nHist))/std)>2.0 && (abs(j-maxIndex)<4)) {
+					peakSumX += histSumX[j];
+					peakSumY += histSumY[j];
+					peakPoints++;
+
+				    for( size_t k = 0; k < lines.size(); k++ )
+				    {
+				    	if (j == t[k]) {
+							line( colortemp2, Point(lines[k][0], lines[k][1]),
+								Point(lines[k][2], lines[k][3]), Scalar(255,0,0), 1, 8 );
+				    	}
+				    }
+
+				}
 		    }
 
 //			namedWindow( "a", CV_WINDOW_AUTOSIZE );
@@ -433,7 +457,14 @@ int main(int argc, char* argv[] ){
 //			waitKey(0);
 
 		    //float imageAngle = histSum[maxIndex]/hist[maxIndex]/PI*180;
-		    float imageAngle = atan2(histSumX[maxIndex],histSumY[maxIndex])/PI*180;
+		    //float imageAngle = atan2(histSumX[maxIndex],histSumY[maxIndex])/PI*180;
+
+		    float imageAngle;
+		    if (peakPoints) {
+		    	imageAngle = atan2(peakSumX,peakSumY)/PI*180;
+		    } else {
+		    	imageAngle = atan2(histSumX[maxIndex],histSumY[maxIndex])/PI*180;
+		    }
 
 		    if (hist[maxIndex]==0) imageAngle = 0;
 		    cout<<"imageAngle vs Actual: "<<imageAngle<<" / "<<rotateAngle<<endl;
@@ -449,7 +480,7 @@ int main(int argc, char* argv[] ){
 //		    	imwrite(dir+"/faceRot/"+files[i]+".bmp",colortemp2);
 //		    }
 //		    imwrite(dir+"/faceRotBin/"+files[i]+".bmp",temp2);
-		    FileOut<<imageAngle<<"\t"<<rotateAngle<<"\t"<<(((double)hist[maxIndex]-((double)sum/nHist))/std)<<endl;
+		    FileOut<<imageAngle<<"\t"<<rotateAngle<<"\t"<<(((double)hist[maxIndex]-((double)sum/nHist))/std)<<"\t"<<peakPoints<<endl;
 			//FileOut.write(aaa.str().c_str(),sizeof(aaa.str().c_str()));
 
 
