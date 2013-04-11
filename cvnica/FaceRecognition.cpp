@@ -66,6 +66,7 @@ FaceRecognition::FaceRecognition(
 				if(tokens[0] == "ro") istringstream (tokens[1]) >> nRefImageOrder;
 			}
 		}
+		Mat aveImg;
 		refImage.resize(nSubject * nRefImagesPerSubject);
 		int i;
 		for (i=0;;i++) {
@@ -74,7 +75,15 @@ FaceRecognition::FaceRecognition(
 			if(str=="") break;
 			vector<string> tokens = nicatio::StringTokenizer::getTokens(str,"\n\r");
 			imread( dir+"/"+tokens[0], -1 ).copyTo(refImage[i]);
+			if (i==0){
+				aveImg=Mat::zeros(refImage[i].size(),CV_32FC1);
+			}
+			Mat temp; refImage[i].convertTo(temp,CV_32FC1);
+			aveImg += temp;
 		}
+		aveImg/=nSubject*nRefImagesPerSubject;
+		Mat aveImg2; aveImg.convertTo(aveImg2,CV_8UC1);
+		imwrite("aveimg.bmp",aveImg2);
 	}
 }
 
@@ -107,14 +116,16 @@ void FaceRecognition::Recognition(
 		string							dir,
 		string							type,
 		int								DBname,
-		int								criterion)
+		int								criterion,
+		int								startAngle,
+		int								endAngle)
 {
 	DirectoryLocation = dir;
 	vector<string> files = vector<string>();
 	if(nicatio::getdirType(dir,type,files,0)){
 		cout<< "Error: Invalid file location \n" <<endl;
 	}
-	_Recognition(refImage,files,DBname,criterion);
+	_Recognition(refImage,files,DBname,criterion,startAngle,endAngle);
 }
 
 void FaceRecognition::getScoreTestImageBased(
@@ -219,7 +230,7 @@ void FaceRecognition::getScoreTestImageBased(
 					float refSigma = sqrt((double)s*Asq-(double)As*As);
 					float tesSigma = sqrt((double)s*Bsq-(double)Bs*Bs);
 					float corrCoef = ((double)s*Ms - (double)As*Bs)/(refSigma*tesSigma);
-
+					if (refSigma*tesSigma == 0) continue;
 					if (maxCorrCoef < corrCoef) {
 						maxCorrCoef = corrCoef;
 						posX = i;
@@ -242,114 +253,139 @@ void FaceRecognition::getScoreTestImageBased(
 }
 
 
-float FaceRecognition::getScore(
-		const Mat						inputA,
-		const Mat						inputB,
+
+void FaceRecognition::getScoreTestImageBasedRotation(
+		const vector<Mat>				inputA,
+		const Mat						_inputB,
+		const int						nFileIndex,
 		const int						searchRadius,
 		const int						criterion,
-		char&							posX,
-		char&							posY)
+		const int						startAngle,
+		const int						endAngle)
 {
+	int nTotalReferenceImages = inputA.size();
 	int upper, lower;
-	float maxCorrCoef = -1;
-	posX = 0;
-	posY = 0;
 	upper = searchRadius>>1;
 	lower = (searchRadius%2)? (-upper):(-upper+1);
-
-	if(inputA.type() != inputB.type()) return -1;
-	if(inputA.size() != inputB.size()) return -1;
-	// based on offset of the reference image
-
-	int w = inputA.size().width;
-	int h = inputA.size().height;
-
-	Mat inputA32; inputA.convertTo(inputA32,CV_32F);
-	Mat inputB32; inputB.convertTo(inputB32,CV_32F);
-	Mat inputAA32; multiply (inputA32,inputA32,inputAA32);
-	Mat inputBB32; multiply (inputB32,inputB32,inputBB32);
+	float max=-2;
+	ushort maxSubjectIndex = 0;
 
 	if (criterion == METHOD_CORR){
-		for (int i=lower; i<=upper; i++) {
-			for (int j=lower; j<=upper; j++) {
-				int a_,b_,c_,d_;
-				int _a,_b;
-				int a,b,c,d;
-				float Asq,Bsq,Ms;
-				float As,Bs;
+		char *ptr_rpx = &(RecognitionPositionX.at<char>(nFileIndex,0));
+		char *ptr_rpy = &(RecognitionPositionY.at<char>(nFileIndex,0));
+		float *ptr_rs = &(RecognitionScore.at<float>(nFileIndex,0));
+		for (int j = 0; j < nTotalReferenceImages; j++,ptr_rpx++,ptr_rpy++,ptr_rs++){
+			float maxCorrCoef = -1;
+			int posX = 0;
+			int posY = 0;
+			int posAngle = 0;
+			for (int angle = startAngle; angle < endAngle; angle++){
+				Mat inputB = cvNica::rotateImage(_inputB, angle, 1);
+				Mat inputB32; inputB.convertTo(inputB32,CV_32F);
+				Mat inputBB32; multiply (inputB32,inputB32,inputBB32);
 
-				if(i<0) {
-					a_ = -i;
-					_a = 0;
-					c_ = w+i;
-				}
-				else {
-					a_ = 0;
-					_a = i;
-					c_ = w-i;
-				}
+				int w = inputA[0].size().width;
+				int h = inputA[0].size().height;
 
-				if(j<0) {
-					b_ = -j;
-					_b = 0;
-					d_ = h+j;
-				}
-				else {
-					b_ = 0;
-					_b = j;
-					d_ = h-j;
-				}
+				int sRsize = searchRadius*searchRadius;
+				int *a__ = (int*)malloc(sRsize*6*sizeof(int));
+				float *inputB_ = (float*)malloc(sRsize*2*sizeof(float));
+				int *ptr_a_ = a__;
+				int *ptr_b_ = a__+sRsize;
+				int *ptr_c_ = ptr_b_+sRsize;
+				int *ptr_d_ = ptr_c_+sRsize;
+				int *ptr__a = ptr_d_+sRsize;
+				int *ptr__b = ptr__a+sRsize;
+				float *ptr_inputB_ = inputB_;
+				float *ptr_inputBB_ = inputB_+sRsize;
 
 
-				if(i<0){
-					a = a_;
-					c = 0;
-				} else {
-					a = 0;
-					c = _a;
-				}
+				for (int i=lower; i<=upper; i++) {
+					for (int j=lower; j<=upper; j++,ptr_a_++,ptr_b_++,ptr_c_++,ptr_d_++,ptr__a++,ptr__b++,ptr_inputB_++,ptr_inputBB_++) {
 
-				if(j<0){
-					b = b_;
-					d = 0;
-				} else {
-					b = 0;
-					d = _b;
-				}
+						if(i<0) { 	*(ptr_a_) = -i;		*(ptr__a) = 0;		*(ptr_c_) = w+i; }
+						else 	{	*(ptr_a_) = 0; 		*(ptr__a) = i;		*(ptr_c_) = w-i; }
+						if(j<0) {	*(ptr_b_) = -j;		*(ptr__b) = 0;		*(ptr_d_) = h+j; }
+						else 	{	*(ptr_b_) = 0;		*(ptr__b) = j;		*(ptr_d_) = h-j; }
 
+						Mat inputBCrop=inputB32(Rect (*(ptr__a),*(ptr__b),*(ptr_c_),*(ptr_d_)));
+						Mat inputBBCrop=inputBB32(Rect (*(ptr__a),*(ptr__b),*(ptr_c_),*(ptr_d_)));
+						Mat multResult(*(ptr_c_),*(ptr_d_),CV_32F);
 
-				Mat inputACrop=inputA32(Rect (a_,b_,c_,d_));
-				Mat inputBCrop=inputB32(Rect (_a,_b,c_,d_));
-				Mat inputAACrop=inputAA32(Rect (a_,b_,c_,d_));
-				Mat inputBBCrop=inputBB32(Rect (_a,_b,c_,d_));
-				Mat multResult(c_,d_,CV_32F);
-
-
-				multiply (inputACrop,inputBCrop,multResult);
-
-
-				Ms = sum(multResult)[0];
-				Asq = sum(inputAACrop)[0];
-				Bsq = sum(inputBBCrop)[0];
-				As = sum(inputACrop)[0];
-				Bs = sum(inputBCrop)[0];
-
-				int s = c_*d_;
-
-				float refSigma = sqrt((double)s*Asq-(double)As*As);
-				float tesSigma = sqrt((double)s*Bsq-(double)Bs*Bs);
-				float corrCoef = ((double)s*Ms - (double)As*Bs)/(refSigma*tesSigma);
-
-				if (maxCorrCoef < corrCoef) {
-					maxCorrCoef = corrCoef;
-					posX = i;
-					posY = j;
+						*(ptr_inputBB_) = sum(inputBBCrop)[0];
+						*(ptr_inputB_) = sum(inputBCrop)[0];
+					}
 				}
 
+
+
+
+
+
+				if(inputA[j].type() != inputB.type()) return;
+				if(inputA[j].size() != inputB.size()) return;
+				// based on offset of the reference image
+
+				ptr_a_ = a__;
+				ptr_b_ = a__+sRsize;
+				ptr_c_ = ptr_b_+sRsize;
+				ptr_d_ = ptr_c_+sRsize;
+				ptr__a = ptr_d_+sRsize;
+				ptr__b = ptr__a+sRsize;
+				ptr_inputB_ = inputB_;
+				ptr_inputBB_ = inputB_+sRsize;
+
+
+				Mat inputA32; inputA[j].convertTo(inputA32,CV_32F);
+				Mat inputAA32; multiply (inputA32,inputA32,inputAA32);
+
+
+				for (int i=lower; i<=upper; i++) {
+					for (int j=lower; j<=upper; j++,ptr_a_++,ptr_b_++,ptr_c_++,ptr_d_++,ptr__a++,ptr__b++,ptr_inputB_++,ptr_inputBB_++) {
+						float Asq,Bsq,Ms;
+						float As,Bs;
+
+						int a_=*(ptr_a_),b_=*(ptr_b_),c_=*(ptr_c_),d_=*(ptr_d_);
+						int _a=*(ptr__a),_b=*(ptr__b);
+
+						Mat inputACrop=inputA32(Rect (a_,b_,c_,d_));
+						Mat inputBCrop=inputB32(Rect (_a,_b,c_,d_));
+						Mat inputAACrop=inputAA32(Rect (a_,b_,c_,d_));
+						Mat multResult(c_,d_,CV_32F);
+						multiply (inputACrop,inputBCrop,multResult);
+
+						Ms = sum(multResult)[0];
+						Asq = sum(inputAACrop)[0];
+						Bsq = *(ptr_inputBB_);
+						As = sum(inputACrop)[0];
+						Bs = *(ptr_inputB_);
+
+						int s = c_*d_;
+
+						float refSigma = sqrt((double)s*Asq-(double)As*As);
+						float tesSigma = sqrt((double)s*Bsq-(double)Bs*Bs);
+						float corrCoef = ((double)s*Ms - (double)As*Bs)/(refSigma*tesSigma);
+						if (refSigma*tesSigma == 0) continue;
+						if (maxCorrCoef < corrCoef) {
+							maxCorrCoef = corrCoef;
+							posX = i;
+							posY = j;
+							posAngle = angle;
+						}
+					}
+				}
+			}
+			*(ptr_rpx) = posX;
+			*(ptr_rpy) = posY;
+			*(ptr_rs)  = maxCorrCoef;
+			if (maxCorrCoef>max) {
+				max = maxCorrCoef;
+				maxSubjectIndex = j;
 			}
 		}
+
+		RecognitionResult.at<ushort>(nFileIndex,0) = maxSubjectIndex;
 	}
-	return maxCorrCoef;
 }
 
 
@@ -357,7 +393,9 @@ void FaceRecognition::_Recognition(
 		vector<Mat>						referenceImage,
 		vector<string>					files,
 		int								DBname,
-		int								criterion)
+		int								criterion,
+		int								startAngle,
+		int								endAngle)
 {
 	nFiles = files.size();
 	int nTotalReferenceImages = nSubject*nRefImagesPerSubject;
@@ -371,14 +409,24 @@ void FaceRecognition::_Recognition(
 		nImagesSubset.assign(nis,nis+5);
 		getBadImageInfo(files,1);
 	}
-
-	for (int i = 0; i < nFiles; i++) {
-		cout << files[i] << endl;
-		Mat testImage = imread( DirectoryLocation+"/"+files[i], -1 );
-		double t=(double)getTickCount();
-		getScoreTestImageBased(referenceImage, testImage, i, nSearchRadius, criterion);
-		t = ((double)getTickCount() - t)/getTickFrequency();
-		cout << "Registration Time : " << t << " sec" << endl;
+	if (startAngle == endAngle) {
+		for (int i = 0; i < nFiles; i++) {
+			cout << files[i] << endl;
+			Mat testImage = imread( DirectoryLocation+"/"+files[i], -1 );
+			double t=(double)getTickCount();
+			getScoreTestImageBased(referenceImage, testImage, i, nSearchRadius, criterion);
+			t = ((double)getTickCount() - t)/getTickFrequency();
+			cout << "Registration Time : " << t << " sec" << endl;
+		}
+	} else {
+		for (int i = 0; i < nFiles; i++) {
+			cout << files[i] << endl;
+			Mat testImage = imread( DirectoryLocation+"/"+files[i], -1 );
+			double t=(double)getTickCount();
+			getScoreTestImageBasedRotation(referenceImage, testImage, i, nSearchRadius, criterion, startAngle, endAngle);
+			t = ((double)getTickCount() - t)/getTickFrequency();
+			cout << "Registration Time : " << t << " sec" << endl;
+		}
 	}
 	cout <<"done"<<endl;
 }

@@ -25,7 +25,8 @@ Mat rotateImage(
 		const Mat						&source,
 		double 							angle,
 		bool							type,
-		int								borderType=0);
+		int								borderType=0,
+		int								borderColor=0x000000);
 
 void FindBlobs(
 		const Mat &binary,

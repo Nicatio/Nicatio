@@ -15,16 +15,24 @@ using namespace std;
 //#define FEATHERING
 //#define FLASH
 //#define SMOOTHING
-
+#define FA
 //#define FR
 //#define LINEHISTEQUALIZE
 //#define DOG
+//#define DOGCIRCLE
 //#define DMQIDOG
 //#define DOGDMQI
 //#define DMQICONTRASTSHIFT
+//#define DMQI
+//#define SMQI
+//#define DMQIADVANCED
 //#define BINFACE
 
-#define ROTATEFACEANGLEDETECTION
+
+//#define ROTATEFACEANGLEDETECTION
+
+
+//#define ROTATEFACEANGLEDETECTIONDMQI
 
 int main(int argc, char* argv[] ){
 
@@ -178,9 +186,10 @@ int main(int argc, char* argv[] ){
 			cout<< "Error: Invalid file location \n" <<endl;
 			return -1;
 		}
+
 		//cout << cos(90.0/180*PI) << endl;
 		//cout << cos(PI) << endl;
-		Mat temp1 =  imread( dir+"/"+files[64], -1 );
+		//Mat temp1 =  imread( dir+"/"+files[64], -1 );
 //
 //		Mat temp23 = cvNica::rotateImage(temp1, 66,0);
 //
@@ -231,7 +240,7 @@ int main(int argc, char* argv[] ){
 //		waitKey(0);
 
 
-		Size s = temp1.size();
+		//Size s = temp1.size();
 		//nicatio::Grayscale(temp2.data, temp2_.data, temp2.cols, temp2.rows);
 
 
@@ -240,6 +249,7 @@ int main(int argc, char* argv[] ){
 
 #ifdef FR
 		cvNica::FaceRecognition fr(dir,refLocation);
+		//fr.Recognition(dir,"pgm",DB_YALEB,METHOD_CORR,-45,0);
 		fr.Recognition(dir,"pgm",DB_YALEB,METHOD_CORR);
 		cout<<"1 "<<fr.getAccuracy()<<" "<<endl;
 		cout<<"2 "<<fr.getAccuracyIncludingBadImages()<<" "<<endl;
@@ -251,6 +261,22 @@ int main(int argc, char* argv[] ){
 #endif
 
 
+
+#ifdef FA
+		//cvNica::FaceAnalysis fhhhah();
+
+		Mat dsf = Mat::zeros(3,3,CV_32FC1);
+		dsf.at<float>(2,2) = 255;
+
+		Mat dsf2; dsf.convertTo(dsf2,CV_8UC1);
+		imwrite("dfdf.bmp",dsf2);
+
+		cvNica::FaceAnalysis fa(dir,"pgm");
+		fa.setGroup("faceindex.bmp");
+		//fa.draw(64,2);
+		fa.mse(64);
+//
+#endif
 		ofstream FileOut;
 		FileOut.open("result.txt",(ios::out));
 		int nHist = 16;//32;
@@ -319,6 +345,257 @@ int main(int argc, char* argv[] ){
 
 
 #ifdef ROTATEFACEANGLEDETECTION
+//			Mat _temp1 =  imread( dir+"/"+files[i], -1 );
+//			//Mat temp1; resize(dtemp1,temp1,Size(0,0),0.5,0.5);
+//			//GaussianBlur(temp1,temp1,Size(5,5),1.0);
+//			int r2 = _temp1.cols;
+//			int r = r2>>1;
+//			Mat temp1 = _temp1(Rect(0,0,r2,r2));
+//
+//			//Mat mask =  Mat::ones(temp1.size(),CV_8U)*255;
+//			Mat mask =  Mat::zeros(Size(r2*2+1,r2*2+1),CV_8U);
+//
+//			circle(mask,Point(r2,r2),r2-1,255,-1,CV_AA);
+//			resize(mask,mask,temp1.size());
+//						namedWindow( "c", CV_WINDOW_AUTOSIZE );
+//						imshow( "c",mask );
+//						waitKey(0);
+//			double rotateAngle = rand() % 4500;
+//			//rotateAngle -= 450;
+//			rotateAngle /= 100;
+//
+//			rotateAngle = 0;
+//
+//			Mat temp23 = cvNica::rotateImage(temp1, rotateAngle, 0, 1);
+//			Mat rotated_mask = cvNica::rotateImage(mask, rotateAngle, 0);
+
+			Mat _temp1 =  imread( dir+"/"+files[i], -1 );
+			//Mat temp1; resize(dtemp1,temp1,Size(0,0),0.5,0.5);
+			//GaussianBlur(temp1,temp1,Size(5,5),1.0);
+			int r2 = _temp1.cols;
+			Mat temp1 = _temp1(Rect(0,0,r2,r2));
+
+			//Mat mask =  Mat::ones(temp1.size(),CV_8U)*255;
+			Mat mask =  Mat::zeros(Size(r2*2+1,r2*2+1),CV_8U);
+
+			circle(mask,Point(r2,r2),r2-1,255,-1,CV_AA);
+			resize(mask,mask,temp1.size());
+
+			double rotateAngle = rand() % 4500;
+			//rotateAngle -= 450;
+			rotateAngle /= 100;
+
+			//rotateAngle = 0;
+
+
+
+
+
+
+
+
+			Mat temp23 = cvNica::rotateImage(temp1, rotateAngle, 0, 1);
+			//Mat rotated_mask = cvNica::rotateImage(mask, rotateAngle, 1);
+
+
+			Mat temp2,colortemp2,colortemp3;
+			//cvNica::BinFace(temp23,temp2,135,109);
+			cvNica::BinFaceMask(temp23,mask,temp2,temp1.size(),135,109);
+
+			//Mat temp333;
+			//cvNica::BinFace(temp1,temp333,135,109);
+
+
+
+
+
+			Mat output = Mat::zeros(temp2.size(), CV_8UC3);
+			std::vector < std::vector<cv::Point2i > > blobs;
+
+			vector<Vec4i> lines;
+			cvNica::FindBlobs(temp2, blobs);
+
+			// Randomy color the blobs
+
+			for(size_t m=0; m < blobs.size(); m++) {
+				unsigned char r = 0;//255 * (rand()/(1.0 + RAND_MAX));
+				unsigned char g = 0;//255 * (rand()/(1.0 + RAND_MAX));
+				unsigned char b = 0;//255 * (rand()/(1.0 + RAND_MAX));
+				if (blobs[m].size()<15) {
+					for(size_t n=0; n < blobs[m].size(); n++) {
+						int x = blobs[m][n].x;
+						int y = blobs[m][n].y;
+						temp2.at<uchar>(y,x) = b;
+
+						//output.at<Vec3b>(y,x)[0] = b;
+						//output.at<Vec3b>(y,x)[1] = g;
+						//output.at<Vec3b>(y,x)[2] = r;
+					}
+				}
+			}
+//			    namedWindow( "m", CV_WINDOW_AUTOSIZE );
+//			    imshow("m", temp2);
+//			    namedWindow( "n", CV_WINDOW_AUTOSIZE );
+//			    imshow("n", output);
+//			    waitKey(0);
+
+
+
+
+
+			cvtColor( temp2, colortemp2, CV_GRAY2BGR );
+		    //HoughLinesP( temp2, lines, 1, CV_PI/180, 30, 20, 4 );
+			//HoughLinesP( temp2, lines, 1, CV_PI/180, 20, 15, 4 );
+			HoughLinesP( temp2, lines, 1, CV_PI/180, 30, 20, 4 );
+
+		    vector<int> hist(nHist,0);
+		    vector<float> histSum(nHist,0);
+		    vector<int> histSumX(nHist,0);
+		    vector<int> histSumY(nHist,0);
+
+		    int sum = lines.size();
+		    int sumsq = 0;
+			int *t = new int[sum];
+		    for( size_t k = 0; k < lines.size(); k++ )
+		    {
+		        line( colortemp2, Point(lines[k][0], lines[k][1]),
+		            Point(lines[k][2], lines[k][3]), Scalar(0,0,255), 1, 8 );
+				float angle = atan2(lines[k][3]-lines[k][1],lines[k][2]-lines[k][0]);
+		        short temp = (short)((angle + offset)/PI*nHist);
+				if (temp<0) temp = nHist-1;
+
+				hist[temp]++;
+				histSum[temp]+=angle;
+				histSumX[temp]+=lines[k][3]-lines[k][1];
+				histSumY[temp]+=lines[k][2]-lines[k][0];
+				t[k] = temp;
+
+
+		        //cout<<angle<<endl;
+		    }
+		    for (short j=0;j<nHist;j++){
+		    	sumsq += hist[j]*hist[j];
+		    }
+		    double std = sqrt( ((double)sumsq/nHist) - ((double)sum/nHist)*((double)sum/nHist));
+		    int max = hist[0];
+			int maxIndex = 0;
+			int peakPoints = 0;
+			int peakSumX = 0;
+			int peakSumY = 0;
+		    for (short j=0;j<nHist;j++)
+		    {
+		    	if (max < hist[j]) {
+		    		max = hist[j];
+		    		maxIndex = j;
+		    	}
+		    	//cout<<" "<<j<<": "<<hist[j]<<" : "<<(((double)hist[j]-((double)sum/nHist))/(double)std)<<endl;
+		    }
+		    for (short j=0;j<nHist;j++)
+		    {
+				//if ((((double)hist[j]-((double)sum/nHist))/std)>2.0 && (abs(j-maxIndex)<7)) {
+		    	if ((((double)hist[j]-((double)sum/nHist))/std)>=1.5 && (abs(j-maxIndex)<4)) {
+					peakSumX += histSumX[j];
+					peakSumY += histSumY[j];
+					peakPoints++;
+
+				    for( size_t k = 0; k < lines.size(); k++ )
+				    {
+				    	if (j == t[k]) {
+							line( colortemp2, Point(lines[k][0], lines[k][1]),
+								Point(lines[k][2], lines[k][3]), Scalar(255,0,0), 1, 8 );
+				    	}
+				    }
+				}
+		    }
+
+//			namedWindow( "a", CV_WINDOW_AUTOSIZE );
+//			imshow( "a",colortemp2 );
+//			waitKey(0);
+
+		    //float imageAngle = histSum[maxIndex]/hist[maxIndex]/PI*180;
+		    //float imageAngle = atan2(histSumX[maxIndex],histSumY[maxIndex])/PI*180;
+
+		    double imageAngle;
+		    if (peakPoints) {
+		    	imageAngle = atan2(peakSumX,peakSumY)/PI*180;
+		    } else {
+		    	imageAngle = atan2(histSumX[maxIndex],histSumY[maxIndex])/PI*180;
+		    }
+
+		    if (hist[maxIndex]==0) imageAngle = 0;
+
+
+//		    imwrite(dir+"/faceRotBinRaw/"+files[i]+".bmp",temp2);
+//		    double diff = (imageAngle+rotateAngle);
+//		    if (diff<0) diff*=-1;
+//		    cout<<"imageAngle vs Actual: "<<imageAngle<<" / "<<rotateAngle<<" / "<<diff<<endl;
+//		    if (diff>10) {
+//		    	//Mat temp323 = cvNica::rotateImage(temp23, imageAngle, 0);
+//		    	imwrite(dir+"/faceRotFail/a/"+files[i]+".bmp",temp23);
+//		    	imwrite(dir+"/faceRotFail/"+files[i]+".bmp",colortemp2);
+//		    } else {
+//		    	//Mat temp323 = cvNica::rotateImage(temp23, imageAngle, 0);
+//		    	imwrite(dir+"/faceRot/a/"+files[i]+".bmp",temp23);
+//		    	imwrite(dir+"/faceRot/"+files[i]+".bmp",colortemp2);
+//		    }
+//		    //imwrite(dir+"/faceRotBin/"+files[i]+".bmp",temp2);
+
+
+
+			Mat df;
+			Mat temp1_double;
+			Mat mask_double;
+			//Mat temp1;
+			cvNica::DoGMask(temp23,mask,temp1,mask.size(),0.2,1,-2,0,0,0,10);
+//					InputArray 						_src,
+//					InputArray 						_mask,
+//					OutputArray						_dst,
+//					Size							maskSize,
+//					const double&					gamma,
+//					const double&					sigma0,
+//					const double&					sigma1,
+//					const int&						sx,
+//					const int&						sy,
+//					const int&						mask_,
+//					const double&					do_norm)
+//			cvNica::DoG(temp1,temp1,0.2,1,-2,0,0,0,10);
+
+
+			Mat correct = cvNica::rotateImage(temp1, imageAngle, 0, 1);
+
+
+			Mat df_double(temp1.size(),CV_32FC1);
+			correct.convertTo(temp1_double,CV_32FC1);
+			mask.convertTo(mask_double,CV_32FC1);
+
+			multiply(temp1_double,mask_double,df_double);
+
+			df_double /= 255;
+			df_double.convertTo(df,CV_8UC1);
+
+//			namedWindow( "a", CV_WINDOW_AUTOSIZE );
+//			imshow( "a",df );
+//			waitKey(0);
+
+			unsigned found = files[i].rfind("bad");
+			if (found!=std::string::npos) {
+				vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
+				imwrite(dir+"\\circledogrotc\\"+tokens[0]+".pgm",df);
+				rename( string(dir+"\\circledogrotc\\"+tokens[0]+".pgm").c_str() , string(dir+"\\circledogrotc\\"+tokens[0]+".pgm.bad").c_str() );
+			} else {
+				imwrite(dir+"\\circledogrotc\\"+files[i],df);
+			}
+
+
+
+		    FileOut<<imageAngle<<"\t"<<rotateAngle<<"\t"<<(((double)hist[maxIndex]-((double)sum/nHist))/std)<<"\t"<<peakPoints<<endl;
+			//FileOut.write(aaa.str().c_str(),sizeof(aaa.str().c_str()));
+
+
+#endif
+
+
+#ifdef ROTATEFACEANGLEDETECTIONDMQI
 
 			Mat temp1 =  imread( dir+"/"+files[i], -1 );
 			//Mat temp1; resize(dtemp1,temp1,Size(0,0),0.5,0.5);
@@ -329,24 +606,32 @@ int main(int argc, char* argv[] ){
 			double rotateAngle = rand() % 4500;
 			//rotateAngle -= 450;
 			rotateAngle /= 100;
-
+			//rotateAngle = 0;
 			//rotateAngle = 45;
 
-			Mat temp23 = cvNica::rotateImage(temp1, rotateAngle, 0, 1);
+			Mat temp23 = cvNica::rotateImage(temp1, rotateAngle, 0, 0, 0x000000);
 			Mat rotated_mask = cvNica::rotateImage(mask, rotateAngle, 0);
-
+			rotated_mask = 255- rotated_mask;
 
 			Mat temp2,colortemp2,colortemp3;
 			//cvNica::BinFace(temp23,temp2,135,109);
-			cvNica::BinFaceMask(temp23,rotated_mask,temp2,temp1.size(),135,109);
+			//cvNica::BinFaceMask(temp23,rotated_mask,temp2,temp1.size(),135,109);
+
+			Mat temp222,temp223;
+		//cvNica::Denoise(temp23,temp222);
+			cvNica::DynamicMorphQuotImage(temp23,temp223);
+			bitwise_or(temp223,rotated_mask,temp2);
+			//equalizeHist(temp223,temp223);
+
+			//cvNica::IntensityShifting(temp223, temp2, 228);
+			threshold(temp2,temp2,224.0,255.0,THRESH_BINARY_INV);
+
 
 			//Mat temp333;
 			//cvNica::BinFace(temp1,temp333,135,109);
-
-//			namedWindow( "c", CV_WINDOW_AUTOSIZE );
-//			imshow( "c",temp333 );
+//			namedWindow( "d", CV_WINDOW_AUTOSIZE );
+//			imshow( "d",temp223);
 //			waitKey(0);
-//
 //			namedWindow( "d", CV_WINDOW_AUTOSIZE );
 //			imshow( "d",temp2);
 //			waitKey(0);
@@ -389,12 +674,14 @@ int main(int argc, char* argv[] ){
 
 
 			cvtColor( temp2, colortemp2, CV_GRAY2BGR );
-		    HoughLinesP( temp2, lines, 1, CV_PI/180, 30, 20, 4 );
+		    //HoughLinesP( temp2, lines, 1, CV_PI/180, 30, 20, 4 );
+			//HoughLinesP( temp2, lines, 1, CV_PI/180, 20, 15, 4 );
+			HoughLinesP( temp2, lines, 1, CV_PI/180, 30, 20, 3 );
 
-		    vector<int> hist(36,0);
-		    vector<float> histSum(36,0);
-		    vector<int> histSumX(36,0);
-		    vector<int> histSumY(36,0);
+		    vector<int> hist(nHist,0);
+		    vector<float> histSum(nHist,0);
+		    vector<int> histSumX(nHist,0);
+		    vector<int> histSumY(nHist,0);
 
 		    int sum = lines.size();
 		    int sumsq = 0;
@@ -431,12 +718,12 @@ int main(int argc, char* argv[] ){
 		    		max = hist[j];
 		    		maxIndex = j;
 		    	}
-		    	cout<<" "<<j<<": "<<hist[j]<<" : "<<((hist[j]-(sum/nHist))/std)<<endl;
+		    	//cout<<" "<<j<<": "<<hist[j]<<" : "<<(((double)hist[j]-((double)sum/nHist))/(double)std)<<endl;
 		    }
 		    for (short j=0;j<nHist;j++)
 		    {
 				//if ((((double)hist[j]-((double)sum/nHist))/std)>2.0 && (abs(j-maxIndex)<7)) {
-		    	if ((((double)hist[j]-((double)sum/nHist))/std)>2.0 && (abs(j-maxIndex)<4)) {
+		    	if ((((double)hist[j]-((double)sum/nHist))/std)>=1.5 && (abs(j-maxIndex)<4)) {
 					peakSumX += histSumX[j];
 					peakSumY += histSumY[j];
 					peakPoints++;
@@ -448,7 +735,6 @@ int main(int argc, char* argv[] ){
 								Point(lines[k][2], lines[k][3]), Scalar(255,0,0), 1, 8 );
 				    	}
 				    }
-
 				}
 		    }
 
@@ -459,7 +745,7 @@ int main(int argc, char* argv[] ){
 		    //float imageAngle = histSum[maxIndex]/hist[maxIndex]/PI*180;
 		    //float imageAngle = atan2(histSumX[maxIndex],histSumY[maxIndex])/PI*180;
 
-		    float imageAngle;
+		    double imageAngle;
 		    if (peakPoints) {
 		    	imageAngle = atan2(peakSumX,peakSumY)/PI*180;
 		    } else {
@@ -467,19 +753,22 @@ int main(int argc, char* argv[] ){
 		    }
 
 		    if (hist[maxIndex]==0) imageAngle = 0;
-		    cout<<"imageAngle vs Actual: "<<imageAngle<<" / "<<rotateAngle<<endl;
 
-//		    imwrite(dir+"/faceRotBinRaw/"+files[i]+".bmp",temp2);
-//		    if (imageAngle<-5 || imageAngle>5) {
-//		    	Mat temp323 = cvNica::rotateImage(temp23, imageAngle, 0);
+
+		    imwrite(dir+"/faceRotBinRaw/"+files[i]+".bmp",temp2);
+//		    double diff = (imageAngle+rotateAngle);
+//		    if (diff<0) diff*=-1;
+//		    cout<<"imageAngle vs Actual: "<<imageAngle<<" / "<<rotateAngle<<" / "<<diff<<endl;
+//		    if (diff>10) {
+//		    	//Mat temp323 = cvNica::rotateImage(temp23, imageAngle, 0);
 //		    	imwrite(dir+"/faceRotFail/a/"+files[i]+".bmp",temp23);
 //		    	imwrite(dir+"/faceRotFail/"+files[i]+".bmp",colortemp2);
 //		    } else {
-//		    	Mat temp323 = cvNica::rotateImage(temp23, imageAngle, 0);
+//		    	//Mat temp323 = cvNica::rotateImage(temp23, imageAngle, 0);
 //		    	imwrite(dir+"/faceRot/a/"+files[i]+".bmp",temp23);
 //		    	imwrite(dir+"/faceRot/"+files[i]+".bmp",colortemp2);
 //		    }
-//		    imwrite(dir+"/faceRotBin/"+files[i]+".bmp",temp2);
+//		    //imwrite(dir+"/faceRotBin/"+files[i]+".bmp",temp2);
 		    FileOut<<imageAngle<<"\t"<<rotateAngle<<"\t"<<(((double)hist[maxIndex]-((double)sum/nHist))/std)<<"\t"<<peakPoints<<endl;
 			//FileOut.write(aaa.str().c_str(),sizeof(aaa.str().c_str()));
 
@@ -512,6 +801,29 @@ int main(int argc, char* argv[] ){
 //			}
 #endif
 
+#ifdef DOGCIRCLE
+			cout << files[i] <<"\r"<< endl;
+			Mat _image1;
+			_image1 = imread( dir+"/"+files[i], -1 );
+			Mat temp2;
+
+			cvNica::DoG(_image1,temp2,0.2,1,-2,0,0,0,10);
+
+
+			unsigned found = files[i].rfind("bad");
+			if (found!=std::string::npos) {
+				vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
+				imwrite(dir+"\\dogcircle\\"+tokens[0]+".pgm",temp2);
+				rename( string(dir+"\\dogcircle\\"+tokens[0]+".pgm").c_str() , string(dir+"\\dogcircle\\"+tokens[0]+".pgm.bad").c_str() );
+
+			} else {
+
+				imwrite(dir+"\\dogcircle\\"+files[i],temp2);
+
+			}
+#endif
+
+
 #ifdef DOG
 			cout << files[i] <<"\r"<< endl;
 			Mat _image1;
@@ -533,6 +845,96 @@ int main(int argc, char* argv[] ){
 //
 //			}
 #endif
+
+#ifdef DMQI
+			cout << files[i] <<"\r"<< endl;
+			Mat _image1;
+			_image1 = imread( dir+"\\"+files[i], -1 );
+			Size size = _image1.size();
+			Mat _deno1(size,CV_8UC1);
+			Mat _deno2(size,CV_8UC1);
+			Mat _dmqi(size,CV_8UC1);
+			Mat _histeq(size,CV_8UC1);
+			nicatio::Denoise( _image1.data,_deno1.data,_image1.cols,_image1.rows);
+			cvNica::DynamicMorphQuotImage(_deno1,_dmqi,0);
+			//nicatio::DynamicMorphQuotImage( _deno1.data,_dmqi.data,_image1.cols,_image1.rows, 0);
+			nicatio::HistEqualize2(_dmqi.data,_histeq.data,_image1.cols,_image1.rows);
+			_deno2=_histeq;
+			//cvNica::IntensityShifting(_histeq, _deno2, 128);
+//			unsigned found = files[i].rfind("bad");
+//			if (found!=std::string::npos) {
+//				vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
+//				imwrite(dir+"\\dmqi\\"+tokens[0]+".pgm",_deno2);
+//				rename( string(dir+"\\dmqi\\"+tokens[0]+".pgm").c_str() , string(dir+"\\dmqi\\"+tokens[0]+".pgm.bad").c_str() );
+//
+//			} else {
+//
+//				imwrite(dir+"\\dmqi\\"+files[i],_deno2);
+//
+//			}
+
+
+				imwrite(dir+"\\dmqi\\"+files[i],_deno2);
+
+
+#endif
+
+#ifdef SMQI
+			cout << files[i] <<"\r"<< endl;
+			Mat _image1;
+			_image1 = imread( dir+"\\"+files[i], -1 );
+			Size size = _image1.size();
+			Mat _deno1(size,CV_8UC1);
+			Mat _deno2(size,CV_8UC1);
+			Mat _dmqi(size,CV_8UC1);
+			Mat _histeq(size,CV_8UC1);
+			nicatio::Denoise( _image1.data,_deno1.data,_image1.cols,_image1.rows);
+			cvNica::SelectiveMorphQuotImage(_deno1,_dmqi,0);
+			//nicatio::DynamicMorphQuotImage( _deno1.data,_dmqi.data,_image1.cols,_image1.rows, 0);
+			nicatio::HistEqualize2(_dmqi.data,_histeq.data,_image1.cols,_image1.rows);
+			_deno2=_histeq;
+			//cvNica::IntensityShifting(_histeq, _deno2, 128);
+			unsigned found = files[i].rfind("bad");
+			if (found!=std::string::npos) {
+				vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
+				imwrite(dir+"\\smqi\\"+tokens[0]+".pgm",_deno2);
+				rename( string(dir+"\\smqi\\"+tokens[0]+".pgm").c_str() , string(dir+"\\smqi\\"+tokens[0]+".pgm.bad").c_str() );
+
+			} else {
+
+				imwrite(dir+"\\smqi\\"+files[i],_deno2);
+
+			}
+#endif
+
+#ifdef DMQIADVANCED
+			cout << files[i] <<"\r"<< endl;
+			Mat _image1;
+			_image1 = imread( dir+"\\"+files[i], -1 );
+			Size size = _image1.size();
+			Mat _deno1(size,CV_8UC1);
+			Mat _deno2(size,CV_8UC1);
+			Mat _dmqi(size,CV_8UC1);
+			Mat _histeq(size,CV_8UC1);
+			nicatio::Denoise( _image1.data,_deno1.data,_image1.cols,_image1.rows);
+			cvNica::NormDynamicMorphQuotImage(_deno1,_dmqi,0);
+			//nicatio::DynamicMorphQuotImage( _deno1.data,_dmqi.data,_image1.cols,_image1.rows, 0);
+			nicatio::HistEqualize2(_dmqi.data,_histeq.data,_image1.cols,_image1.rows);
+			_deno2=_histeq;
+			//cvNica::IntensityShifting(_histeq, _deno2, 128);
+//			unsigned found = files[i].rfind("bad");
+//			if (found!=std::string::npos) {
+//				vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
+//				imwrite(dir+"\\dmqiadv\\"+tokens[0]+".pgm",_deno2);
+//				rename( string(dir+"\\dmqiadv\\"+tokens[0]+".pgm").c_str() , string(dir+"\\dmqiadv\\"+tokens[0]+".pgm.bad").c_str() );
+//
+//			} else {
+//
+//				imwrite(dir+"\\dmqiadv\\"+files[i],_deno2);
+//
+//			}
+#endif
+
 
 #ifdef DMQICONTRASTSHIFT
 			cout << files[i] <<"\r"<< endl;

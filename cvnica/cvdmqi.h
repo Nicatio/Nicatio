@@ -10,6 +10,7 @@
 
 #include "cv.h"
 #include "highgui.h"
+#include "cvDoG.h"
 
 using namespace cv;
 
@@ -22,6 +23,36 @@ void lineHistEqualize(
 void lineHistEqualize2(
 		InputArray 						_src,
 		OutputArray						_dst);
+
+
+
+
+
+void Reflectance_re(
+		InputArray 						_deno,
+		InputArray						_closedeno,
+		OutputArray						_dst);
+
+void SelectiveClosing(
+		InputArray 						_src,
+		OutputArray						_dst,
+		const double&					alpha=1.8,
+		const double&					beta=1.35);
+
+void NormDynamicMorphQuotImage(
+		InputArray 						_src,
+		OutputArray						_dst,
+		const int&						equalize=0);
+
+void GaussianMorphQuotImage(
+		InputArray 						_src,
+		OutputArray						_dst,
+		const int&						equalize=0);
+
+void SelectiveMorphQuotImage(
+		InputArray 						_src,
+		OutputArray						_dst,
+		const int&						equalize=0);
 
 void DynamicMorphQuotImage(
 		InputArray 						_src,

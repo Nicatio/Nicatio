@@ -14,6 +14,7 @@
 #include "vector"
 #include "../nicatio/io.h"
 #include "../nicatio/filter.h"
+#include "cvFilter.h"
 
 #define METHOD_L1NORM	0
 #define METHOD_L2NORM	1
@@ -53,20 +54,23 @@ public:
 			string							dir,
 			string							type,
 			int								DBname,
-			int								criterion=METHOD_CORR);
-	float getScore(
-			const Mat						inputA,
-			const Mat						inputB,
-			const int						searchRadius,
-			const int						criterion,
-			char&							posX,
-			char&							posY);
+			int								criterion=METHOD_CORR,
+			int								startAngle=0,
+			int								endAngle=0);
 	void getScoreTestImageBased(
 			const vector<Mat>				inputA,
 			const Mat						inputB,
 			const int						nFileIndex,
 			const int						searchRadius,
 			const int						criterion);
+	void getScoreTestImageBasedRotation(
+			const vector<Mat>				inputA,
+			const Mat						inputB,
+			const int						nFileIndex,
+			const int						searchRadius,
+			const int						criterion,
+			const int						startAngle,
+			const int						endAngle);
 	float getAccuracy();
 	float getAccuracyIncludingBadImages();
 	vector<float> getAccuracyIncludingBadImagesSubset();
@@ -99,7 +103,9 @@ private:
 			vector<Mat>						referenceImage,
 			vector<string>					files,
 			int								DBname,
-			int								criterion);
+			int								criterion,
+			int								startAngle=0,
+			int								endAngle=0);
 	vector<int> vectorStretch(
 			vector<int>							input);
 };

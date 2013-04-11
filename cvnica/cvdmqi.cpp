@@ -87,7 +87,178 @@ void lineHistEqualize2(
 
 }
 
+void Reflectance_re(
+		InputArray 						_deno,
+		InputArray						_closedeno,
+		OutputArray						_dst)
+{
+	Mat deno = _deno.getMat();
+	Mat closedeno = _closedeno.getMat();
+//	namedWindow( "a", CV_WINDOW_AUTOSIZE );
+//	imshow( "a", closedeno );
+//	waitKey(0);
+	deno.convertTo(deno, CV_32F);
+	closedeno.convertTo(closedeno, CV_32F, 1);
 
+	deno /= closedeno;
+	deno*=255.0;
+	deno.convertTo(_dst,CV_8UC1);
+//	namedWindow( "a", CV_WINDOW_AUTOSIZE );
+//	imshow( "a", _dst );
+//	waitKey(0);
+}
+
+
+void SelectiveClosing(
+		InputArray 						_src,
+		OutputArray						_dst,
+		const double&					alpha,
+		const double&					beta)
+{
+	Mat src = _src.getMat();
+	_dst.create(src.size(),src.type());
+	Mat dst = _dst.getMat();
+
+	Mat l = Mat(src.size(),src.type());
+	Mat m = Mat(src.size(),src.type());
+	Mat s = Mat(src.size(),src.type());
+
+	Mat _l = Mat(src.size(),src.type());
+	Mat _m = Mat(src.size(),src.type());
+	Mat _s = Mat(src.size(),src.type());
+
+	int dilation_type = MORPH_RECT;
+	Mat elementL = getStructuringElement( dilation_type, Size( 9,9 ), Point( 4,4 ) );
+	Mat elementM = getStructuringElement( dilation_type, Size( 7,7 ), Point( 3,3 ) );
+	Mat elementS = getStructuringElement( dilation_type, Size( 5,5 ), Point( 2,2 ) );
+
+	dilate( src, l, elementL);
+	dilate( src, m, elementM);
+	dilate( src, s, elementS);
+	erode( l, _l, elementL);
+	erode( m, _m, elementM);
+	erode( s, _s, elementS);
+
+	unsigned char *ptrL = _l.data, *ptrM = _m.data, *ptrS = _s.data;
+	unsigned char *ptrDst = dst.data;
+	unsigned char *ptrSrc = src.data;
+
+	int sz = _src.total();
+
+	for (int i=0; i<sz; i++,ptrL++,ptrM++,ptrS++,ptrDst++,ptrSrc++){
+		double __l = (double)*(ptrL);
+		double __m = (double)*(ptrM);
+		double __s = (double)*(ptrS);
+		double _sb = __s*beta;
+		double _sa = __s*alpha;
+		double _sc = __s*1.00;
+		if(__l>_sa) *(ptrDst) = __l;
+		else if((__l>_sb)&&(__l<=_sa)) *(ptrDst) = __m;
+		else if((__l>_sc)&&(__l<=_sb)) *(ptrDst) = __s;
+		else *(ptrDst) = *(ptrSrc);
+//		if(__l>_sa) *(ptrDst) = 0x00;
+//		else if((__l>_sb)&&(__l<=_sa)) *(ptrDst) = 0x50;
+//		else if((__l>_sc)&&(__l<=_sb)) *(ptrDst) = 0xa0;
+//		else *(ptrDst) = 0xf0;
+//		if(__l>_sa) *(ptrDst) = __l;
+//		else if((__l>_sb)&&(__l<=_sa)) *(ptrDst) = __m;
+//		else *(ptrDst) = __s;
+/*		if(__l>_sa) *(ptrDst) = 0x00;
+		else if((__l>_sb)&&(__l<=_sa)) *(ptrDst) = 0x80;
+		else *(ptrDst) = 0xff;*/
+	}
+
+
+}
+
+void NormDynamicMorphQuotImage(
+		InputArray 						_src,
+		OutputArray						_dst,
+		const int&						equalize)
+{
+	Mat src = _src.getMat();
+	Mat dc = Mat(src.size(),src.type());
+	DynamicClosing (src,dc);
+	int sz = src.cols*src.rows;
+	Mat _ddd,rep,dst,ddd;
+	Reflectance_re(src,dc,_ddd);
+	namedWindow( "b", CV_WINDOW_AUTOSIZE );
+	imshow( "b", _ddd );
+
+	Mat resultAbs,resultPow;
+	Mat resultExpP,resultExpM;
+	double a = 0.1, mean1, mean2, min_, max_;
+	double do_norm = 10.0;
+	double trim = abs(do_norm), oneOverTrim=1/trim;
+	_ddd.convertTo(ddd,CV_32FC1);
+	absdiff(ddd, Scalar::all(0), resultAbs);
+	pow(resultAbs,a,resultPow);
+	mean1 = sum(resultPow)[0]/sz;
+	mean1 = 1/pow(mean1,(1.0/a));
+
+	ddd*=mean1;
+
+	absdiff(ddd, Scalar::all(0), resultAbs);
+	min(resultAbs,trim,resultAbs);
+	pow(resultAbs,a,resultPow);
+	mean2 = sum(resultPow)[0]/sz;
+	mean2 = 1/pow(mean2,(1.0/a));
+
+	exp(ddd*mean2*oneOverTrim,resultExpP);
+	exp(-ddd*mean2*oneOverTrim,resultExpM);
+
+	divide((resultExpP - resultExpM),(resultExpP + resultExpM),ddd);
+
+	ddd *= trim;
+	minMaxLoc(ddd,&min_,&max_);
+
+
+	max_ = 255/(max_-min_);
+
+	ddd-=min_;
+	ddd*=max_;
+	ddd.convertTo(rep,src.type());
+
+	_dst.create(src.size(),src.type());
+	dst = _dst.getMat();
+
+	rep.copyTo(dst);
+	namedWindow( "a", CV_WINDOW_AUTOSIZE );
+	imshow( "a", dst );
+	waitKey(0);
+
+}
+
+void GaussianMorphQuotImage(
+		InputArray 						_src,
+		OutputArray						_dst,
+		const int&						equalize)
+{
+	Mat src = _src.getMat();
+	Mat dc = Mat(src.size(),src.type());
+	DynamicClosing (src,dc);
+
+	Mat src2;
+	Mat dc2;
+	cvNica::DoG(src,src2,0.2,1,-2,0,0,0,10);
+	cvNica::DoG(dc,dc2,0.2,1,-2,0,0,0,10);
+
+	Reflectance_re(src2,dc2,_dst);
+
+
+}
+
+void SelectiveMorphQuotImage(
+		InputArray 						_src,
+		OutputArray						_dst,
+		const int&						equalize)
+{
+	Mat src = _src.getMat();
+	Mat dc = Mat(src.size(),src.type());
+	SelectiveClosing (src,dc);
+	Reflectance(src,dc,_dst);
+
+}
 
 void DynamicMorphQuotImage(
 		InputArray 						_src,
@@ -109,8 +280,10 @@ void Reflectance(
 
 	Mat deno = _deno.getMat();
 	Mat closedeno = _closedeno.getMat();
+
 	deno.convertTo(deno, CV_32F);
-	closedeno.convertTo(closedeno, CV_32F, 1,0.0001);
+	closedeno.convertTo(closedeno, CV_32F, 1);
+
 	deno /= closedeno;
 	deno*=255.0;
 	deno.convertTo(_dst,CV_8UC1);

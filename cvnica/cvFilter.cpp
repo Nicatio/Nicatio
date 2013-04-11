@@ -31,7 +31,8 @@ Mat rotateImage(
 		const Mat						&src,
 		double 							angle,
 		bool							type,
-		int 							borderType)
+		int 							borderType,
+		int								borderColor)
 {
 	Mat dst;
 	if (type) {
@@ -44,7 +45,7 @@ Mat rotateImage(
 		Size repSize(src.cols*3, src.rows*3);
 		Mat rep(repSize,src.type());
 		if (!borderType) {
-			copyMakeBorder(src, rep, src.rows, src.rows, src.cols, src.cols, BORDER_CONSTANT, 0);
+			copyMakeBorder(src, rep, src.rows, src.rows, src.cols, src.cols, BORDER_CONSTANT, borderColor);
 		} else {
 			copyMakeBorder(src, rep, src.rows, src.rows, src.cols, src.cols, BORDER_REPLICATE);
 		}
@@ -56,11 +57,14 @@ Mat rotateImage(
 		Mat rot_mat = getRotationMatrix2D(src_center, angle, 1.0);
 		Mat _dst;
 		warpAffine(rep, _dst, rot_mat, repSize);
-		dst = _dst(Rect(src.cols*1.5F-newW/2,src.rows*1.5F-newH/2,newW,newH));
+		//dst = _dst(Rect(src.cols*1.5F-newW/2,src.rows*1.5F-newH/2,newW,newH));
+		dst = _dst(Rect(src.cols*1.5F-src.cols/2,src.rows*1.5F-src.rows/2,src.cols,src.rows));
 	}
 
     return dst;
 }
+
+
 
 
 void FindBlobs(

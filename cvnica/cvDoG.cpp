@@ -110,7 +110,7 @@ void DoGMask(
 	Mat mask; __mask.convertTo(mask,CV_32FC1);
 	Size srcSize = src.size();
 	Size repSize = Size(srcSize.width+(border<<1), srcSize.height+(border<<1));
-	int sz = maskSize.area();
+	int sz = sum(mask)[0]/255;//maskSize.area();
 	Mat dst;
 	Mat rep(repSize,src.type());
 	Mat dog;
