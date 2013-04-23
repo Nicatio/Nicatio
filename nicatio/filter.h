@@ -114,7 +114,7 @@ void Grayscale(
 
 void Gamma(
 		const unsigned char				*inputImg,
-		double 							*outputImg,
+		const unsigned char				*outputImg,
 		const int&						width,
 		const int&						height,
 		const double&					gamma);

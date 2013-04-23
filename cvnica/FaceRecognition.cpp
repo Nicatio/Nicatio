@@ -28,7 +28,7 @@ FaceRecognition::FaceRecognition(
 	if (nSubject%refImagesPerSubject==0) {
 		refImage = referenceImage;
 		nRefImagesPerSubject = refImagesPerSubject;
-		nSearchRadius = 5;
+		nSearchRadius = 15;
 	} else {
 		std::cout<<"Error: invalid imagesPerSubject or number of subjects."<<std::endl;
 	}
@@ -44,7 +44,7 @@ FaceRecognition::FaceRecognition(
 	nRefImagesPerSubject = 0;
 	nTestImageOrder = 0;
 	nRefImageOrder = 0;
-	nSearchRadius = 5;
+	nSearchRadius = 15;
 	nCorrect = 0;
 	nFiles = 0;
 	nBadImages = 0;
@@ -481,23 +481,30 @@ void FaceRecognition::_Recognition(
 //	cout <<"done"<<endl;
 //}
 
-float FaceRecognition::getAccuracy()
+float FaceRecognition::getAccuracy(
+		vector<string>						files)
 {
 	if (RecognitionResult.empty()) return -1;
 	int h = RecognitionResult.size().height;
 	int nTestImagesPerSubject = h/nSubject;
 	int correctCounter=0;
+	ofstream FileOut;
+	FileOut.open("error.txt",(ios::out));
 	if (!nTestImageOrder) {
 		if (!nRefImageOrder) {
 			for (int i=0; i<h; i++) {
 				if ((RecognitionResult.at<ushort>(i,0)/nRefImagesPerSubject) == ((i/nTestImagesPerSubject)%nSubject)) {
 					correctCounter++;
+				} else {
+					FileOut<<files[i]<<endl;
 				}
 			}
 		} else {
 			for (int i=0; i<h; i++) {
 				if (RecognitionResult.at<ushort>(i,0)%nSubject == ((i/nTestImagesPerSubject)%nSubject)) {
 					correctCounter++;
+				} else {
+					FileOut<<files[i]<<endl;
 				}
 			}
 		}
@@ -506,16 +513,21 @@ float FaceRecognition::getAccuracy()
 			for (int i=0; i<h; i++) {
 				if ((RecognitionResult.at<ushort>(i,0)/nRefImagesPerSubject) == (i%nSubject)) {
 					correctCounter++;
+				} else {
+					FileOut<<files[i]<<endl;
 				}
 			}
 		} else {
 			for (int i=0; i<h; i++) {
 				if (RecognitionResult.at<ushort>(i,0)%nSubject == (i%nSubject)) {
 					correctCounter++;
+				} else {
+					FileOut<<files[i]<<endl;
 				}
 			}
 		}
 	}
+	FileOut.close();
 	nCorrect = correctCounter;
 	cout<<"h: "<<h<<endl;
 	cout<<"correctCounter: "<<correctCounter<<endl;

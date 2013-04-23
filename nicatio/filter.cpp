@@ -727,7 +727,7 @@ void Grayscale(
 
 void Gamma(
 		const unsigned char				*inputImg,
-		double 							*outputImg,
+		const unsigned char 			*outputImg,
 		const int&						width,
 		const int&						height,
 		const double&					gamma)
@@ -735,16 +735,34 @@ void Gamma(
 	int _max = 0;
 	int sz = width*height;
 	unsigned char *ptrInputImg = (unsigned char*) inputImg;
+	double *doubleOutputImg = new double[sz];
 	unsigned char *ptrOutputImg = (unsigned char*) outputImg;
 
 	for( int p = 0; p < sz; p++ ){
 		if(_max < *(ptrInputImg)) _max = *(ptrInputImg++);
 	}
 	if (gamma == 0.0) {
+		double min=1e100, max=0;
+		double *ptrDoubleOutputImg = doubleOutputImg;
 		ptrInputImg = (unsigned char*) inputImg;
-		for( int p = 0; p < sz; p++ )
-		{
-			*(ptrOutputImg++) = log((double) (*(ptrInputImg++) + (1>_max)?1:_max))/256;
+//		for( int p = 0; p < sz; p++ )
+//		{
+//			*(ptrOutputImg++) = log((double) (*(ptrInputImg++) + (1>_max)?1:_max))/255;
+//		}
+
+		for (int i=0; i<sz; i++) {
+			double t = *(ptrInputImg++);
+			//t = log(t);
+			if (t!=0.0)	t = log(t);//pow(t, _gamma);
+			*(ptrDoubleOutputImg++) = t;
+			if (t>max) max=t;
+			if (t<min) min=t;								// get min max magnitude values
+		}
+		ptrDoubleOutputImg = doubleOutputImg;
+		ptrInputImg = (unsigned char*) inputImg;
+		double stretch = 1.0/(max-min)*255;					// stretch coefficient
+		for (int i=0; i<sz; i++) {
+			*(ptrOutputImg++) = (unsigned char) ((*(ptrDoubleOutputImg++)-min)*stretch);
 		}
 	} else {
 		for( int p = 0; p < sz; p++ )
@@ -818,6 +836,8 @@ void HistEqualize2(
 		*(ptrOutputImg++) = aa;
     }
 }
+
+
 
 
 

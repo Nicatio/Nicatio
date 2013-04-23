@@ -1,8 +1,14 @@
 #include <iostream>
 #include <fstream>
+#include <sstream>
+#include <vector>
+#include <string>
+//#include "dirent.h"
 #include "cv.h"
 #include "highgui.h"
 #include "nicatio/nicatio.h"
+//#include "./dirent/dirent.h"
+#include "io.h"
 #include "cvnica/cvnica.h"
 
 
@@ -10,13 +16,17 @@
 using namespace cv;
 using namespace std;
 
+#define PGM
+//#define PCAP
+//#define TXT
 //#define GF
 //#define ENHANCE
 //#define FEATHERING
 //#define FLASH
 //#define SMOOTHING
-#define FA
+//#define FA
 //#define FR
+//#define CMUCROP
 //#define LINEHISTEQUALIZE
 //#define DOG
 //#define DOGCIRCLE
@@ -24,7 +34,7 @@ using namespace std;
 //#define DOGDMQI
 //#define DMQICONTRASTSHIFT
 //#define DMQI
-//#define SMQI
+#define SMQI
 //#define DMQIADVANCED
 //#define BINFACE
 
@@ -174,9 +184,19 @@ int main(int argc, char* argv[] ){
 
 
 
+#ifdef TXT
+		string dir = string(argv[1]);
+		string refLocation = string(argv[2]);
 
+		vector<string> files = vector<string>();
 
+		if (nicatio::getdirType(dir,"txt",files,0)) {
+			cout<< "Error: Invalid file location \n" <<endl;
+			return -1;
+		}
+#endif
 
+#ifdef PGM
 		string dir = string(argv[1]);
 		string refLocation = string(argv[2]);
 
@@ -186,72 +206,26 @@ int main(int argc, char* argv[] ){
 			cout<< "Error: Invalid file location \n" <<endl;
 			return -1;
 		}
+#endif
 
-		//cout << cos(90.0/180*PI) << endl;
-		//cout << cos(PI) << endl;
-		//Mat temp1 =  imread( dir+"/"+files[64], -1 );
-//
-//		Mat temp23 = cvNica::rotateImage(temp1, 66,0);
-//
-////		namedWindow( "c", CV_WINDOW_AUTOSIZE );
-////		imshow( "c",temp23 );
-////		waitKey(0);
-//
-//		cout<<dir+"/"+files[64]<<endl;
-//		Mat temp2,colortemp2;
-//		vector<Vec4i> lines;
-//		cvNica::BinFace(temp23,temp2,135,109);
-//		cvtColor( temp2, colortemp2, CV_GRAY2BGR );
-//	    HoughLinesP( temp2, lines, 1, CV_PI/180, 50, 20, 5 );
-//
-//	    vector<int> hist(36,0);
-//	    vector<float> histSum(36,0);
-//
-//	    for( size_t i = 0; i < lines.size(); i++ )
-//	    {
-//	        line( colortemp2, Point(lines[i][0], lines[i][1]),
-//	            Point(lines[i][2], lines[i][3]), Scalar(0,0,255), 3, 8 );
-//			float angle = atan2(lines[i][3]-lines[i][1],lines[i][2]-lines[i][0]);
-//	        short temp = (short)((angle + 1.5271630954950383798082294224275)/PI*36);
-//			if (temp<0) temp = 35;
-//
-//			hist[temp]++;
-//			histSum[temp]+=angle;
-//
-//
-//	       // cout<<temp<<endl;
-//	    }
-//
-//	    int max = hist[0];
-//		int maxIndex = 0;
-//	    for (short j=0;j<36;j++)
-//	    {
-//	    	if (max < hist[j]) {
-//	    		max = hist[j];
-//	    		maxIndex = j;
-//	    	}
-//	    	cout<<j<<": "<<hist[j]<<endl;
-//	    }
-//
-//	    float imageAngle = histSum[maxIndex]/hist[maxIndex]/PI*180;
-//	    cout<<"imageAngle: "<<imageAngle<<endl;
-//		namedWindow( "a", CV_WINDOW_AUTOSIZE );
-//		imshow( "a",colortemp2 );
-//		waitKey(0);
+#ifdef PCAP
+		string dir = string(argv[1]);
+		string refLocation = string(argv[2]);
 
+		vector<string> files = vector<string>();
 
-		//Size s = temp1.size();
-		//nicatio::Grayscale(temp2.data, temp2_.data, temp2.cols, temp2.rows);
+		if (nicatio::getdirType(dir,"pcap",files,0)) {
+			cout<< "Error: Invalid file location \n" <<endl;
+			return -1;
+		}
+#endif
 
-
-		//cvNica::FaceRecognition fr(1,ad);
-		//fr.Recognition(dir,"pgm",METHOD_CORR);
 
 #ifdef FR
 		cvNica::FaceRecognition fr(dir,refLocation);
 		//fr.Recognition(dir,"pgm",DB_YALEB,METHOD_CORR,-45,0);
 		fr.Recognition(dir,"pgm",DB_YALEB,METHOD_CORR);
-		cout<<"1 "<<fr.getAccuracy()<<" "<<endl;
+		cout<<"1 "<<fr.getAccuracy(files)<<" "<<endl;
 		cout<<"2 "<<fr.getAccuracyIncludingBadImages()<<" "<<endl;
 		fr.getAccuracyIncludingBadImagesSubset();
 
@@ -277,13 +251,50 @@ int main(int argc, char* argv[] ){
 		fa.mse(64);
 //
 #endif
+#ifndef PCAP
 		ofstream FileOut;
 		FileOut.open("result.txt",(ios::out));
 		int nHist = 16;//32;
 		float offset = PI * (0.5-(float)(180.0/(float)nHist)/360.0);
 
 		double t = (double)getTickCount();
+#endif
+
+#ifdef PCAP
+
+		ofstream FilePcap2TS;
+		ofstream FilePcap2ES;
+		ofstream File2642yuv;
+		ofstream Filets2yuv;
+		ofstream FileList;
+		ofstream FileListenc;
+
+
+		FilePcap2TS.open("pcap2ts.bat",(ios::out));
+		FilePcap2ES.open("pcap2es.bat",(ios::out));
+		File2642yuv.open("264yuv.bat",(ios::out));
+		Filets2yuv.open("ts2yuv.bat",(ios::out));
+		FileList.open("list.bat",(ios::out));
+		FileListenc.open("list_enc.bat",(ios::out));
+
+
+#endif
+
+
 		for (unsigned int i = 0;i < files.size();i++) {
+#ifdef PCAP
+			vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
+
+			FilePcap2TS<<"PCAPtoTS.exe	"<<tokens[0]<<".pcap"<<endl;
+			FilePcap2ES<<"PCAPtoES.exe	"<<tokens[0]<<".pcap	"<<1234<<endl;
+
+			File2642yuv<<"ffmpeg.exe	-y	-i	"<<tokens[0]<<".264	-pix_fmt uyvy422	"<<tokens[0]<<".yuv"<<endl;
+			Filets2yuv<<"ffmpeg.exe	-y	-i	"<<tokens[0]<<".ts	-pix_fmt uyvy422	"<<tokens[0]<<".yuv"<<endl;
+
+			FileList<<tokens[0]<<".yuv	"<<tokens[0]<<".pcap	progressive"<<endl;
+			FileListenc<<tokens[0]<<".yuv	"<<tokens[0]<<".pcap	progressive	pes"<<endl;
+
+#endif
 //		//for (unsigned int i = 0;i < 1;i++) {
 //			//int iter = 1;
 //			cout << files[i] << endl;
@@ -342,7 +353,14 @@ int main(int argc, char* argv[] ){
 
 
 			//fr.getScore(temp1_,temp2_,5,METHOD_CORR);
+#ifdef CMUCROP
+			stringstream a3;
+			a3<<dir<<"/"<<files[i];
+			vector<double> position = nicatio::readFileSingleLine(a3.str().c_str());
 
+			int adf = 34;
+			adf += 34;
+#endif
 
 #ifdef ROTATEFACEANGLEDETECTION
 //			Mat _temp1 =  imread( dir+"/"+files[i], -1 );
@@ -855,26 +873,33 @@ int main(int argc, char* argv[] ){
 			Mat _deno2(size,CV_8UC1);
 			Mat _dmqi(size,CV_8UC1);
 			Mat _histeq(size,CV_8UC1);
+			Mat _histeq2(size,CV_8UC1);
 			nicatio::Denoise( _image1.data,_deno1.data,_image1.cols,_image1.rows);
+			imwrite("ori.bmp",_image1);
+			//imwrite("deno.bmp",_deno1);
 			cvNica::DynamicMorphQuotImage(_deno1,_dmqi,0);
+			imwrite("dmqi.bmp",_dmqi);
 			//nicatio::DynamicMorphQuotImage( _deno1.data,_dmqi.data,_image1.cols,_image1.rows, 0);
-			nicatio::HistEqualize2(_dmqi.data,_histeq.data,_image1.cols,_image1.rows);
-			_deno2=_histeq;
+			nicatio::HistEqualize(_dmqi.data,_histeq.data,_image1.cols,_image1.rows);
+			nicatio::HistEqualize2(_dmqi.data,_histeq2.data,_image1.cols,_image1.rows);
+			//imwrite("histeq.bmp",_histeq);
+			//imwrite("histeq2.bmp",_histeq2);
+			_deno2=_dmqi;
 			//cvNica::IntensityShifting(_histeq, _deno2, 128);
-//			unsigned found = files[i].rfind("bad");
-//			if (found!=std::string::npos) {
-//				vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
-//				imwrite(dir+"\\dmqi\\"+tokens[0]+".pgm",_deno2);
-//				rename( string(dir+"\\dmqi\\"+tokens[0]+".pgm").c_str() , string(dir+"\\dmqi\\"+tokens[0]+".pgm.bad").c_str() );
-//
-//			} else {
-//
-//				imwrite(dir+"\\dmqi\\"+files[i],_deno2);
-//
-//			}
+			unsigned found = files[i].rfind("bad");
+			if (found!=std::string::npos) {
+				vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
+				imwrite(dir+"\\dmqi\\"+tokens[0]+".pgm",_deno2);
+				rename( string(dir+"\\dmqi\\"+tokens[0]+".pgm").c_str() , string(dir+"\\dmqi\\"+tokens[0]+".pgm.bad").c_str() );
 
+			} else {
 
 				imwrite(dir+"\\dmqi\\"+files[i],_deno2);
+
+			}
+
+
+				//imwrite(dir+"\\dmqi\\"+files[i],_deno2);
 
 
 #endif
@@ -888,11 +913,37 @@ int main(int argc, char* argv[] ){
 			Mat _deno2(size,CV_8UC1);
 			Mat _dmqi(size,CV_8UC1);
 			Mat _histeq(size,CV_8UC1);
+			//nicatio::MedianFilter(_image1.data,_deno1.data,_image1.cols,_image1.rows);
 			nicatio::Denoise( _image1.data,_deno1.data,_image1.cols,_image1.rows);
+			//_deno1=_image1;
+			//cvNica::DynamicMorphQuotImage(_deno1,_dmqi,0);
 			cvNica::SelectiveMorphQuotImage(_deno1,_dmqi,0);
+			//_dmqi=_deno1;
 			//nicatio::DynamicMorphQuotImage( _deno1.data,_dmqi.data,_image1.cols,_image1.rows, 0);
-			nicatio::HistEqualize2(_dmqi.data,_histeq.data,_image1.cols,_image1.rows);
+			//_dmqi = 255-_dmqi;
+			//equalizeHist(_dmqi,_histeq);
+			//nicatio::HistEqualize(_dmqi.data,_histeq.data,_image1.cols,_image1.rows);
+			//nicatio::MedianFilter(_histeq.data,_deno2.data,_image1.cols,_image1.rows);
+			//nicatio::Gamma(_dmqi.data,_deno2.data,_image1.cols,_image1.rows,2.0);
+			//nicatio::Gamma(_histeq.data,_deno2.data,_image1.cols,_image1.rows,25.0);
+			//_histeq = 255-_histeq;
+			equalizeHist(_dmqi,_histeq);
+//			double mmin, mmax;
+//			minMaxIdx(_histeq,&mmin,&mmax);
+//			_deno2 = _histeq - mmin;
+//			_deno2 *= 255.0/(mmax-mmin);
+			//Mat _deno3;
+			//GaussianBlur(_histeq, _deno2, Size(3,3), 1.0, 1.0, BORDER_DEFAULT);
+
+
+			//_deno2;// = _deno3(Rect(1,1,_deno1.size().width,_deno1.size().height));
+			//_deno2=_dmqi;
 			_deno2=_histeq;
+			//cvNica::IntensityShifting(_histeq, _deno2, 220);
+//			imwrite("ori.bmp",_image1);
+//			imwrite("dmqi.bmp",_dmqi);
+//			imwrite("histeq.bmp",_deno2);
+
 			//cvNica::IntensityShifting(_histeq, _deno2, 128);
 			unsigned found = files[i].rfind("bad");
 			if (found!=std::string::npos) {
@@ -1136,9 +1187,22 @@ int main(int argc, char* argv[] ){
 //			imwrite(dir+"\\new5\\"+files[i]+"_processed.bmp",result);
 //			//waitKey(0);
 		}
+#ifndef PCAP
 		t = ((double)getTickCount() - t)/getTickFrequency();
 		cout << "filtering finish.\nelapsed time : " << t << " sec" << endl;
 		FileOut.close();
+#endif
+
+#ifdef PCAP
+
+		FilePcap2TS.close();
+		FilePcap2ES.close();
+		File2642yuv.close();
+		Filets2yuv.close();
+		FileList.close();
+		FileListenc.close();
+
+#endif
 ///////////////////////
 
 

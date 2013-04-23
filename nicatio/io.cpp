@@ -78,7 +78,49 @@ int getdirType (
 }
 
 
+vector<string> &split(const string &s, char delim, vector<string> &elems) {
+    stringstream ss(s);											// split function used for parsing PSF
+    string item;
+    while (getline(ss, item, delim)) {
+        elems.push_back(item);
+    }
+    return elems;
+}
 
+vector<string> split(const string &s, char delim) {
+    vector<string> elems;										// split function wrapper
+    return split(s, delim, elems);
+}
+
+vector<double> readFileSingleLine(												// read a file and convert it into a dMatrix
+		const char							*filename)
+{
+	ifstream FileI;
+	FileI.open(filename,ios::in | ios::app);
+	FileI.seekg (0, FileI.beg);
+	vector<double> a;
+	int i=0;
+	char buffer[256];											// use limited buffer
+
+
+	FileI.getline(buffer,256);								// get the entire line
+	stringstream temp(buffer);
+	vector<string> b = split(temp.str(),' ');				// split a line with tap
+	int c = b.size();
+	for(int j=0; j<c; j++) {
+		stringstream tok(b[j]);
+		double tok2;
+		tok>>tok2;											// char to string and string to double
+		a.push_back(tok2);									// push it into vector
+	}
+
+
+
+	FileI.close();
+
+	return a;									// return dMatrix
 }
 
 
+
+};

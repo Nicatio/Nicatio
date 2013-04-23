@@ -71,7 +71,8 @@ public:
 			const int						criterion,
 			const int						startAngle,
 			const int						endAngle);
-	float getAccuracy();
+	float getAccuracy(
+			vector<string>						filess);
 	float getAccuracyIncludingBadImages();
 	vector<float> getAccuracyIncludingBadImagesSubset();
 	void getBadImageInfo (
