@@ -3,6 +3,9 @@
 #include <sstream>
 #include <vector>
 #include <string>
+
+#include <sys/stat.h>
+
 //#include "dirent.h"
 #include "cv.h"
 #include "highgui.h"
@@ -26,6 +29,7 @@ using namespace std;
 //#define SMOOTHING
 //#define FA
 //#define FR
+//#define FRREGION
 //#define CMUCROP
 //#define LINEHISTEQUALIZE
 //#define DOG
@@ -33,11 +37,12 @@ using namespace std;
 //#define DMQIDOG
 //#define DOGDMQI
 //#define DMQICONTRASTSHIFT
-//#define DMQI
-#define SMQI
+#define DMQI
+//#define SMQI
+//#define TEST
 //#define DMQIADVANCED
 //#define BINFACE
-
+//#define CROPCMU
 
 //#define ROTATEFACEANGLEDETECTION
 
@@ -220,18 +225,79 @@ int main(int argc, char* argv[] ){
 		}
 #endif
 
-
 #ifdef FR
+
+		ofstream fw;
+		stringstream df;
+		vector<string> tokens = nicatio::StringTokenizer::getTokens(dir,"/");
+
+		df<<tokens[tokens.size()-1]<<"_result.txt";
+		string dff = df.str().c_str();
+		fw.open(df.str().c_str(),ios::out);
+
 		cvNica::FaceRecognition fr(dir,refLocation);
 		//fr.Recognition(dir,"pgm",DB_YALEB,METHOD_CORR,-45,0);
-		fr.Recognition(dir,"pgm",DB_YALEB,METHOD_CORR);
-		cout<<"1 "<<fr.getAccuracy(files)<<" "<<endl;
-		cout<<"2 "<<fr.getAccuracyIncludingBadImages()<<" "<<endl;
-		fr.getAccuracyIncludingBadImagesSubset();
 
+		fr.Recognition(dir,"pgm",DB_YALEB,METHOD_CORR);
+
+
+		fw<<"1 "<<fr.getAccuracy(files)<<" "<<endl;
+		fw<<"2 "<<fr.getAccuracyIncludingBadImages()<<" "<<endl;
+		fr.getAccuracyIncludingBadImagesSubset(fw);
+		fw.close();
 		FileStorage abcd("dix.xml",FileStorage::WRITE);
 		abcd << "frRecognitionResult" << fr.RecognitionResult;
+		stringstream adf;
+		adf<<"diy.xml";
+		FileStorage abcd2(adf.str(),FileStorage::WRITE);
+		abcd2 << "frRecognitionScore" << fr.RecognitionScore;
+		abcd2.release();
 		abcd.release();
+
+#endif
+
+#ifdef FRREGION
+		int pos[52]= {0,0,167,10,	 // ÀÌ¸¶
+		0,11,64,65,	 // ¿Þ´«
+		65,11,102,65,	 // ¹Ì°£
+		103,11,167,65,	 // ¿À¸¥´«
+		0,66,50,114,	 // ÄÚ ¿ÞÂÊ
+		51,66,116,114,	 // ÄÚ
+		117,66,167,114,	 // ÄÚ ¿À¸¥ÂÊ
+		0,115,83,134,	 // ÀÎÁß ¿ÞÂÊ
+		84,115,167,134,   // ÀÎÁß ¿À¸¥ÂÊ
+		0,135,39,162,	 // ÀÔ ¿ÞÂÊ
+		40,135,127,162,	 // ÀÔ
+		128,135,167,162,	 // ÀÔ ¿À¸¥ÂÊ
+		0,163,167,191};	 // ÅÎ
+		for (int i=0; i<13; i++) {
+		ofstream fw;
+		stringstream df;
+		vector<string> tokens = nicatio::StringTokenizer::getTokens(dir,"/");
+
+		df<<tokens[tokens.size()-1]<<i<<"_result.txt";
+		string dff = df.str().c_str();
+		fw.open(df.str().c_str(),ios::out);
+
+		cvNica::FaceRecognition fr(dir,refLocation);
+		//fr.Recognition(dir,"pgm",DB_YALEB,METHOD_CORR,-45,0);
+		fr.Recognition(dir,"pgm",DB_YALEB,METHOD_CORR,0,0,pos[i*4],pos[i*4+1],pos[i*4+2],pos[i*4+3]);
+		//fr.Recognition(dir,"pgm",DB_YALEB,METHOD_CORR);
+
+
+		fw<<"1 "<<fr.getAccuracy(files)<<" "<<endl;
+		fw<<"2 "<<fr.getAccuracyIncludingBadImages()<<" "<<endl;
+		fr.getAccuracyIncludingBadImagesSubset(fw);
+		fw.close();
+		FileStorage abcd("dix.xml",FileStorage::WRITE);
+		abcd << "frRecognitionResult" << fr.RecognitionResult;
+		stringstream adf;
+		adf<<i<<"n.xml";
+		FileStorage abcd2(adf.str(),FileStorage::WRITE);
+		abcd2 << "frRecognitionScore" << fr.RecognitionScore;
+		abcd2.release();
+		abcd.release();
+		}
 #endif
 
 
@@ -280,8 +346,51 @@ int main(int argc, char* argv[] ){
 
 #endif
 
+		//for (double m = 1.35;m <= 1.451;m+=0.01) {
+//			for (unsigned int n = 5;n <= 15;n+=2) {
+//		if (n>m){
+
+			stringstream folder_;
+			folder_<<dir<<"/smqi/";//<<"_s"<<m<<"_l"<<n<<"r/";
+			//folder_<<dir<<"/smqi"<<"_a"<<m<<"/";
+			string folder = folder_.str();
 
 		for (unsigned int i = 0;i < files.size();i++) {
+//			/cygdrive/e/Documents/Nicatio/Research/DB/Face/pie_jpg/IllumLabels
+//			/cygdrive/e/Documents/Nicatio/Research/DB/Face/pie_jpg
+//			/cygdrive/e/Documents/Nicatio/Research/DB/Face/yalebDB
+//			/cygdrive/e/Documents/Nicatio/Research/DB/Face/yalebDB/ref_list_subset1.txt
+#ifdef CROPCMU
+			ifstream FileOpen;
+			stringstream a;
+			a<<dir<<"/"<<files[i];
+			FileOpen.open(a.str().c_str(),ios::in);
+			double LeyeX,LeyeY,ReyeX,ReyeY,noseX,noseY;
+			FileOpen>>LeyeX>>LeyeY>>ReyeX>>ReyeY>>noseX>>noseY;
+			vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],"_");
+			vector<string> tokens2 = nicatio::StringTokenizer::getTokens(tokens[2],".");
+			//string dfd = refLocation+"/faces/"+tokens[0]+"/"+tokens[1]+"_"+tokens2[0]+".jpg";
+			Mat image;
+			image = imread(refLocation+"/faces/"+tokens[0]+"/illum/"+tokens[1]+"_"+tokens2[0]+".jpg",-1);
+			int left = (LeyeX+ReyeX)*0.5 - 80;
+			int minY = (LeyeY>ReyeY)?ReyeY:LeyeY;
+			int top = (minY) - 50;
+			Mat _cropped = image(Rect(left,top,154,176));
+			Mat cropped; _cropped.convertTo(cropped,CV_8UC3);
+			Size size = cropped.size();
+			Mat gray(size,CV_8UC1);
+			nicatio::Grayscale(cropped.data, gray.data,cropped.cols,cropped.rows);
+			imwrite(refLocation+"/cropped/"+tokens[0]+"_"+tokens[1]+"_"+tokens2[0]+".pgm",gray);
+//			namedWindow( "a", CV_WINDOW_AUTOSIZE );
+//			imshow( "a", gray);
+//
+//			waitKey(0);
+//
+//			int da=0;
+//			da+da;
+
+#endif
+
 #ifdef PCAP
 			vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
 
@@ -873,18 +982,20 @@ int main(int argc, char* argv[] ){
 			Mat _deno2(size,CV_8UC1);
 			Mat _dmqi(size,CV_8UC1);
 			Mat _histeq(size,CV_8UC1);
-			Mat _histeq2(size,CV_8UC1);
+			Mat _gdeno(size,CV_8UC1);
 			nicatio::Denoise( _image1.data,_deno1.data,_image1.cols,_image1.rows);
 			imwrite("ori.bmp",_image1);
 			//imwrite("deno.bmp",_deno1);
 			cvNica::DynamicMorphQuotImage(_deno1,_dmqi,0);
 			imwrite("dmqi.bmp",_dmqi);
+			//cvNica::RemoveGrainyNoise(_dmqi,_deno2,20);
 			//nicatio::DynamicMorphQuotImage( _deno1.data,_dmqi.data,_image1.cols,_image1.rows, 0);
 			nicatio::HistEqualize(_dmqi.data,_histeq.data,_image1.cols,_image1.rows);
-			nicatio::HistEqualize2(_dmqi.data,_histeq2.data,_image1.cols,_image1.rows);
+			//nicatio::HistEqualize2(_dmqi.data,_histeq2.data,_image1.cols,_image1.rows);
 			//imwrite("histeq.bmp",_histeq);
 			//imwrite("histeq2.bmp",_histeq2);
-			_deno2=_dmqi;
+			//_deno2=_dmqi;
+			_deno2=_histeq;
 			//cvNica::IntensityShifting(_histeq, _deno2, 128);
 			unsigned found = files[i].rfind("bad");
 			if (found!=std::string::npos) {
@@ -917,17 +1028,17 @@ int main(int argc, char* argv[] ){
 			nicatio::Denoise( _image1.data,_deno1.data,_image1.cols,_image1.rows);
 			//_deno1=_image1;
 			//cvNica::DynamicMorphQuotImage(_deno1,_dmqi,0);
-			cvNica::SelectiveMorphQuotImage(_deno1,_dmqi,0);
+			cvNica::SelectiveMorphQuotImage(_deno1,_dmqi,1.4,5,9,0);
 			//_dmqi=_deno1;
 			//nicatio::DynamicMorphQuotImage( _deno1.data,_dmqi.data,_image1.cols,_image1.rows, 0);
 			//_dmqi = 255-_dmqi;
 			//equalizeHist(_dmqi,_histeq);
-			//nicatio::HistEqualize(_dmqi.data,_histeq.data,_image1.cols,_image1.rows);
+			nicatio::HistEqualize(_dmqi.data,_histeq.data,_image1.cols,_image1.rows);
 			//nicatio::MedianFilter(_histeq.data,_deno2.data,_image1.cols,_image1.rows);
 			//nicatio::Gamma(_dmqi.data,_deno2.data,_image1.cols,_image1.rows,2.0);
 			//nicatio::Gamma(_histeq.data,_deno2.data,_image1.cols,_image1.rows,25.0);
 			//_histeq = 255-_histeq;
-			equalizeHist(_dmqi,_histeq);
+			//equalizeHist(_dmqi,_histeq);
 //			double mmin, mmax;
 //			minMaxIdx(_histeq,&mmin,&mmax);
 //			_deno2 = _histeq - mmin;
@@ -946,17 +1057,90 @@ int main(int argc, char* argv[] ){
 
 			//cvNica::IntensityShifting(_histeq, _deno2, 128);
 			unsigned found = files[i].rfind("bad");
+
+			//string dirfolder = dir+folder;
+			mkdir(folder.c_str(),777);
 			if (found!=std::string::npos) {
 				vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
-				imwrite(dir+"\\smqi\\"+tokens[0]+".pgm",_deno2);
-				rename( string(dir+"\\smqi\\"+tokens[0]+".pgm").c_str() , string(dir+"\\smqi\\"+tokens[0]+".pgm.bad").c_str() );
+				imwrite(folder+tokens[0]+".pgm",_deno2);
+				rename( string(folder+tokens[0]+".pgm").c_str() , string(folder+tokens[0]+".pgm.bad").c_str() );
 
 			} else {
 
-				imwrite(dir+"\\smqi\\"+files[i],_deno2);
+				imwrite(folder+files[i],_deno2);
 
 			}
 #endif
+
+#ifdef TEST
+			cout << files[i] <<"\r"<< endl;
+			Mat _image1;
+			_image1 = imread( dir+"\\"+files[i], -1 );
+
+
+			resize(_image1,_image1,Size(0,0),0.5,0.5);
+			resize(_image1,_image1,Size(0,0),2.0,2.0);
+			Size size = _image1.size();
+			Mat _deno1(size,CV_8UC1);
+			Mat _deno2(size,CV_8UC1);
+			Mat _dmqi(size,CV_8UC1);
+			Mat _dmqi2(size,CV_8UC1);
+			Mat _histeq(size,CV_8UC1);
+			//nicatio::MedianFilter(_image1.data,_deno1.data,_image1.cols,_image1.rows);
+			nicatio::Denoise( _image1.data,_deno1.data,_image1.cols,_image1.rows);
+			//_deno1=_image1;
+			//cvNica::DynamicMorphQuotImage(_deno1,_dmqi,0);
+			//cvNica::SelectiveMorphQuotImage(_deno1,_dmqi,0);
+			//cvNica::QuotImage(_deno1,_dmqi,0);
+			cvNica::SelectiveMorphQuotImage(_deno1,_dmqi,0);
+			//_dmqi=_deno1;
+			//nicatio::DynamicMorphQuotImage( _deno1.data,_dmqi.data,_image1.cols,_image1.rows, 0);
+			//_dmqi = 255-_dmqi;
+			equalizeHist(_dmqi,_histeq);
+			//nicatio::HistEqualize(_dmqi.data,_histeq.data,_image1.cols,_image1.rows);
+
+//			namedWindow( "b", CV_WINDOW_AUTOSIZE );
+//			imshow( "b", _dmqi );
+//			namedWindow( "c", CV_WINDOW_AUTOSIZE );
+//				imshow( "c", _histeq );
+//			waitKey(0);
+
+			//nicatio::MedianFilter(_histeq.data,_deno2.data,_image1.cols,_image1.rows);
+			//nicatio::Gamma(_dmqi.data,_deno2.data,_image1.cols,_image1.rows,2.0);
+			//nicatio::Gamma(_histeq.data,_deno2.data,_image1.cols,_image1.rows,25.0);
+			//_histeq = 255-_histeq;
+			//equalizeHist(_dmqi,_histeq);
+//			double mmin, mmax;
+//			minMaxIdx(_histeq,&mmin,&mmax);
+//			_deno2 = _histeq - mmin;
+//			_deno2 *= 255.0/(mmax-mmin);
+			//Mat _deno3;
+			//GaussianBlur(_histeq, _deno2, Size(3,3), 1.0, 1.0, BORDER_DEFAULT);
+
+
+			//_deno2;// = _deno3(Rect(1,1,_deno1.size().width,_deno1.size().height));
+			//_deno2=_dmqi;
+			_deno2=_histeq;
+			//cvNica::IntensityShifting(_histeq, _deno2, 220);
+//			imwrite("ori.bmp",_image1);
+//			imwrite("dmqi.bmp",_dmqi);
+//			imwrite("histeq.bmp",_deno2);
+
+			//cvNica::IntensityShifting(_histeq, _deno2, 128);
+			unsigned found = files[i].rfind("bad");
+			string folder = "/smqi/";
+			if (found!=std::string::npos) {
+				vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
+				imwrite(dir+folder+tokens[0]+".pgm",_deno2);
+				rename( string(dir+folder+tokens[0]+".pgm").c_str() , string(dir+folder+tokens[0]+".pgm.bad").c_str() );
+
+			} else {
+
+				imwrite(dir+folder+files[i],_deno2);
+
+			}
+#endif
+
 
 #ifdef DMQIADVANCED
 			cout << files[i] <<"\r"<< endl;
@@ -1187,6 +1371,8 @@ int main(int argc, char* argv[] ){
 //			imwrite(dir+"\\new5\\"+files[i]+"_processed.bmp",result);
 //			//waitKey(0);
 		}
+		//}
+		//}}}
 #ifndef PCAP
 		t = ((double)getTickCount() - t)/getTickFrequency();
 		cout << "filtering finish.\nelapsed time : " << t << " sec" << endl;
