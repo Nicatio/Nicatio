@@ -53,7 +53,9 @@ void DoG(
 
 	gauss7 -= gauss13;
 	dog = gauss7(Rect(border,border,srcSize.width,srcSize.height));
-
+	//resize(dog,dog,Size(100,132));
+	//srcSize = dog.size();
+	//sz = srcSize.area();
 	if(do_norm) {
 		absdiff(dog, Scalar::all(0), resultAbs);
 		pow(resultAbs,a,resultPow);
@@ -83,7 +85,7 @@ void DoG(
 	dog*=max_;
 	dog.convertTo(rep,src.type());
 
-	_dst.create(src.size(),src.type());
+	_dst.create(srcSize,src.type());
 	dst = _dst.getMat();
 
 	rep.copyTo(dst);

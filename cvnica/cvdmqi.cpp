@@ -210,12 +210,13 @@ void SelectiveClosing(
 //		else if((__l>_sb)&&(__l<=_sa)) *(ptrDst) = 0x50;
 //		else if((__l>_sc)&&(__l<=_sb)) *(ptrDst) = 0xa0;
 //		else *(ptrDst) = 0xf0;
+
 		if(__l>_sa) *(ptrDst) = __l;
 		//else if((__l>_sb)&&(__l<=_sa)) *(ptrDst) = __m;
 		else *(ptrDst) = __s;
-/*		if(__l>_sa) *(ptrDst) = 0x00;
-		else if((__l>_sb)&&(__l<=_sa)) *(ptrDst) = 0x80;
-		else *(ptrDst) = 0xff;*/
+//		if(__l>_sa) *(ptrDst) = 0x00;
+//		else if((__l>_sb)&&(__l<=_sa)) *(ptrDst) = 0x80;
+//		else *(ptrDst) = 0xff;
 	}
 
 
@@ -336,6 +337,7 @@ void SelectiveMorphQuotImage(
 	Mat src = _src.getMat();
 	Mat dc = Mat(src.size(),src.type());
 	SelectiveClosing (src,dc,alpha,tempSmall,tempLarge);
+	//imwrite("dc.bmp",dc);
 	Reflectance(src,dc,_dst);
 
 }
@@ -348,7 +350,7 @@ void DynamicMorphQuotImage(
 	Mat src = _src.getMat();
 	Mat dc = Mat(src.size(),src.type());
 	DynamicClosing (src,dc);
-	imwrite("dc.bmp",dc);
+	//imwrite("dc.bmp",dc);
 	Reflectance(src,dc,_dst,200.0);
 
 }
@@ -382,7 +384,10 @@ void Denoise(
 	Mat d = Mat(src.size(),src.type());
 	Mat e = Mat(src.size(),src.type());
 
-	Mat element = getStructuringElement( MORPH_RECT, Size( 3,3 ), Point( 1,1 ) );
+	//Mat element = getStructuringElement( MORPH_RECT, Size( 3,3 ), Point( 1,1 ) ); element. element.data[0]=0; element.data[1]=0;// element.at<uchar>(1,1) = 0;
+	uchar _element [3][3] = {{1,1,1},{1,0,1},{1,1,1}};
+	Mat element(3,3,CV_8U, _element);
+
 	dilate( src, d, element);
 	erode ( src, e, element);
 
@@ -397,8 +402,8 @@ void Denoise(
 		unsigned char __e = *(ptrE);
 		unsigned char __src = *(ptrSrc);
 
-		if 		(__d>__src)	*(ptrDst) = __d;
-		else if (__e<__src) *(ptrDst) = __e;
+		if 		(__d<__src)	*(ptrDst) = __d;
+		else if (__e>__src) *(ptrDst) = __e;
 		else 				*(ptrDst) = __src;
 	}
 }

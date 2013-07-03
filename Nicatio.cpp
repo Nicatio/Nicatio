@@ -28,7 +28,7 @@ using namespace std;
 //#define FLASH
 //#define SMOOTHING
 //#define FA
-//#define FR
+#define FR
 //#define FRREGION
 //#define CMUCROP
 //#define LINEHISTEQUALIZE
@@ -37,7 +37,7 @@ using namespace std;
 //#define DMQIDOG
 //#define DOGDMQI
 //#define DMQICONTRASTSHIFT
-#define DMQI
+//#define DMQI
 //#define SMQI
 //#define TEST
 //#define DMQIADVANCED
@@ -50,6 +50,47 @@ using namespace std;
 //#define ROTATEFACEANGLEDETECTIONDMQI
 
 int main(int argc, char* argv[] ){
+//	Mat a111 = imread("111.bmp",-1);
+//	Mat a1112 = imread("1112.bmp",-1);
+//
+//	Mat a111g;
+//	Mat a1112g;
+//
+//	cvtColor(a111,a111g,CV_RGB2GRAY);
+//	cvtColor(a1112,a1112g,CV_RGB2GRAY);
+//
+//	Mat a111dog;
+//	Mat a1112dog;
+//
+//	cvNica::DoG(a111g,a111dog,0.2,1,-2,0,0,0,10);
+//	cvNica::DoG(a1112g,a1112dog,0.2,1,-2,0,0,0,10);
+//
+//	imwrite("a111.bmp",a111dog);
+//	imwrite("a1112.bmp",a1112dog);
+//
+//
+//	Mat S=Mat::ones(100,270,CV_32FC1);
+//	Mat V=Mat::ones(100,270,CV_32FC1);
+//	Mat H=Mat::zeros(100,270,CV_32FC1);
+//	for(int i=0;i<270;i++) {
+//		H.col(i) = i;
+//	}
+//	vector<Mat> HSV;
+//	HSV.push_back(H);
+//	HSV.push_back(S);
+//	HSV.push_back(V);
+//	Mat mergeHSV;
+//	Mat RGB;
+//	Mat RGB8;
+//	merge(HSV,mergeHSV);
+//	cvtColor(mergeHSV,RGB,CV_HSV2RGB);
+//	RGB*=255;
+//	RGB.convertTo(RGB8,CV_8UC3);
+//						namedWindow( "b", CV_WINDOW_AUTOSIZE );
+//											imshow( "b",RGB8);
+//						waitKey(0);
+//						int abd = 0;
+//						abd=2;
 
 	#ifdef GF
 	CGuidedFilter guidedfilter;
@@ -305,16 +346,25 @@ int main(int argc, char* argv[] ){
 #ifdef FA
 		//cvNica::FaceAnalysis fhhhah();
 
-		Mat dsf = Mat::zeros(3,3,CV_32FC1);
-		dsf.at<float>(2,2) = 255;
-
-		Mat dsf2; dsf.convertTo(dsf2,CV_8UC1);
-		imwrite("dfdf.bmp",dsf2);
+//		Mat dsf = Mat::zeros(3,3,CV_32FC1);
+//		dsf.at<float>(2,2) = 255;
+//
+//		Mat dsf2; dsf.convertTo(dsf2,CV_8UC1);
+//		imwrite("dfdf.bmp",dsf2);
 
 		cvNica::FaceAnalysis fa(dir,"pgm");
-		fa.setGroup("faceindex.bmp");
+
+		//1
 		//fa.draw(64,2);
-		fa.mse(64);
+
+		//2
+		//fa.setGroup("faceindex.bmp");
+		//fa.mse(64);
+
+		//3
+		//fa.correlationPic(64,2,1);
+		fa.maskPic(64,2,1);
+
 //
 #endif
 #ifndef PCAP
@@ -952,7 +1002,7 @@ int main(int argc, char* argv[] ){
 
 
 #ifdef DOG
-			cout << files[i] <<"\r"<< endl;
+			//cout << files[i] <<"\r"<< endl;
 			Mat _image1;
 			_image1 = imread( dir+"/"+files[i], -1 );
 			Mat temp2;
@@ -974,7 +1024,7 @@ int main(int argc, char* argv[] ){
 #endif
 
 #ifdef DMQI
-			cout << files[i] <<"\r"<< endl;
+			//cout << files[i] <<"\r"<< endl;
 			Mat _image1;
 			_image1 = imread( dir+"\\"+files[i], -1 );
 			Size size = _image1.size();
@@ -984,30 +1034,34 @@ int main(int argc, char* argv[] ){
 			Mat _histeq(size,CV_8UC1);
 			Mat _gdeno(size,CV_8UC1);
 			nicatio::Denoise( _image1.data,_deno1.data,_image1.cols,_image1.rows);
-			imwrite("ori.bmp",_image1);
+			//imwrite("ori.bmp",_image1);
 			//imwrite("deno.bmp",_deno1);
 			cvNica::DynamicMorphQuotImage(_deno1,_dmqi,0);
-			imwrite("dmqi.bmp",_dmqi);
-			//cvNica::RemoveGrainyNoise(_dmqi,_deno2,20);
+			//imwrite("dmqi.bmp",_dmqi);
+			cvNica::RemoveGrainyNoise(_dmqi,_deno2,33);
 			//nicatio::DynamicMorphQuotImage( _deno1.data,_dmqi.data,_image1.cols,_image1.rows, 0);
-			nicatio::HistEqualize(_dmqi.data,_histeq.data,_image1.cols,_image1.rows);
+			//nicatio::HistEqualize(_dmqi.data,_histeq.data,_image1.cols,_image1.rows);
 			//nicatio::HistEqualize2(_dmqi.data,_histeq2.data,_image1.cols,_image1.rows);
 			//imwrite("histeq.bmp",_histeq);
 			//imwrite("histeq2.bmp",_histeq2);
 			//_deno2=_dmqi;
-			_deno2=_histeq;
+			//_deno2=_histeq;
 			//cvNica::IntensityShifting(_histeq, _deno2, 128);
-			unsigned found = files[i].rfind("bad");
-			if (found!=std::string::npos) {
-				vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
-				imwrite(dir+"\\dmqi\\"+tokens[0]+".pgm",_deno2);
-				rename( string(dir+"\\dmqi\\"+tokens[0]+".pgm").c_str() , string(dir+"\\dmqi\\"+tokens[0]+".pgm.bad").c_str() );
 
-			} else {
 
-				imwrite(dir+"\\dmqi\\"+files[i],_deno2);
 
-			}
+
+//			unsigned found = files[i].rfind("bad");
+//			if (found!=std::string::npos) {
+//				vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
+//				imwrite(dir+"\\dmqir\\"+tokens[0]+".pgm",_deno2);
+//				rename( string(dir+"\\dmqir\\"+tokens[0]+".pgm").c_str() , string(dir+"\\dmqir\\"+tokens[0]+".pgm.bad").c_str() );
+//
+//			} else {
+//
+//				imwrite(dir+"\\dmqir\\"+files[i],_deno2);
+//
+//			}
 
 
 				//imwrite(dir+"\\dmqi\\"+files[i],_deno2);
@@ -1016,24 +1070,25 @@ int main(int argc, char* argv[] ){
 #endif
 
 #ifdef SMQI
-			cout << files[i] <<"\r"<< endl;
+			//cout << files[i] <<"\r"<< endl;
 			Mat _image1;
 			_image1 = imread( dir+"\\"+files[i], -1 );
 			Size size = _image1.size();
 			Mat _deno1(size,CV_8UC1);
-			Mat _deno2(size,CV_8UC1);
+			//Mat _deno2(size,CV_8UC1);
 			Mat _dmqi(size,CV_8UC1);
 			Mat _histeq(size,CV_8UC1);
 			//nicatio::MedianFilter(_image1.data,_deno1.data,_image1.cols,_image1.rows);
-			nicatio::Denoise( _image1.data,_deno1.data,_image1.cols,_image1.rows);
+			//nicatio::Denoise( _image1.data,_deno1.data,_image1.cols,_image1.rows);
+			cvNica::Denoise(_image1,_deno1);
 			//_deno1=_image1;
 			//cvNica::DynamicMorphQuotImage(_deno1,_dmqi,0);
 			cvNica::SelectiveMorphQuotImage(_deno1,_dmqi,1.4,5,9,0);
 			//_dmqi=_deno1;
 			//nicatio::DynamicMorphQuotImage( _deno1.data,_dmqi.data,_image1.cols,_image1.rows, 0);
 			//_dmqi = 255-_dmqi;
-			//equalizeHist(_dmqi,_histeq);
-			nicatio::HistEqualize(_dmqi.data,_histeq.data,_image1.cols,_image1.rows);
+			equalizeHist(_dmqi,_histeq);
+			//nicatio::HistEqualize(_dmqi.data,_histeq.data,_image1.cols,_image1.rows);
 			//nicatio::MedianFilter(_histeq.data,_deno2.data,_image1.cols,_image1.rows);
 			//nicatio::Gamma(_dmqi.data,_deno2.data,_image1.cols,_image1.rows,2.0);
 			//nicatio::Gamma(_histeq.data,_deno2.data,_image1.cols,_image1.rows,25.0);
@@ -1049,25 +1104,30 @@ int main(int argc, char* argv[] ){
 
 			//_deno2;// = _deno3(Rect(1,1,_deno1.size().width,_deno1.size().height));
 			//_deno2=_dmqi;
-			_deno2=_histeq;
-			//cvNica::IntensityShifting(_histeq, _deno2, 220);
+			//_deno2=_histeq;
+			////cvNica::IntensityShifting(_histeq, _deno2, 220);
 //			imwrite("ori.bmp",_image1);
 //			imwrite("dmqi.bmp",_dmqi);
 //			imwrite("histeq.bmp",_deno2);
 
 			//cvNica::IntensityShifting(_histeq, _deno2, 128);
+
+
+
+
+
 			unsigned found = files[i].rfind("bad");
 
 			//string dirfolder = dir+folder;
 			mkdir(folder.c_str(),777);
 			if (found!=std::string::npos) {
 				vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
-				imwrite(folder+tokens[0]+".pgm",_deno2);
+				imwrite(folder+tokens[0]+".pgm",_histeq);
 				rename( string(folder+tokens[0]+".pgm").c_str() , string(folder+tokens[0]+".pgm.bad").c_str() );
 
 			} else {
 
-				imwrite(folder+files[i],_deno2);
+				imwrite(folder+files[i],_histeq);
 
 			}
 #endif
@@ -1685,3 +1745,4 @@ int main(int argc, char* argv[] ){
 //	return e;
 	return 0;
 }
+
