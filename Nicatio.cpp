@@ -3,9 +3,6 @@
 #include <sstream>
 #include <vector>
 #include <string>
-
-#include <sys/stat.h>
-
 //#include "dirent.h"
 #include "cv.h"
 #include "highgui.h"
@@ -19,7 +16,9 @@
 using namespace cv;
 using namespace std;
 
-#define PGM
+//#define PGM
+
+#define BMP
 //#define PCAP
 //#define TXT
 //#define GF
@@ -28,8 +27,10 @@ using namespace std;
 //#define FLASH
 //#define SMOOTHING
 //#define FA
-#define FR
-//#define FRREGION
+
+//#define FR
+//#define Fileout
+
 //#define CMUCROP
 //#define LINEHISTEQUALIZE
 //#define DOG
@@ -38,59 +39,68 @@ using namespace std;
 //#define DOGDMQI
 //#define DMQICONTRASTSHIFT
 //#define DMQI
+
 //#define SMQI
-//#define TEST
+
 //#define DMQIADVANCED
 //#define BINFACE
-//#define CROPCMU
-
 //#define ROTATEFACEANGLEDETECTION
-
-
 //#define ROTATEFACEANGLEDETECTIONDMQI
 
+
+
+//#define illuminationNormalization
+#define textDetection
+
+#ifdef textDetection
 int main(int argc, char* argv[] ){
-//	Mat a111 = imread("111.bmp",-1);
-//	Mat a1112 = imread("1112.bmp",-1);
-//
-//	Mat a111g;
-//	Mat a1112g;
-//
-//	cvtColor(a111,a111g,CV_RGB2GRAY);
-//	cvtColor(a1112,a1112g,CV_RGB2GRAY);
-//
-//	Mat a111dog;
-//	Mat a1112dog;
-//
-//	cvNica::DoG(a111g,a111dog,0.2,1,-2,0,0,0,10);
-//	cvNica::DoG(a1112g,a1112dog,0.2,1,-2,0,0,0,10);
-//
-//	imwrite("a111.bmp",a111dog);
-//	imwrite("a1112.bmp",a1112dog);
-//
-//
-//	Mat S=Mat::ones(100,270,CV_32FC1);
-//	Mat V=Mat::ones(100,270,CV_32FC1);
-//	Mat H=Mat::zeros(100,270,CV_32FC1);
-//	for(int i=0;i<270;i++) {
-//		H.col(i) = i;
-//	}
-//	vector<Mat> HSV;
-//	HSV.push_back(H);
-//	HSV.push_back(S);
-//	HSV.push_back(V);
-//	Mat mergeHSV;
-//	Mat RGB;
-//	Mat RGB8;
-//	merge(HSV,mergeHSV);
-//	cvtColor(mergeHSV,RGB,CV_HSV2RGB);
-//	RGB*=255;
-//	RGB.convertTo(RGB8,CV_8UC3);
-//						namedWindow( "b", CV_WINDOW_AUTOSIZE );
-//											imshow( "b",RGB8);
-//						waitKey(0);
-//						int abd = 0;
-//						abd=2;
+
+#ifdef BMP
+	string dir = string(argv[1]);
+	string refLocation = string(argv[2]);
+
+	vector<string> files = vector<string>();
+
+	if (nicatio::getdirType(dir,"bmp",files,0)) {
+		cout<< "Error: Invalid file location \n" <<endl;
+		return -1;
+	}
+#endif
+
+	for (unsigned int i = 0;i < files.size();i++) {
+		Mat _image1;
+		_image1 = imread( dir+"\\"+files[i], -1 );
+		Size size = _image1.size();
+		Mat _deno1(size,CV_8UC1);
+		Mat _deno2(size,CV_8UC1);
+		Mat _dmqi(size,CV_8UC1);
+		Mat _histeq(size,CV_8UC1);
+		cvNica::Denoise(_image1,_deno1);
+		cvNica::SelectiveMorphQuotImage(_deno1,_dmqi,0);
+		nicatio::HistEqualize(_dmqi.data,_histeq.data,_image1.cols,_image1.rows);
+		_deno2=_histeq;
+		unsigned found = files[i].rfind("bad");
+		if (found!=std::string::npos) {
+			vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
+			imwrite(dir+"\\smqi\\"+tokens[0]+".pgm",_deno2);
+			rename( string(dir+"\\smqi\\"+tokens[0]+".pgm").c_str() , string(dir+"\\smqi\\"+tokens[0]+".pgm.bad").c_str() );
+		} else {
+			imwrite(dir+"\\smqi\\"+files[i],_deno2);
+
+		}
+	}
+
+}
+
+#endif
+
+#ifdef illuminationNormalization
+
+// Run configurations
+// /cygdrive/e/Documents/Nicatio/Research/DB/Face/yalebDB/smqi/
+// /cygdrive/e/Documents/Nicatio/Research/DB/Face/yalebDB/smqi/ref_list2.txt
+
+int main(int argc, char* argv[] ){
 
 	#ifdef GF
 	CGuidedFilter guidedfilter;
@@ -254,6 +264,18 @@ int main(int argc, char* argv[] ){
 		}
 #endif
 
+#ifdef BMP
+		string dir = string(argv[1]);
+		string refLocation = string(argv[2]);
+
+		vector<string> files = vector<string>();
+
+		if (nicatio::getdirType(dir,"bmp",files,0)) {
+			cout<< "Error: Invalid file location \n" <<endl;
+			return -1;
+		}
+#endif
+
 #ifdef PCAP
 		string dir = string(argv[1]);
 		string refLocation = string(argv[2]);
@@ -266,79 +288,18 @@ int main(int argc, char* argv[] ){
 		}
 #endif
 
+
 #ifdef FR
-
-		ofstream fw;
-		stringstream df;
-		vector<string> tokens = nicatio::StringTokenizer::getTokens(dir,"/");
-
-		df<<tokens[tokens.size()-1]<<"_result.txt";
-		string dff = df.str().c_str();
-		fw.open(df.str().c_str(),ios::out);
-
 		cvNica::FaceRecognition fr(dir,refLocation);
 		//fr.Recognition(dir,"pgm",DB_YALEB,METHOD_CORR,-45,0);
-
 		fr.Recognition(dir,"pgm",DB_YALEB,METHOD_CORR);
+		cout<<"1 "<<fr.getAccuracy(files)<<" "<<endl;
+		cout<<"2 "<<fr.getAccuracyIncludingBadImages()<<" "<<endl;
+		fr.getAccuracyIncludingBadImagesSubset();
 
-
-		fw<<"1 "<<fr.getAccuracy(files)<<" "<<endl;
-		fw<<"2 "<<fr.getAccuracyIncludingBadImages()<<" "<<endl;
-		fr.getAccuracyIncludingBadImagesSubset(fw);
-		fw.close();
 		FileStorage abcd("dix.xml",FileStorage::WRITE);
 		abcd << "frRecognitionResult" << fr.RecognitionResult;
-		stringstream adf;
-		adf<<"diy.xml";
-		FileStorage abcd2(adf.str(),FileStorage::WRITE);
-		abcd2 << "frRecognitionScore" << fr.RecognitionScore;
-		abcd2.release();
 		abcd.release();
-
-#endif
-
-#ifdef FRREGION
-		int pos[52]= {0,0,167,10,	 // ÀÌ¸¶
-		0,11,64,65,	 // ¿Þ´«
-		65,11,102,65,	 // ¹Ì°£
-		103,11,167,65,	 // ¿À¸¥´«
-		0,66,50,114,	 // ÄÚ ¿ÞÂÊ
-		51,66,116,114,	 // ÄÚ
-		117,66,167,114,	 // ÄÚ ¿À¸¥ÂÊ
-		0,115,83,134,	 // ÀÎÁß ¿ÞÂÊ
-		84,115,167,134,   // ÀÎÁß ¿À¸¥ÂÊ
-		0,135,39,162,	 // ÀÔ ¿ÞÂÊ
-		40,135,127,162,	 // ÀÔ
-		128,135,167,162,	 // ÀÔ ¿À¸¥ÂÊ
-		0,163,167,191};	 // ÅÎ
-		for (int i=0; i<13; i++) {
-		ofstream fw;
-		stringstream df;
-		vector<string> tokens = nicatio::StringTokenizer::getTokens(dir,"/");
-
-		df<<tokens[tokens.size()-1]<<i<<"_result.txt";
-		string dff = df.str().c_str();
-		fw.open(df.str().c_str(),ios::out);
-
-		cvNica::FaceRecognition fr(dir,refLocation);
-		//fr.Recognition(dir,"pgm",DB_YALEB,METHOD_CORR,-45,0);
-		fr.Recognition(dir,"pgm",DB_YALEB,METHOD_CORR,0,0,pos[i*4],pos[i*4+1],pos[i*4+2],pos[i*4+3]);
-		//fr.Recognition(dir,"pgm",DB_YALEB,METHOD_CORR);
-
-
-		fw<<"1 "<<fr.getAccuracy(files)<<" "<<endl;
-		fw<<"2 "<<fr.getAccuracyIncludingBadImages()<<" "<<endl;
-		fr.getAccuracyIncludingBadImagesSubset(fw);
-		fw.close();
-		FileStorage abcd("dix.xml",FileStorage::WRITE);
-		abcd << "frRecognitionResult" << fr.RecognitionResult;
-		stringstream adf;
-		adf<<i<<"n.xml";
-		FileStorage abcd2(adf.str(),FileStorage::WRITE);
-		abcd2 << "frRecognitionScore" << fr.RecognitionScore;
-		abcd2.release();
-		abcd.release();
-		}
 #endif
 
 
@@ -346,28 +307,20 @@ int main(int argc, char* argv[] ){
 #ifdef FA
 		//cvNica::FaceAnalysis fhhhah();
 
-//		Mat dsf = Mat::zeros(3,3,CV_32FC1);
-//		dsf.at<float>(2,2) = 255;
-//
-//		Mat dsf2; dsf.convertTo(dsf2,CV_8UC1);
-//		imwrite("dfdf.bmp",dsf2);
+		Mat dsf = Mat::zeros(3,3,CV_32FC1);
+		dsf.at<float>(2,2) = 255;
+
+		Mat dsf2; dsf.convertTo(dsf2,CV_8UC1);
+		imwrite("dfdf.bmp",dsf2);
 
 		cvNica::FaceAnalysis fa(dir,"pgm");
-
-		//1
+		fa.setGroup("faceindex.bmp");
 		//fa.draw(64,2);
-
-		//2
-		//fa.setGroup("faceindex.bmp");
-		//fa.mse(64);
-
-		//3
-		//fa.correlationPic(64,2,1);
-		fa.maskPic(64,2,1);
-
+		fa.mse(64);
 //
 #endif
-#ifndef PCAP
+
+#ifdef Fileout
 		ofstream FileOut;
 		FileOut.open("result.txt",(ios::out));
 		int nHist = 16;//32;
@@ -396,51 +349,8 @@ int main(int argc, char* argv[] ){
 
 #endif
 
-		//for (double m = 1.35;m <= 1.451;m+=0.01) {
-//			for (unsigned int n = 5;n <= 15;n+=2) {
-//		if (n>m){
-
-			stringstream folder_;
-			folder_<<dir<<"/smqi/";//<<"_s"<<m<<"_l"<<n<<"r/";
-			//folder_<<dir<<"/smqi"<<"_a"<<m<<"/";
-			string folder = folder_.str();
 
 		for (unsigned int i = 0;i < files.size();i++) {
-//			/cygdrive/e/Documents/Nicatio/Research/DB/Face/pie_jpg/IllumLabels
-//			/cygdrive/e/Documents/Nicatio/Research/DB/Face/pie_jpg
-//			/cygdrive/e/Documents/Nicatio/Research/DB/Face/yalebDB
-//			/cygdrive/e/Documents/Nicatio/Research/DB/Face/yalebDB/ref_list_subset1.txt
-#ifdef CROPCMU
-			ifstream FileOpen;
-			stringstream a;
-			a<<dir<<"/"<<files[i];
-			FileOpen.open(a.str().c_str(),ios::in);
-			double LeyeX,LeyeY,ReyeX,ReyeY,noseX,noseY;
-			FileOpen>>LeyeX>>LeyeY>>ReyeX>>ReyeY>>noseX>>noseY;
-			vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],"_");
-			vector<string> tokens2 = nicatio::StringTokenizer::getTokens(tokens[2],".");
-			//string dfd = refLocation+"/faces/"+tokens[0]+"/"+tokens[1]+"_"+tokens2[0]+".jpg";
-			Mat image;
-			image = imread(refLocation+"/faces/"+tokens[0]+"/illum/"+tokens[1]+"_"+tokens2[0]+".jpg",-1);
-			int left = (LeyeX+ReyeX)*0.5 - 80;
-			int minY = (LeyeY>ReyeY)?ReyeY:LeyeY;
-			int top = (minY) - 50;
-			Mat _cropped = image(Rect(left,top,154,176));
-			Mat cropped; _cropped.convertTo(cropped,CV_8UC3);
-			Size size = cropped.size();
-			Mat gray(size,CV_8UC1);
-			nicatio::Grayscale(cropped.data, gray.data,cropped.cols,cropped.rows);
-			imwrite(refLocation+"/cropped/"+tokens[0]+"_"+tokens[1]+"_"+tokens2[0]+".pgm",gray);
-//			namedWindow( "a", CV_WINDOW_AUTOSIZE );
-//			imshow( "a", gray);
-//
-//			waitKey(0);
-//
-//			int da=0;
-//			da+da;
-
-#endif
-
 #ifdef PCAP
 			vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
 
@@ -1032,34 +942,30 @@ int main(int argc, char* argv[] ){
 			Mat _deno2(size,CV_8UC1);
 			Mat _dmqi(size,CV_8UC1);
 			Mat _histeq(size,CV_8UC1);
-			Mat _gdeno(size,CV_8UC1);
-			nicatio::Denoise( _image1.data,_deno1.data,_image1.cols,_image1.rows);
+			//Mat _histeq2(size,CV_8UC1);
+			//nicatio::Denoise( _image1.data,_deno1.data,_image1.cols,_image1.rows);
+			cvNica::Denoise(_image1,_deno1);
 			//imwrite("ori.bmp",_image1);
 			//imwrite("deno.bmp",_deno1);
 			cvNica::DynamicMorphQuotImage(_deno1,_dmqi,0);
+			cvNica::RemoveGrainyNoise(_dmqi,_deno2,30);
 			//imwrite("dmqi.bmp",_dmqi);
-			cvNica::RemoveGrainyNoise(_dmqi,_deno2,33);
 			//nicatio::DynamicMorphQuotImage( _deno1.data,_dmqi.data,_image1.cols,_image1.rows, 0);
-			//nicatio::HistEqualize(_dmqi.data,_histeq.data,_image1.cols,_image1.rows);
+			//nicatio::HistEqualize(_deno2.data,_histeq.data,_image1.cols,_image1.rows);
 			//nicatio::HistEqualize2(_dmqi.data,_histeq2.data,_image1.cols,_image1.rows);
 			//imwrite("histeq.bmp",_histeq);
 			//imwrite("histeq2.bmp",_histeq2);
 			//_deno2=_dmqi;
-			//_deno2=_histeq;
 			//cvNica::IntensityShifting(_histeq, _deno2, 128);
-
-
-
-
 //			unsigned found = files[i].rfind("bad");
 //			if (found!=std::string::npos) {
 //				vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
-//				imwrite(dir+"\\dmqir\\"+tokens[0]+".pgm",_deno2);
-//				rename( string(dir+"\\dmqir\\"+tokens[0]+".pgm").c_str() , string(dir+"\\dmqir\\"+tokens[0]+".pgm.bad").c_str() );
+//				imwrite(dir+"\\dmqi\\"+tokens[0]+".pgm",_deno2);
+//				rename( string(dir+"\\dmqi\\"+tokens[0]+".pgm").c_str() , string(dir+"\\dmqi\\"+tokens[0]+".pgm.bad").c_str() );
 //
 //			} else {
 //
-//				imwrite(dir+"\\dmqir\\"+files[i],_deno2);
+//				imwrite(dir+"\\dmqi\\"+files[i],_deno2);
 //
 //			}
 
@@ -1075,7 +981,7 @@ int main(int argc, char* argv[] ){
 			_image1 = imread( dir+"\\"+files[i], -1 );
 			Size size = _image1.size();
 			Mat _deno1(size,CV_8UC1);
-			//Mat _deno2(size,CV_8UC1);
+			Mat _deno2(size,CV_8UC1);
 			Mat _dmqi(size,CV_8UC1);
 			Mat _histeq(size,CV_8UC1);
 			//nicatio::MedianFilter(_image1.data,_deno1.data,_image1.cols,_image1.rows);
@@ -1083,88 +989,12 @@ int main(int argc, char* argv[] ){
 			cvNica::Denoise(_image1,_deno1);
 			//_deno1=_image1;
 			//cvNica::DynamicMorphQuotImage(_deno1,_dmqi,0);
-			cvNica::SelectiveMorphQuotImage(_deno1,_dmqi,1.4,5,9,0);
-			//_dmqi=_deno1;
-			//nicatio::DynamicMorphQuotImage( _deno1.data,_dmqi.data,_image1.cols,_image1.rows, 0);
-			//_dmqi = 255-_dmqi;
-			equalizeHist(_dmqi,_histeq);
-			//nicatio::HistEqualize(_dmqi.data,_histeq.data,_image1.cols,_image1.rows);
-			//nicatio::MedianFilter(_histeq.data,_deno2.data,_image1.cols,_image1.rows);
-			//nicatio::Gamma(_dmqi.data,_deno2.data,_image1.cols,_image1.rows,2.0);
-			//nicatio::Gamma(_histeq.data,_deno2.data,_image1.cols,_image1.rows,25.0);
-			//_histeq = 255-_histeq;
-			//equalizeHist(_dmqi,_histeq);
-//			double mmin, mmax;
-//			minMaxIdx(_histeq,&mmin,&mmax);
-//			_deno2 = _histeq - mmin;
-//			_deno2 *= 255.0/(mmax-mmin);
-			//Mat _deno3;
-			//GaussianBlur(_histeq, _deno2, Size(3,3), 1.0, 1.0, BORDER_DEFAULT);
-
-
-			//_deno2;// = _deno3(Rect(1,1,_deno1.size().width,_deno1.size().height));
-			//_deno2=_dmqi;
-			//_deno2=_histeq;
-			////cvNica::IntensityShifting(_histeq, _deno2, 220);
-//			imwrite("ori.bmp",_image1);
-//			imwrite("dmqi.bmp",_dmqi);
-//			imwrite("histeq.bmp",_deno2);
-
-			//cvNica::IntensityShifting(_histeq, _deno2, 128);
-
-
-
-
-
-			unsigned found = files[i].rfind("bad");
-
-			//string dirfolder = dir+folder;
-			mkdir(folder.c_str(),777);
-			if (found!=std::string::npos) {
-				vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
-				imwrite(folder+tokens[0]+".pgm",_histeq);
-				rename( string(folder+tokens[0]+".pgm").c_str() , string(folder+tokens[0]+".pgm.bad").c_str() );
-
-			} else {
-
-				imwrite(folder+files[i],_histeq);
-
-			}
-#endif
-
-#ifdef TEST
-			cout << files[i] <<"\r"<< endl;
-			Mat _image1;
-			_image1 = imread( dir+"\\"+files[i], -1 );
-
-
-			resize(_image1,_image1,Size(0,0),0.5,0.5);
-			resize(_image1,_image1,Size(0,0),2.0,2.0);
-			Size size = _image1.size();
-			Mat _deno1(size,CV_8UC1);
-			Mat _deno2(size,CV_8UC1);
-			Mat _dmqi(size,CV_8UC1);
-			Mat _dmqi2(size,CV_8UC1);
-			Mat _histeq(size,CV_8UC1);
-			//nicatio::MedianFilter(_image1.data,_deno1.data,_image1.cols,_image1.rows);
-			nicatio::Denoise( _image1.data,_deno1.data,_image1.cols,_image1.rows);
-			//_deno1=_image1;
-			//cvNica::DynamicMorphQuotImage(_deno1,_dmqi,0);
-			//cvNica::SelectiveMorphQuotImage(_deno1,_dmqi,0);
-			//cvNica::QuotImage(_deno1,_dmqi,0);
 			cvNica::SelectiveMorphQuotImage(_deno1,_dmqi,0);
 			//_dmqi=_deno1;
 			//nicatio::DynamicMorphQuotImage( _deno1.data,_dmqi.data,_image1.cols,_image1.rows, 0);
 			//_dmqi = 255-_dmqi;
-			equalizeHist(_dmqi,_histeq);
-			//nicatio::HistEqualize(_dmqi.data,_histeq.data,_image1.cols,_image1.rows);
-
-//			namedWindow( "b", CV_WINDOW_AUTOSIZE );
-//			imshow( "b", _dmqi );
-//			namedWindow( "c", CV_WINDOW_AUTOSIZE );
-//				imshow( "c", _histeq );
-//			waitKey(0);
-
+			//equalizeHist(_dmqi,_histeq);
+			nicatio::HistEqualize(_dmqi.data,_histeq.data,_image1.cols,_image1.rows);
 			//nicatio::MedianFilter(_histeq.data,_deno2.data,_image1.cols,_image1.rows);
 			//nicatio::Gamma(_dmqi.data,_deno2.data,_image1.cols,_image1.rows,2.0);
 			//nicatio::Gamma(_histeq.data,_deno2.data,_image1.cols,_image1.rows,25.0);
@@ -1187,20 +1017,22 @@ int main(int argc, char* argv[] ){
 //			imwrite("histeq.bmp",_deno2);
 
 			//cvNica::IntensityShifting(_histeq, _deno2, 128);
+
+
+
+
 			unsigned found = files[i].rfind("bad");
-			string folder = "/smqi/";
 			if (found!=std::string::npos) {
 				vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
-				imwrite(dir+folder+tokens[0]+".pgm",_deno2);
-				rename( string(dir+folder+tokens[0]+".pgm").c_str() , string(dir+folder+tokens[0]+".pgm.bad").c_str() );
+				imwrite(dir+"\\smqi\\"+tokens[0]+".pgm",_deno2);
+				rename( string(dir+"\\smqi\\"+tokens[0]+".pgm").c_str() , string(dir+"\\smqi\\"+tokens[0]+".pgm.bad").c_str() );
 
 			} else {
 
-				imwrite(dir+folder+files[i],_deno2);
+				imwrite(dir+"\\smqi\\"+files[i],_deno2);
 
 			}
 #endif
-
 
 #ifdef DMQIADVANCED
 			cout << files[i] <<"\r"<< endl;
@@ -1431,9 +1263,7 @@ int main(int argc, char* argv[] ){
 //			imwrite(dir+"\\new5\\"+files[i]+"_processed.bmp",result);
 //			//waitKey(0);
 		}
-		//}
-		//}}}
-#ifndef PCAP
+#ifdef Fileout
 		t = ((double)getTickCount() - t)/getTickFrequency();
 		cout << "filtering finish.\nelapsed time : " << t << " sec" << endl;
 		FileOut.close();
@@ -1449,300 +1279,9 @@ int main(int argc, char* argv[] ){
 		FileListenc.close();
 
 #endif
-///////////////////////
 
-
-
-//
-//
-//
-//
-//location ::::::::::::: E:\yalebDB\
-//
-//
-//	//int e=0;
-//
-//	if (argv[1]==NULL) {
-//
-//		cout<< "Error: Invalid file location \n" <<endl;
-//		return -1;
-//	}
-//
-//
-//	string dir = string(argv[1]);
-//	    vector<string> files = vector<string>();
-//
-//	    if (nicatio::getdirType(dir,"bmp",files,0)) {
-//			cout<< "Error: Invalid file location \n" <<endl;
-//			return -1;
-//	    }
-//
-//
-//	    for (unsigned int i = 0;i < files.size();i++) {
-//	    //for (unsigned int i = 0;i < 1;i++) {
-//	    	//int iter = 1;
-//	        cout << files[i] << endl;
-//	    	Mat _image;
-//	    	_image = imread( dir+"\\"+files[i], -1 );
-//	    	Size size =  _image.size();
-//
-//
-//	    	double sigmaS = 24;
-//			double sigmaR = 0.2;
-//
-//			cvNica::AdaptiveManifoldFilter amf;
-//
-//			Mat result;
-//			Mat empty;
-//			amf.process(_image,result,sigmaS,sigmaR,empty);
-//
-////	    	for(int df=1;df<=9;df++){
-////	    		_image.col(0).copyTo(_image.col(df));
-////	    		_image.row(0).copyTo(_image.row(df));
-////	    	}
-//
-//
-////	    	_image.col(1).setTo(_image.col(0));
-////	    	_image.col(2).setTo(_image.col(0));
-////	    	_image.col(3).setTo(_image.col(0));
-////	    	_image.col(4).setTo(_image.col(0));
-////	    	_image.col(5).setTo(_image.col(0));
-////	    	_image.col(6).setTo(_image.col(0));
-////	    	_image.col(7).setTo(_image.col(0));
-////	    	_image.col(8).setTo(_image.col(0));
-////	    	_image.col(9).setTo(_image.col(0));
-//
-//
-//
-//
-//
-//
-//	    	Mat _gray(size,CV_8UC1);
-//	    	Mat _histeq(size,CV_8UC1);
-//	    	Mat _histeq2(size,CV_8UC1);
-//	    	Mat _dmqi_o(size,CV_8UC1);
-//	    	Mat _deno1(size,CV_8UC1);
-//	    	Mat _deno2(size,CV_8UC1);
-//	    	Mat _dmqi(size,CV_8UC1);
-//	    	nicatio::Grayscale(_image.data, _gray.data,_image.cols,_image.rows);
-//	    	//nicatio::HistEqualize2(_gray.data,_histeq.data,_image.cols,_image.rows);
-//	    	//cvNica::Denoise(_gray,_deno2);
-//	    	//nicatio::Denoise( _gray.data,_deno1.data,_image.cols,_image.rows);
-//	    	//nicatio::DynamicMorphQuotImage( _histeq.data,_dmqi_o.data,_image.cols,_image.rows, 0);
-//
-//			//nicatio::HistEqualize2(_dmqi.data,_histeq2.data,_image.cols,_image.rows);
-//
-//
-//
-//
-//
-////			vector< Mat > l_split, p_split, q_split;
-////			l = _image;
-////			p = l;
-////
-////			r = 16;
-////			eps = pow(0.1, 2);
-////
-////			split(Mat::zeros(l.rows, l.cols, CV_8UC3), q_split);
-////			split(l, l_split);
-////			split(p, p_split);
-////
-////			for (int i = 0; i < 3; i++)
-////			{
-////				q_split[i] = guidedfilter.filtering(l_split[i], p_split[i], r, eps);
-////			}
-////
-////			merge(q_split, q);
-////
-////			Mat sub = l - q;
-////			Mat l_enhanced = sub.mul(5) + q;
-//
-//
-//			//resize(l, l, Size(l.cols/2, l.rows/2));
-//			//resize(q, q, Size(q.cols/2, q.rows/2));
-//			//resize(l_enhanced, l_enhanced, Size(l_enhanced.cols/2, l_enhanced.rows/2));
-////			namedWindow( "tulips", CV_WINDOW_AUTOSIZE );
-////			namedWindow( "reference", CV_WINDOW_AUTOSIZE );
-////			namedWindow( "enhanced", CV_WINDOW_AUTOSIZE );
-////			imshow("tulips", l);
-////			imshow("reference", q);
-////			imshow("enhanced", l_enhanced);
-//
-//
-//
-//
-//
-//
-//	    	//GaussianBlur(_gray,_gray,Size(5,5),0.0,0.0);
-//			cvNica::lineHistEqualize2(_gray,_deno1);
-//	    	//Canny(_gray,_deno1,0.4,70);
-//			nicatio::Denoise( _gray.data,_deno2.data,_image.cols,_image.rows);
-//
-//
-//			//equalizeHist(_histeq2,_histeq2);
-//			//equalizeHist(_dmqi,_histeq2);
-//
-//
-//			CGuidedFilter guidedfilter;
-//
-//			Mat l=_gray1, p, q;
-//
-//			int r = 0;
-//			double eps = 0.0;
-//
-//			p = _gray;
-//
-//			r = 2;
-//			eps = pow(10.0, -6);
-//
-//
-//			q = guidedfilter.filtering(l, p, r, eps);
-//
-//			Mat sub = l - q;
-//			Mat l_enhanced = sub.mul(5) + q;
-//
-//
-//			cvNica::Reflectance(_gray,q,_deno1);
-//			equalizeHist(_deno1,_deno1);
-////
-//
-//			cvNica::DynamicMorphQuotImage(q,_histeq2);
-//			equalizeHist(_histeq2,_histeq2);
-////	    	namedWindow( "a", CV_WINDOW_AUTOSIZE );
-////	    	imshow( "a", _dmqi_o );
-////	    	namedWindow( "b", CV_WINDOW_AUTOSIZE );
-////	    	imshow( "b", _dmqi );
-////			waitKey(0);
-//
-//	    	//nicatio::filter3x3(_image_6.data,_image6.data,_image.cols,_image.rows,NULL);
-//	    	//nicatio::Denoise(_image_6.data,_image7.data,_image.cols,_image.rows);
-//	    	//nicatio::DynamicClosing(_image7.data,_image8.data,_image.cols,_image.rows);
-////	    	for (int j=0;j<iter;j++){
-////	    		nicatio::DynamicMorphQuotImage( _gray.data,_image9_.data,_image.cols,_image.rows, 0);
-////	    		//nicatio::DynamicMorphQuotImage_revision(_image_6.data,_image9.data,_image.cols,_image.rows, 0);
-////	    		//nicatio::Threshold(_image9.data,_image10.data,0,185,_image.cols,_image.rows,0,0xff);
-////	    		//nicatio::Threshold(_image9_.data,_image10_.data,0,185,_image.cols,_image.rows,0,0xff);
-////	    		//nicatio::MedianFilter(_image10_.data,_image11.data,_image.cols,_image.rows);
-////	    		//cout<<j<<endl;
-////	    	}
-//			//imwrite("E:\\yalebDB\\new4\\"+files[i]+"_processed.bmp",_dmqi);
-//			//imwrite("E:\\yalebDB\\new4\\"+files[i]+"_processed1.bmp",_gray);
-//			//imwrite("E:\\yalebDB\\new4\\"+files[i]+"_processed2.bmp",q);
-//			//imwrite("E:\\yalebDB\\new4\\"+files[i]+"_processed3.bmp",_deno1);
-//			//imwrite("E:\\yalebDB\\new4\\"+files[i]+"_processed.bmp",q);
-//			imwrite("E:\\yalebDB\\new4\\"+files[i]+"_processed4.bmp",_histeq2);
-//
-//
-//	    }
-//
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-//	if (argv[2]==NULL) {
-//
-//		cout<< "Error: Invalid file name \n" <<endl;
-//		return -1;
-//	}
-//
-//	ofstream fin;
-//
-//
-//	fin.open(strcat(argv[1],argv[2]),ios::out | ios::binary);
-//
-//	fin<<"afdfasdf";
-//	fin.close();
-
-//	Mat _image, _image2, _image3;
-//	_image = imread( argv[1], -1 );
-//
-//	/*
-//	int dilation_size = 1;
-//	int dilation_type = MORPH_RECT;
-//	Mat element = getStructuringElement( dilation_type,
-//	                                       Size( 2*dilation_size + 1, 2*dilation_size+1 ),
-//	                                       Point( dilation_size, dilation_size ) );
-//	dilate( _image,  _image2, element, Point(-1,-1),1);
-//	erode( _image2,  _image3, element, Point(-1,-1),1);
-//	 */
-//	//medianBlur(_image,_image2,3);
-//	GaussianBlur(_image,_image2,Size(3,3),0.0,0.0);
-//
-//	int _srcType = _image.channels();
-//
-//	e = _srcType;
-//	cout<<e<<endl;
-//
-//	Size size =  _image.size();
-//	Mat _image4(size,CV_8UC3);
-//	Mat _image5(size,CV_8UC3);
-//	int sz = _image.cols*_image.rows;
-//	int iter=1;
-//	int sum=0;
-//
-//		//nicatio::MorphColor(nicatio::Dilation,_image.data,_image4.data,_image.cols,_image.rows);
-//	nicatio::filter3x3Color(_image.data,_image4.data,_image.cols,_image.rows,NULL);
-//
-//
-//	for(int i=0; i < sz*3;i++){
-//		_image5.data[i] = abs(_image4.data[i] - _image2.data[i]);
-//		sum+=_image5.data[i];
-//	}
-//
-//	double dfaf = nicatio::Lightness(_image.data,_image.cols,_image.rows,3);
-//	cout<<dfaf<<endl;
-//
-//	cout<<sum<<endl;
-//
-////	namedWindow( "a", CV_WINDOW_AUTOSIZE );
-////	imshow( "a", _image4 );
-////	namedWindow( "b", CV_WINDOW_AUTOSIZE );
-////	imshow( "b", _image2 );
-////	namedWindow( "c", CV_WINDOW_AUTOSIZE );
-////	imshow( "c", _image5 );
-//
-//	Mat _image_6(size,CV_8UC1);
-//	Mat _image6(size,CV_8UC1);
-//	Mat _image7(size,CV_8UC1);
-//	Mat _image8(size,CV_8UC1);
-//	Mat _image9(size,CV_8UC1);
-//	Mat _image9_(size,CV_8UC1);
-//	Mat _image10(size,CV_8UC1);
-//	Mat _image10_(size,CV_8UC1);
-//	Mat _image11(size,CV_8UC1);
-//	nicatio::Grayscale(_image.data,_image_6.data,_image.cols,_image.rows);
-//	nicatio::filter3x3(_image_6.data,_image6.data,_image.cols,_image.rows,NULL);
-//	nicatio::Denoise(_image6.data,_image7.data,_image.cols,_image.rows);
-//	nicatio::DynamicClosing(_image7.data,_image8.data,_image.cols,_image.rows);
-//	for (int j=0;j<iter;j++){
-//		nicatio::DynamicMorphQuotImage(_image6.data,_image9_.data,_image.cols,_image.rows, 0);
-//		nicatio::DynamicMorphQuotImage_revision(_image6.data,_image9.data,_image.cols,_image.rows, 0);
-//		nicatio::Threshold(_image9.data,_image10.data,0,185,_image.cols,_image.rows,0,0xff);
-//		nicatio::Threshold(_image9_.data,_image10_.data,0,185,_image.cols,_image.rows,0,0xff);
-//		nicatio::MedianFilter(_image10_.data,_image11.data,_image.cols,_image.rows);
-//		cout<<j<<endl;
-//	}
-//
-//	namedWindow( "e", CV_WINDOW_AUTOSIZE );
-//	imshow( "e", _image9_ );
-//	namedWindow( "f", CV_WINDOW_AUTOSIZE );
-//	imshow( "f", _image11 );
-//	namedWindow( "g", CV_WINDOW_AUTOSIZE );
-//	imshow( "g", _image9 );
-//	namedWindow( "h", CV_WINDOW_AUTOSIZE );
-//	imshow( "h", _image10 );
-//	waitKey(0);
-//	return e;
 	return 0;
 }
+#endif
+
 

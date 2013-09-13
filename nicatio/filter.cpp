@@ -782,6 +782,7 @@ void HistEqualize(
 	int sz = width*height;
 	int hist[256] = {0};
     int sum_of_hist[256] = {0};
+    double sz255 = 255.0/sz;
     unsigned char *ptrInputImg = (unsigned char*) inputImg;
     unsigned char *ptrOutputImg = (unsigned char*) outputImg;
     int *ptrHist = hist;
@@ -794,10 +795,17 @@ void HistEqualize(
             *(ptrSOH++) = sum ;
     }
 
+    ptrSOH = sum_of_hist;
+    for(int i = 0 ; i < 256 ; i++,ptrSOH++ ) {
+            *(ptrSOH) = (unsigned char) (0.5+ sz255 * *(ptrSOH)) ;
+    }
+
     ptrInputImg = (unsigned char*) inputImg;
 
     for(int i = 0 ; i < sz ; i++ ) {
-    	*(ptrOutputImg++) = sum_of_hist[*(ptrInputImg++)] * (255.0/sz);
+    	*(ptrOutputImg++) = sum_of_hist[*(ptrInputImg++)];
+    	//*(ptrOutputImg++) = sum_of_hist[*(ptrInputImg++)]) * (256.0/sz);
+    	//*(ptrOutputImg++) = (unsigned char)(0.5+(255.0/sz)* sum_of_hist[*(ptrInputImg++)]) ;
     }
 }
 

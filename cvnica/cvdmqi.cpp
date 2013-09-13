@@ -113,8 +113,7 @@ void SelectiveClosing(
 		InputArray 						_src,
 		OutputArray						_dst,
 		const double&					alpha,
-		const int&						tempSmall,
-		const int&						tempLarge)
+		const double&					beta)
 {
 	Mat src = _src.getMat();
 	_dst.create(src.size(),src.type());
@@ -131,11 +130,9 @@ void SelectiveClosing(
 	//Mat _ss = Mat(src.size(),src.type());
 
 	int dilation_type = MORPH_RECT;
-	Mat elementL = getStructuringElement( dilation_type, Size( tempLarge,tempLarge ), Point( (tempLarge>>1),(tempLarge>>1) ) );
-	//Mat elementL = getStructuringElement( dilation_type, Size( 7,7 ), Point( 3,3 ) );
+	Mat elementL = getStructuringElement( dilation_type, Size( 9,9 ), Point( 4,4 ) );
 	//Mat elementM = getStructuringElement( dilation_type, Size( 7,7 ), Point( 3,3 ) );
-	//Mat elementS = getStructuringElement( dilation_type, Size( 3,3 ), Point( 1,1 ) );
-	Mat elementS = getStructuringElement( dilation_type, Size( tempSmall,tempSmall ), Point( (tempSmall>>1),(tempSmall>>1) ) );
+	Mat elementS = getStructuringElement( dilation_type, Size( 5,5 ), Point( 2,2 ) );
 	//Mat elementSS = getStructuringElement( dilation_type, Size( 3,3 ), Point( 1,1 ) );
 
 	dilate( src, l, elementL);
@@ -146,39 +143,6 @@ void SelectiveClosing(
 	//erode( m, _m, elementM);
 	erode( s, _s, elementS);
 	//erode( ss, _ss, elementSS);
-
-
-//	Mat e3 = getStructuringElement( dilation_type, Size( 3,3 ), Point( 1,1 ) );
-//	Mat e5 = getStructuringElement( dilation_type, Size( 5,5 ), Point( 2,2 ) );
-//	Mat e7 = getStructuringElement( dilation_type, Size( 7,7 ), Point( 3,3 ) );
-//	Mat e9 = getStructuringElement( dilation_type, Size( 9,9 ), Point( 4,4 ) );
-//	Mat e11 = getStructuringElement( dilation_type, Size( 11,11 ), Point( 5,5 ) );
-//	Mat l3 = Mat(src.size(),src.type());
-//	Mat l5 = Mat(src.size(),src.type());
-//	Mat l7 = Mat(src.size(),src.type());
-//	Mat l9 = Mat(src.size(),src.type());
-//	Mat l11 = Mat(src.size(),src.type());
-//
-//	dilate( src, l3, e3);
-//	dilate( src, l5, e5);
-//	dilate( src, l7, e7);
-//	dilate( src, l9, e9);
-//	dilate( src, l11, e11);
-//
-//	erode( l3, l3, e3);
-//	erode( l5, l5, e5);
-//	erode( l7, l7, e7);
-//	erode( l9, l9, e9);
-//	erode( l11, l11, e11);
-//
-//	imwrite("l3.bmp",l3);
-//	imwrite("l5.bmp",l5);
-//	imwrite("l7.bmp",l7);
-//	imwrite("l9.bmp",l9);
-//	imwrite("l11.bmp",l11);
-
-
-
 
 	//unsigned char *ptrL = _l.data, *ptrM = _m.data, *ptrS = _s.data, *ptrSS = _ss.data;
 	unsigned char *ptrL = _l.data, *ptrS = _s.data;
@@ -194,7 +158,7 @@ void SelectiveClosing(
 		double __s = (double)*(ptrS);
 		//double __ss = (double)*(ptrSS);
 		//double _sb = __s*1.4;//beta;
-		double _sa = __s*alpha;
+		double _sa = __s*1.4;//alpha;
 		//double _sc = __s*1.4;
 //		if(__l>_sa) *(ptrDst) = __l;
 //		else if((__l>_sb)&&(__l<=_sa)) *(ptrDst) = __m;
@@ -210,44 +174,17 @@ void SelectiveClosing(
 //		else if((__l>_sb)&&(__l<=_sa)) *(ptrDst) = 0x50;
 //		else if((__l>_sc)&&(__l<=_sb)) *(ptrDst) = 0xa0;
 //		else *(ptrDst) = 0xf0;
-
 		if(__l>_sa) *(ptrDst) = __l;
 		//else if((__l>_sb)&&(__l<=_sa)) *(ptrDst) = __m;
 		else *(ptrDst) = __s;
-//		if(__l>_sa) *(ptrDst) = 0x00;
-//		else if((__l>_sb)&&(__l<=_sa)) *(ptrDst) = 0x80;
-//		else *(ptrDst) = 0xff;
+/*		if(__l>_sa) *(ptrDst) = 0x00;
+		else if((__l>_sb)&&(__l<=_sa)) *(ptrDst) = 0x80;
+		else *(ptrDst) = 0xff;*/
 	}
 
 
 }
-void QuotImage(
-		InputArray 						_src,
-		OutputArray						_dst,
-		const int&						equalize)
-{
-	Mat src = _src.getMat();
 
-	//Mat dc = Mat(src.size(),src.type());
-	equalizeHist(src,src);
-	Mat __src; src.convertTo(__src,CV_32FC1);
-
-	Mat dc; __src.copyTo(dc);
-	dc+=8;
-	Mat dfd;
-
-
-
-	Reflectance(src,dc,dfd);
-	equalizeHist(dfd,dfd);
-	dfd.convertTo(_dst,CV_8UC1);
-	//namedWindow( "b", CV_WINDOW_AUTOSIZE );
-	//imshow( "b", dfd );
-
-	//waitKey(0);
-
-
-}
 void NormDynamicMorphQuotImage(
 		InputArray 						_src,
 		OutputArray						_dst,
@@ -329,15 +266,11 @@ void GaussianMorphQuotImage(
 void SelectiveMorphQuotImage(
 		InputArray 						_src,
 		OutputArray						_dst,
-		const double&					alpha,
-		const int&						tempSmall,
-		const int&						tempLarge,
 		const int&						equalize)
 {
 	Mat src = _src.getMat();
 	Mat dc = Mat(src.size(),src.type());
-	SelectiveClosing (src,dc,alpha,tempSmall,tempLarge);
-	//imwrite("dc.bmp",dc);
+	SelectiveClosing (src,dc);
 	Reflectance(src,dc,_dst);
 
 }
@@ -351,7 +284,7 @@ void DynamicMorphQuotImage(
 	Mat dc = Mat(src.size(),src.type());
 	DynamicClosing (src,dc);
 	//imwrite("dc.bmp",dc);
-	Reflectance(src,dc,_dst,200.0);
+	Reflectance(src,dc,_dst,200);
 
 }
 
@@ -359,7 +292,7 @@ void Reflectance(
 		InputArray 						_deno,
 		InputArray						_closedeno,
 		OutputArray						_dst,
-		float							mul)
+		double							scale)
 {
 
 	Mat deno = _deno.getMat();
@@ -369,7 +302,7 @@ void Reflectance(
 	closedeno.convertTo(closedeno, CV_32F, 1);
 
 	deno /= closedeno;
-	deno*=mul;
+	deno*=scale;
 	deno.convertTo(_dst,CV_8UC1);
 }
 
@@ -407,48 +340,7 @@ void Denoise(
 		else 				*(ptrDst) = __src;
 	}
 }
-void RemoveGrainyNoise(
-		InputArray 						_src,
-		OutputArray						_dst,
-		int								threshold)
-{
-	Mat src = _src.getMat();
-	_dst.create(src.size(),src.type());
-	Mat dst = _dst.getMat();
 
-	Mat d = Mat(src.size(),src.type());
-	Mat e = Mat(src.size(),src.type());
-
-	Mat element = getStructuringElement( MORPH_RECT, Size( 3,3 ), Point( 1,1 ) );
-	dilate( src, d, element);
-	erode ( src, e, element);
-
-	unsigned char *ptrD = d.data, *ptrE = e.data;
-	unsigned char *ptrSrc = src.data;
-	unsigned char *ptrDst = dst.data;
-
-	int sz = src.rows*src.cols;
-
-	for (int i=0; i<sz; i++,ptrD++,ptrE++,ptrSrc++,ptrDst++){
-		unsigned char __d = *(ptrD);
-		unsigned char __e = *(ptrE);
-		unsigned char __src = *(ptrSrc);
-		if (__d != __e) {
-			int a = ((int)__d - (int)__e);
-			if (a<0) a = -a;
-			if (a<threshold) {
-				*(ptrDst) = __d;
-			} else {
-				*(ptrDst) = __src;
-			}
-		} else {
-			*(ptrDst) = __src;
-		}
-//		if 		(__d>__src)	*(ptrDst) = __d;
-//		else if (__e<__src) *(ptrDst) = __e;
-//		else 				*(ptrDst) = __src;
-	}
-}
 void DynamicClosing(
 		InputArray 						_src,
 		OutputArray						_dst,
@@ -503,6 +395,49 @@ void DynamicClosing(
 	}
 
 
+}
+
+void RemoveGrainyNoise(
+		InputArray 						_src,
+		OutputArray						_dst,
+		int								threshold)
+{
+	Mat src = _src.getMat();
+	_dst.create(src.size(),src.type());
+	Mat dst = _dst.getMat();
+
+	Mat d = Mat(src.size(),src.type());
+	Mat e = Mat(src.size(),src.type());
+
+	Mat element = getStructuringElement( MORPH_RECT, Size( 3,3 ), Point( 1,1 ) );
+	dilate( src, d, element);
+	erode ( src, e, element);
+
+	unsigned char *ptrD = d.data, *ptrE = e.data;
+	unsigned char *ptrSrc = src.data;
+	unsigned char *ptrDst = dst.data;
+
+	int sz = src.rows*src.cols;
+
+	for (int i=0; i<sz; i++,ptrD++,ptrE++,ptrSrc++,ptrDst++){
+		unsigned char __d = *(ptrD);
+		unsigned char __e = *(ptrE);
+		unsigned char __src = *(ptrSrc);
+		if (__d != __e) {
+			int a = ((int)__d - (int)__e);
+			if (a<0) a = -a;
+			if (a<threshold) {
+				*(ptrDst) = __d;
+			} else {
+				*(ptrDst) = __src;
+			}
+		} else {
+			*(ptrDst) = __src;
+		}
+//		if 		(__d>__src)	*(ptrDst) = __d;
+//		else if (__e<__src) *(ptrDst) = __e;
+//		else 				*(ptrDst) = __src;
+	}
 }
 
 }
