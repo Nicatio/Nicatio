@@ -80,6 +80,21 @@ void RemoveGrainyNoise(
 		InputArray 						_src,
 		OutputArray						_dst,
 		int								threshold);
+
+void SelectiveClosingParam(
+		InputArray 						_src,
+		OutputArray						_dst,
+		const int&						large,
+		const int&						small,
+		const double&					alpha=1.8,
+		const double&					beta=1.35);
+
+void SelectiveMorphQuotImageParam(
+		InputArray 						_src,
+		OutputArray						_dst,
+		const int&						large,
+		const int&						small,
+		const int&						equalize=0);
 }
 
 

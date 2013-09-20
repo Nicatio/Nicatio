@@ -57,7 +57,7 @@ int main(int argc, char* argv[] ){
 
 #ifdef BMP
 	string dir = string(argv[1]);
-	string refLocation = string(argv[2]);
+	//string refLocation = string(argv[2]);
 
 	vector<string> files = vector<string>();
 
@@ -69,27 +69,48 @@ int main(int argc, char* argv[] ){
 
 	for (unsigned int i = 0;i < files.size();i++) {
 		Mat _image1;
-		_image1 = imread( dir+"\\"+files[i], -1 );
+		_image1 = imread( dir+"/"+files[i], -1 );
 		Size size = _image1.size();
+
 		Mat _deno1(size,CV_8UC1);
 		Mat _deno2(size,CV_8UC1);
+		Mat _deno3(size,CV_8UC1);
+
+		Mat _gray(size,CV_8UC1);
+		Mat _homo(size,CV_8UC1);
+		Mat _bilateral(size,CV_8UC1);
+
 		Mat _dmqi(size,CV_8UC1);
 		Mat _histeq(size,CV_8UC1);
-		cvNica::Denoise(_image1,_deno1);
-		cvNica::SelectiveMorphQuotImage(_deno1,_dmqi,0);
-		nicatio::HistEqualize(_dmqi.data,_histeq.data,_image1.cols,_image1.rows);
-		_deno2=_histeq;
-		unsigned found = files[i].rfind("bad");
-		if (found!=std::string::npos) {
-			vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
-			imwrite(dir+"\\smqi\\"+tokens[0]+".pgm",_deno2);
-			rename( string(dir+"\\smqi\\"+tokens[0]+".pgm").c_str() , string(dir+"\\smqi\\"+tokens[0]+".pgm.bad").c_str() );
-		} else {
-			imwrite(dir+"\\smqi\\"+files[i],_deno2);
+		Mat ccanny(size,CV_8UC1);
+		nicatio::Grayscale(_image1.data, _gray.data,_image1.cols,_image1.rows);
+		cvNica::HomogeneousOperator(_gray.data,_homo.data,_image1.cols,_image1.rows);
 
-		}
+
+
+		cvNica::Denoise(_gray,_deno1);
+		cvNica::SelectiveMorphQuotImageParam(_deno1,_dmqi,101,55,0);
+		nicatio::HistEqualize(_dmqi.data,_deno2.data,_image1.cols,_image1.rows);
+		cvNica::DoG(_gray,_deno1,0.2,1,-2,0,0,0,1000);
+		equalizeHist(_deno1,_deno2);
+		threshold(_deno2,_deno3,224.0,255.0,THRESH_BINARY);
+		threshold(_deno2,_deno2,0.0,30.0,THRESH_BINARY);
+		bitwise_or(_deno2,_deno3,_deno2);
+		//medianBlur(_histeq,_deno2,3);
+		//_deno2=_histeq;
+		//Canny(_gray,ccanny,70,150);
+		int kd=7;
+		bilateralFilter (_gray, _bilateral, kd, kd*2, kd/2 );
+		//cvNica::DifferenceOfVariance(_bilateral,ccanny);
+		//cvNica::VarianceFilter(_gray,ccanny,3);
+		//ccanny.convertTo(ccanny,CV_8UC1);
+		Canny(_bilateral,ccanny,60,20);
+		//Canny(ccanny,ccanny,70,30);
+		//cvNica::VarianceFilter(_gray,ccanny,7);
+		//namedWindow( "a", CV_WINDOW_AUTOSIZE );
+
+		imwrite(dir+"/rdmqi/"+files[i],_homo);
 	}
-
 }
 
 #endif

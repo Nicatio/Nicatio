@@ -51,7 +51,6 @@ void lineHistEqualize2(
 	int cols = src.cols;
 	int rows = src.rows;
 	int sz = cols*rows;
-	int gamma = 2;
 	for (int i=0; i<cols; i++,ptrColDiff++){
 		double _min,_max;
 		Mat temp = src.col(i);
@@ -438,6 +437,105 @@ void RemoveGrainyNoise(
 //		else if (__e<__src) *(ptrDst) = __e;
 //		else 				*(ptrDst) = __src;
 	}
+}
+
+
+
+void SelectiveClosingParam(
+		InputArray 						_src,
+		OutputArray						_dst,
+		const int&						large,
+		const int&						small,
+		const double&					alpha,
+		const double&					beta)
+{
+	Mat src = _src.getMat();
+	_dst.create(src.size(),src.type());
+	Mat dst = _dst.getMat();
+
+	Mat l = Mat(src.size(),src.type());
+	//Mat m = Mat(src.size(),src.type());
+	Mat s = Mat(src.size(),src.type());
+	//Mat ss = Mat(src.size(),src.type());
+
+	Mat _l = Mat(src.size(),src.type());
+	//Mat _m = Mat(src.size(),src.type());
+	Mat _s = Mat(src.size(),src.type());
+	//Mat _ss = Mat(src.size(),src.type());
+
+	int large2 = large/2;
+	int small2 = small/2;
+
+	int dilation_type = MORPH_RECT;
+	Mat elementL = getStructuringElement( dilation_type, Size( large,large ), Point( large2,large2 ) );
+	//Mat elementM = getStructuringElement( dilation_type, Size( 7,7 ), Point( 3,3 ) );
+	Mat elementS = getStructuringElement( dilation_type, Size( small,small ), Point( small2,small2 ) );
+	//Mat elementSS = getStructuringElement( dilation_type, Size( 3,3 ), Point( 1,1 ) );
+
+	dilate( src, l, elementL);
+	//dilate( src, m, elementM);
+	dilate( src, s, elementS);
+	//dilate( src, ss, elementSS);
+	erode( l, _l, elementL);
+	//erode( m, _m, elementM);
+	erode( s, _s, elementS);
+	//erode( ss, _ss, elementSS);
+
+	//unsigned char *ptrL = _l.data, *ptrM = _m.data, *ptrS = _s.data, *ptrSS = _ss.data;
+	unsigned char *ptrL = _l.data, *ptrS = _s.data;
+	unsigned char *ptrDst = dst.data;
+	unsigned char *ptrSrc = src.data;
+
+	int sz = _src.total();
+
+	//for (int i=0; i<sz; i++,ptrL++,ptrM++,ptrS++,ptrSS++,ptrDst++,ptrSrc++){
+	for (int i=0; i<sz; i++,ptrL++,ptrS++,ptrDst++,ptrSrc++){
+		double __l = (double)*(ptrL);
+		//double __m = (double)*(ptrM);
+		double __s = (double)*(ptrS);
+		//double __ss = (double)*(ptrSS);
+		//double _sb = __s*1.4;//beta;
+		double _sa = __s*1.4;//alpha;
+		//double _sc = __s*1.4;
+//		if(__l>_sa) *(ptrDst) = __l;
+//		else if((__l>_sb)&&(__l<=_sa)) *(ptrDst) = __m;
+//		else if((__l>_sc)&&(__l<=_sb)) *(ptrDst) = __s;
+//		else *(ptrDst) = __ss;
+
+
+//		if(__l>_sa) *(ptrDst) = __l;
+//		else if((__l>_sb)&&(__l<=_sa)) *(ptrDst) = __m;
+//		else if((__l>_sc)&&(__l<=_sb)) *(ptrDst) = __s;
+//		else *(ptrDst) = *(ptrSrc);
+//		if(__l>_sa) *(ptrDst) = 0x00;
+//		else if((__l>_sb)&&(__l<=_sa)) *(ptrDst) = 0x50;
+//		else if((__l>_sc)&&(__l<=_sb)) *(ptrDst) = 0xa0;
+//		else *(ptrDst) = 0xf0;
+		if(__l>_sa) *(ptrDst) = __l;
+		//else if((__l>_sb)&&(__l<=_sa)) *(ptrDst) = __m;
+		else *(ptrDst) = __s;
+/*		if(__l>_sa) *(ptrDst) = 0x00;
+		else if((__l>_sb)&&(__l<=_sa)) *(ptrDst) = 0x80;
+		else *(ptrDst) = 0xff;*/
+	}
+
+
+}
+
+
+void SelectiveMorphQuotImageParam(
+		InputArray 						_src,
+		OutputArray						_dst,
+		const int&						large,
+		const int&						small,
+		const int&						equalize)
+{
+	Mat src = _src.getMat();
+	Mat dc = Mat(src.size(),src.type());
+	SelectiveClosingParam(src,dc,large,small);
+	Reflectance(src,dc,_dst);
+	//dc.convertTo(_dst,CV_8UC1);
+
 }
 
 }

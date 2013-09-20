@@ -16,5 +16,5 @@
 #include "cvDoG.h"
 #include "cvFilter.h"
 #include "FaceAnalysis.h"
-
+#include "CornerDescriptor.h"
 #endif /* CVNICA_H_ */
