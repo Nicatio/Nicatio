@@ -36,15 +36,22 @@ FaceRecognition::FaceRecognition(
 
 FaceRecognition::FaceRecognition(
 		string							dir,
-		string							referenceInfoFileLocation)
+		string							referenceInfoFileLocation,
+		string							databaseType)
 {
+
 	setUseOptimized(true);
 	setNumThreads(8);
+
+	if (databaseType == "integrated") bDatabaseType = 0;
+	else if (databaseType == "separated") bDatabaseType = 1;
+	else bDatabaseType = -1;
+
 	nSubject = 0;
 	nRefImagesPerSubject = 0;
 	nTestImageOrder = 0;
 	nRefImageOrder = 0;
-	nSearchRadius = 5;
+	nSearchRadius = 11;
 	nCorrect = 0;
 	nFiles = 0;
 	nBadImages = 0;
@@ -80,6 +87,7 @@ FaceRecognition::FaceRecognition(
 			}
 			Mat temp; refImage[i].convertTo(temp,CV_32FC1);
 			aveImg += temp;
+			cout<<"complete: "<<i<<endl;
 		}
 		aveImg/=nSubject*nRefImagesPerSubject;
 		Mat aveImg2; aveImg.convertTo(aveImg2,CV_8UC1);

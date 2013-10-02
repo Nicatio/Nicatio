@@ -40,7 +40,8 @@ public:
 			vector<Mat>						referenceImage);
 	FaceRecognition(
 			string							dir,
-			string							referenceInfoFileLocation);
+			string							referenceInfoFileLocation,
+			string							databaseType);
 	~FaceRecognition(void);
 	void DirectoryRegister(
 			string							dir);
@@ -87,6 +88,7 @@ public:
 	Mat RecognitionPositionY;
 	Mat BadImage;
 private:
+	int bDatabaseType;
 	int nSubject;
 	int nRefImagesPerSubject;
 	int nRefImageOrder;

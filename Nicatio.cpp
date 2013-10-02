@@ -18,7 +18,16 @@ using namespace std;
 
 //#define PGM
 
-#define BMP
+#define DATA_TYPE_SELECT
+#define DATA_TYPE 0
+// 0: bmp
+// 1: png
+// 2: pgm
+// 3: jpg
+
+
+//#define BMP
+//#define PNG
 //#define PCAP
 //#define TXT
 //#define GF
@@ -28,17 +37,20 @@ using namespace std;
 //#define SMOOTHING
 //#define FA
 
-//#define FR
+
+//#define FR_for_integrated
+//#define FR_for_separated
 //#define Fileout
 
 //#define CMUCROP
 //#define LINEHISTEQUALIZE
-//#define DOG
+#define DOG
 //#define DOGCIRCLE
 //#define DMQIDOG
 //#define DOGDMQI
 //#define DMQICONTRASTSHIFT
 //#define DMQI
+
 
 //#define SMQI
 
@@ -47,13 +59,236 @@ using namespace std;
 //#define ROTATEFACEANGLEDETECTION
 //#define ROTATEFACEANGLEDETECTIONDMQI
 
+//#define FERET_face_database_120x120_normalization
+
+#define illuminationNormalization
+//#define textDetection
 
 
-//#define illuminationNormalization
-#define textDetection
+
+
+
+#ifdef FERET_face_database_120x120_normalization
+int main(int argc, char* argv[] ){
+	const float EYE_DISTANCE = 55;//70.0;	/* final distance between eyes		*/
+	const float EYEROW = 23;//45.0;		/* vertical position of eyes		*/
+	const int   NEW_ROW = 100;		/* size of images after normalization	*/
+	const int   NEW_COL = 100;
+	const float outw = 100;
+	const float outh = 100;
+
+	//string dir = "/cygdrive/e/Downloads/colorferet/colorferet/dvd2/gray_feret_cd2/partitions/by_previously_reported/feret/probe_fafc_diffcamera_diffillum.names";
+	//string refLocation = string(argv[2]);
+	//string names = "/cygdrive/e/Downloads/colorferet/colorferet/dvd2/gray_feret_cd2/partitions/by_previously_reported/feret/probe_fafc_diffcamera_diffillum.names";
+	string names = "/cygdrive/e/Downloads/colorferet/colorferet/dvd2/gray_feret_cd2/partitions/by_previously_reported/feret/gallery.names";
+	string gnd = "/cygdrive/e/Downloads/colorferet/colorferet/dvd2/gray_feret_cd1/data/ground_truths/name_value/";
+	string svloc = "/cygdrive/e/Documents/Nicatio/Research/DB/Face/feret/gallery3/";
+	//string svloc = "/cygdrive/e/Documents/Nicatio/Research/DB/Face/feret/gallery2/";
+	//string imgloc = "/cygdrive/e/Downloads/colorferet/colorferet/dvd2/gray_feret_cd1/data/images/e/";
+	string imgloc = "/cygdrive/e/Downloads/colorferet/colorferet/dvd2/gray_feret_cd1/data/images/e/";
+//	string names = "/cygdrive/e/Downloads/colorferet/colorferet/dvd2/gray_feret_cd2/partitions/by_previously_reported/feret/probe_fafc_diffcamera_diffillum.names";
+	ifstream FileI;
+		FileI.open(names.c_str(),ios::in | ios::app);
+		FileI.seekg (0, FileI.beg);
+
+		char buffer[256];											// use limited buffer
+
+		do {
+			FileI.getline(buffer,256);								// get the entire line
+			cout<<" >< "<<buffer<<endl;
+
+			stringstream buffer2;
+			buffer2<<gnd<<buffer<<".gnd";
+			ifstream FileI2;
+			FileI2.open(buffer2.str().c_str(),ios::in | ios::app);
+			FileI2.seekg (0, FileI.beg);
+			char buffer3[256];
+			int lx=0, ly=0, rx=0, ry=0;
+			do {
+				FileI2.getline(buffer3,256);
+
+				if (buffer3[0]=='l' && buffer3[1]=='e' && buffer3[2]=='f' && buffer3[3]=='t') {
+					//cout<<buffer3<<endl;
+					vector<string> tokens = nicatio::StringTokenizer::getTokens(buffer3," ");
+					lx = atoi(tokens[1].c_str());
+					ly = atoi(tokens[2].c_str());
+					cout<<lx<<endl;
+					cout<<ly<<endl;
+
+
+				}
+				if (buffer3[0]=='r' && buffer3[1]=='i' && buffer3[2]=='g' && buffer3[3]=='h') {
+					//cout<<buffer3<<endl;
+					vector<string> tokens = nicatio::StringTokenizer::getTokens(buffer3," ");
+					rx = atoi(tokens[1].c_str());
+					ry = atoi(tokens[2].c_str());
+					cout<<rx<<endl;
+					cout<<ry<<endl;
+				}
+
+			} while (buffer3[0] != 0);
+			if (lx != 0) {
+				stringstream buffer4;
+				buffer4<<imgloc<<buffer<<".tif";
+				//cout<<buffer4.str()<<endl;
+				stringstream buffer5;
+				buffer5<<svloc<<buffer<<".bmp";
+				Mat im2, im;
+				im= imread( buffer4.str(), -1 );
+//				int lr = lx-rx;
+//				double rate = 65./lr;
+//				lx *= rate;
+//				ly *= rate;
+//				rx *= rate;
+//				ry *= rate;
+				//resize(im2,im,Size(),rate,rate,INTER_CUBIC);
+
+				Mat rot;
+				Size size = im.size();
+
+				double angle = -atan(((double)ry - (double)ly) / ((double)rx - (double)lx));
+				double scale = EYE_DISTANCE/sqrt(((double)ry - (double)ly)*((double)ry - (double)ly) + ((double)rx - (double)lx)*((double)rx - (double)lx));
+
+				resize(im,im2,Size(),scale,scale,INTER_CUBIC);
+
+
+				lx *=scale;
+				ly *=scale;
+				rx *=scale;
+				ry *=scale;
+				Point center = Point( im2.cols/2, im2.rows/2);
+				Mat rot_mat = getRotationMatrix2D( center, -angle*180/PI, 1 );
+
+				warpAffine( im2, rot, rot_mat, im2.size());
+
+
+				  double  COS = cos(angle);
+				   double SIN = sin(angle);
+
+
+				  const int x0 = (int)((rx+lx)/2);
+				  const int y0 = (int)((ry+ly)/2);
+			      int xx = (int)(COS*(lx-x0) - SIN*(ly-y0) + x0);
+			      int yy = (int)(SIN*(lx-x0) + COS*(ly-y0) + y0);
+			      lx = xx;
+			      ly = yy;
+
+
+			      xx = (int)(COS*(rx-x0) - SIN*(ry-y0) + x0);
+			      yy = (int)(SIN*(rx-x0) + COS*(ry-y0) + y0);
+			      rx = xx;
+			      ry = yy;
+			      cout<<scale<<endl;
+					cout<<lx<<endl;
+					cout<<ly<<endl;
+					cout<<rx<<endl;
+					cout<<ry<<endl;
+
+				   float edgetoeyedistance = (outw - EYE_DISTANCE)/2.0;
+				   int lftcol = (int)(rx - edgetoeyedistance);
+				   int rgtcol = (int)(lx + edgetoeyedistance);
+				   int uprrow = (int)(ly - EYEROW);
+				   int btmrow = uprrow + outh;
+
+					cout<<lftcol<<endl;
+					cout<<rgtcol<<endl;
+					cout<<uprrow<<endl;
+					cout<<btmrow<<endl;
+
+				   if (btmrow > im.rows)
+				   {
+				      //fprintf(stderr, "%s: bottom row crop restricted\n", routine);
+				      btmrow = im.rows;
+				      uprrow = (im.rows < btmrow - outh)?im.rows: btmrow - outh;
+				   }
+
+				   if (uprrow < 0)
+				   {
+				      //fprintf(stderr, "%s: top row crop restricted\n", routine);
+				      uprrow = 0;
+				      btmrow = (im.rows < uprrow + outh)?im.rows : uprrow + outh;
+				   }
+
+				   if (lftcol < 0)
+				   {
+				      //fprintf(stderr, "%s: left column crop restricted\n", routine);
+				      lftcol = 0;
+				   }
+
+				   if (rgtcol > im.cols)
+				   {
+				      //fprintf(stderr, "%s: right column crop restricted\n", routine);
+				      rgtcol = im.cols;
+				   }
+
+					cout<<lftcol<<endl;
+					cout<<rgtcol<<endl;
+					cout<<uprrow<<endl;
+					cout<<btmrow<<endl;
+
+
+
+
+				cout<<angle*180/PI<<endl;
+
+				Rect myROI(lftcol, uprrow, outw, outh);
+				Mat croppedImage;
+				Mat(rot, myROI).copyTo(croppedImage);
+				imwrite(buffer5.str(),croppedImage);
+			}
+			FileI2.close();
+
+		} while (buffer[0] != 0);
+		FileI.close();
+
+}
+
+#endif
 
 #ifdef textDetection
+
+
+
+//double getPSNR ( const Mat& I1, const Mat& I2);
+//Scalar getMSSIM( const Mat& I1, const Mat& I2);
+
 int main(int argc, char* argv[] ){
+
+
+
+
+#ifdef DATA_TYPE_SELECT
+	string dataType;
+	if (DATA_TYPE == 0) dataType = "bmp";
+	else if (DATA_TYPE == 1) dataType = "png";
+	else if (DATA_TYPE == 2) dataType = "pgm";
+	else if (DATA_TYPE == 3) dataType = "JPG";
+	else dataType = "bmp";
+
+		string dir = string(argv[1]);
+		//dir = "/cygdrive/e/4/5/";
+		string refLocation = string(argv[2]);
+
+		vector<string> files = vector<string>();
+
+		if (nicatio::getdirType(dir,dataType,files,0)) {
+			cout<< "Error: Invalid file location \n" <<endl;
+			return -1;
+		}
+#endif
+
+#ifdef PNG
+	string dir = string(argv[1]);
+	//string refLocation = string(argv[2]);
+
+	vector<string> files = vector<string>();
+
+	if (nicatio::getdirType(dir,"png",files,0)) {
+		cout<< "Error: Invalid file location \n" <<endl;
+		return -1;
+	}
+#endif
+
 
 #ifdef BMP
 	string dir = string(argv[1]);
@@ -66,25 +301,295 @@ int main(int argc, char* argv[] ){
 		return -1;
 	}
 #endif
+//	cout<<"dDdddd"<<files.size()<<endl;
+//	for (unsigned int i = 0;i < files.size();i++) {
+//		Mat _image1;
+//		cout<<"dDdddd"<<dir+"/"+files[i]<<endl;
+//		_image1 = imread( dir+"/"+files[i], -1 );
+//		Size size = _image1.size();
+//
+//		Mat _deno1(size,CV_8UC3);
+//
+//		GaussianBlur(_image1,_deno1,Size(55,55),0,0,BORDER_DEFAULT );
+//
+//
+//		imwrite(dir+"/ga6/"+files[i]+".png",_deno1);
+//	}
+//}
+
+
+
+
+
+
+
+//	for (unsigned int i = 0;i < files.size();i++) {
+//		Mat _image1,_gauss;
+//		_image1 = imread( dir+"/"+files[i], -1 );
+//		GaussianBlur(_image1,_gauss,Size(15,15),0,0);
+//		Size size = _image1.size();
+//		int count=0;
+//		for (double k=0.1; k<=1.001; k+=0.1){
+//			Mat _resize,_resize2;
+//			resize(_image1,_resize,Size(),k,k,INTER_LANCZOS4);
+//			resize(_gauss,_resize2,Size(),k,k,INTER_LANCZOS4);
+//
+//			//namedWindow( "cat", CV_WINDOW_AUTOSIZE );
+//			//namedWindow( "smoothed", CV_WINDOW_AUTOSIZE );
+//			//imshow("cat", _resize);
+//			//imshow("smoothed", _resize2);
+//			//waitKey(0);
+//			double psnr = getPSNR (_resize,_resize2);
+//			Scalar ssim = getMSSIM(_resize,_resize2);
+//
+//
+//
+//			cout<<"A"<<k<<","<<psnr<<","<<ssim.val[2]<<","<<ssim.val[1]<<","<<ssim.val[0]<<","<<endl;
+//
+//
+//
+//			//resize(_resize,_resize,Size(),1./k,1./k,INTER_NEAREST);
+//			//resize(_resize2,_resize2,Size(),1./k,1./k,INTER_NEAREST);
+//
+//			stringstream d;
+//			d<<dir<<"/bs/"<<files[i]<<k<<"a.png";
+//			stringstream e;
+//						e<<dir<<"/bs/"<<files[i]<<k<<"b.png";
+//			imwrite(d.str(),_resize);
+//			imwrite(e.str(),_resize2);
+//		}
+//
+//
+//
+//	}
+//}
+//
+//double getPSNR(const Mat& I1, const Mat& I2)
+//{
+// Mat s1;
+// absdiff(I1, I2, s1);       // |I1 - I2|
+// s1.convertTo(s1, CV_32F);  // cannot make a square on 8 bits
+// s1 = s1.mul(s1);           // |I1 - I2|^2
+//
+// Scalar s = sum(s1);         // sum elements per channel
+//
+// double sse = s.val[0] + s.val[1] + s.val[2]; // sum channels
+//
+// if( sse <= 1e-10) // for small values return zero
+//     return 0;
+// else
+// {
+//     double  mse =sse /(double)(I1.channels() * I1.total());
+//     double psnr = 10.0*log10((255*255)/mse);
+//     return psnr;
+// }
+//}
+//
+//Scalar getMSSIM( const Mat& i1, const Mat& i2)
+//{
+// const double C1 = 6.5025, C2 = 58.5225;
+// /***************************** INITS **********************************/
+// int d     = CV_32F;
+//
+// Mat I1, I2;
+// i1.convertTo(I1, d);           // cannot calculate on one byte large values
+// i2.convertTo(I2, d);
+//
+// Mat I2_2   = I2.mul(I2);        // I2^2
+// Mat I1_2   = I1.mul(I1);        // I1^2
+// Mat I1_I2  = I1.mul(I2);        // I1 * I2
+//
+// /***********************PRELIMINARY COMPUTING ******************************/
+//
+// Mat mu1, mu2;   //
+// GaussianBlur(I1, mu1, Size(11, 11), 1.5);
+// GaussianBlur(I2, mu2, Size(11, 11), 1.5);
+//
+// Mat mu1_2   =   mu1.mul(mu1);
+// Mat mu2_2   =   mu2.mul(mu2);
+// Mat mu1_mu2 =   mu1.mul(mu2);
+//
+// Mat sigma1_2, sigma2_2, sigma12;
+//
+// GaussianBlur(I1_2, sigma1_2, Size(11, 11), 1.5);
+// sigma1_2 -= mu1_2;
+//
+// GaussianBlur(I2_2, sigma2_2, Size(11, 11), 1.5);
+// sigma2_2 -= mu2_2;
+//
+// GaussianBlur(I1_I2, sigma12, Size(11, 11), 1.5);
+// sigma12 -= mu1_mu2;
+//
+// ///////////////////////////////// FORMULA ////////////////////////////////
+// Mat t1, t2, t3;
+//
+// t1 = 2 * mu1_mu2 + C1;
+// t2 = 2 * sigma12 + C2;
+// t3 = t1.mul(t2);              // t3 = ((2*mu1_mu2 + C1).*(2*sigma12 + C2))
+//
+// t1 = mu1_2 + mu2_2 + C1;
+// t2 = sigma1_2 + sigma2_2 + C2;
+// t1 = t1.mul(t2);               // t1 =((mu1_2 + mu2_2 + C1).*(sigma1_2 + sigma2_2 + C2))
+//
+// Mat ssim_map;
+// divide(t3, t1, ssim_map);      // ssim_map =  t3./t1;
+//
+// Scalar mssim = mean( ssim_map ); // mssim = average of ssim map
+// return mssim;
+//}
+
+
+
+
+//	for (unsigned int i = 0;i < files.size();i++) {
+//		Mat _image1;
+//		_image1 = imread( dir+"/"+files[i], -1 );
+//		Size size = _image1.size();
+//		Mat _bilateral;Mat _bilateral2;
+//		Size size2 (_image1.cols/4,_image1.rows/4);
+//		resize(_image1,_bilateral2,Size(),1./3,1./3,INTER_LINEAR);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//		int kd=11;
+//
+////		cv::GaussianBlur(_bilateral2, _bilateral, cv::Size(0, 0), 15);
+////		cv::addWeighted(_bilateral2, 3, _bilateral, -2, 0, _bilateral);
+//
+//		bilateralFilter (_bilateral2, _bilateral, kd, kd*2, kd/2 );
+//		imwrite(dir+"/bilateral/"+files[i]+".png",_bilateral);
+//
+//
+//		 Mat img, imgLaplacian, imgResult;
+//
+//		    //------------------------------------------------------------------------------------------- test, first of all
+//		    // now do it by hand
+//		    img = (Mat_<uchar>(4,4) << 0,1,2,3,4,5,6,7,8,9,0,11,12,13,14,15);
+//
+//		    // first, the good result
+//		    Laplacian(img, imgLaplacian, CV_8UC1);
+//		    cout << "let opencv do it" << endl;
+//		    cout << imgLaplacian << endl;
+//
+//		    Mat kernel = (Mat_<float>(3,3) <<
+//		        0,  1, 0,
+//		        1, -4, 1,
+//		        0,  1, 0);
+//		    int window_size = 3;
+//
+//		    // now, reaaallly by hand
+//		    // note that, for avoiding padding, the result image will be smaller than the original one.
+//		    Mat frame, frame32;
+//		    Rect roi;
+//		    imgLaplacian = Mat::zeros(img.size(), CV_32F);
+//		    for(int y=0; y<img.rows-window_size/2-1; y++) {
+//		        for(int x=0; x<img.cols-window_size/2-1; x++) {
+//		            roi = Rect(x,y, window_size, window_size);
+//		            frame = img(roi);
+//		            frame.convertTo(frame, CV_32F);
+//		            frame = frame.mul(kernel);
+//		            float v = sum(frame)[0];
+//		            imgLaplacian.at<float>(y,x) = v;
+//		        }
+//		    }
+//		    imgLaplacian.convertTo(imgLaplacian, CV_8U);
+//		    cout << "dudee" << imgLaplacian << endl;
+//
+//		    // a little bit less "by hand"..
+//		    // using cv::filter2D
+//		    filter2D(img, imgLaplacian, -1, kernel);
+//		    cout << imgLaplacian << endl;
+//
+//
+//		    //------------------------------------------------------------------------------------------- real stuffs now
+//		    img = _bilateral2; // load grayscale image
+//
+//		    // ok, now try different kernel
+//		    kernel = (Mat_<float>(3,3) <<
+//		        1,  1, 1,
+//		        1, -8, 1,
+//		        1,  1, 1); // another approximation of second derivate, more stronger
+//		    kernel = (Mat_<float>(3,3) <<
+//		        0,  1, 0,
+//		        1, -4, 1,
+//		        0,  1, 0);
+//		    // do the laplacian filtering as it is
+//		    // well, we need to convert everything in something more deeper then CV_8U
+//		    // because the kernel has some negative values,
+//		    // and we can expect in general to have a Laplacian image with negative values
+//		    // BUT a 8bits unsigned int (the one we are working with) can contain values from 0 to 255
+//		    // so the possible negative number will be truncated
+//		    filter2D(img, imgLaplacian, CV_32F, kernel);
+//		    //filter2D(imgLaplacian, imgLaplacian, CV_32F, kernel);
+//		    img.convertTo(img, CV_32F);
+//		    imgResult = img - imgLaplacian;
+//
+//		    // convert back to 8bits gray scale
+//		    imgResult.convertTo(imgResult, CV_8U);
+//		    imgLaplacian.convertTo(imgLaplacian, CV_8U);
+//		    bilateralFilter (imgResult, _bilateral, kd, kd*2, kd/2 );
+//		    		imwrite(dir+"/sb/"+files[i]+".png",_bilateral);
+//		    imwrite(dir+"/sharpen/"+files[i]+".png", imgResult);
+//
+//		    bilateralFilter (_image1, _bilateral, kd, kd*2, kd/2 );
+//		    filter2D(_bilateral2, imgLaplacian, CV_32F, kernel);
+//		    		    //filter2D(imgLaplacian, imgLaplacian, CV_32F, kernel);
+//		    		    img.convertTo(img, CV_32F);
+//		    		    imgResult = img - imgLaplacian;
+//
+//		    		    // convert back to 8bits gray scale
+//		    		    imgResult.convertTo(imgResult, CV_8U);
+//		    		    imgLaplacian.convertTo(imgLaplacian, CV_8U);
+//
+//		    imwrite(dir+"/bs/"+files[i]+".png",imgResult);
+//
+//	}
+//}
+
+
+
+
+
+
+
+
+
+
+//////cygdrive/e/2/
 
 	for (unsigned int i = 0;i < files.size();i++) {
 		Mat _image1;
 		_image1 = imread( dir+"/"+files[i], -1 );
 		Size size = _image1.size();
+		Size size2 (_image1.cols*2,_image1.rows*2);
 
 		Mat _deno1(size,CV_8UC1);
 		Mat _deno2(size,CV_8UC1);
 		Mat _deno3(size,CV_8UC1);
 
 		Mat _gray(size,CV_8UC1);
-		Mat _homo(size,CV_8UC1);
+
+		Mat _homo=Mat::zeros(size,CV_8UC1);
+		Mat _homo2=Mat::zeros(size2,CV_8UC1);
+
 		Mat _bilateral(size,CV_8UC1);
 
 		Mat _dmqi(size,CV_8UC1);
 		Mat _histeq(size,CV_8UC1);
 		Mat ccanny(size,CV_8UC1);
 		nicatio::Grayscale(_image1.data, _gray.data,_image1.cols,_image1.rows);
-		cvNica::HomogeneousOperator(_gray.data,_homo.data,_image1.cols,_image1.rows);
+
 
 
 
@@ -99,17 +604,63 @@ int main(int argc, char* argv[] ){
 		//medianBlur(_histeq,_deno2,3);
 		//_deno2=_histeq;
 		//Canny(_gray,ccanny,70,150);
-		int kd=7;
-		bilateralFilter (_gray, _bilateral, kd, kd*2, kd/2 );
+		int kd=5;
+
 		//cvNica::DifferenceOfVariance(_bilateral,ccanny);
 		//cvNica::VarianceFilter(_gray,ccanny,3);
 		//ccanny.convertTo(ccanny,CV_8UC1);
-		Canny(_bilateral,ccanny,60,20);
+		//Canny(_bilateral,ccanny,60,20);
 		//Canny(ccanny,ccanny,70,30);
 		//cvNica::VarianceFilter(_gray,ccanny,7);
 		//namedWindow( "a", CV_WINDOW_AUTOSIZE );
+		//bitwise_and(ccanny,_homo,_homo);
 
-		imwrite(dir+"/rdmqi/"+files[i],_homo);
+		Mat _gray2;
+		medianBlur(_gray,_gray,3);
+		bilateralFilter (_gray, _bilateral, kd, kd*2, kd/2 );
+		resize(_bilateral,_gray2,Size(),2,2,INTER_LINEAR);
+
+
+		Mat im3(_image1.rows*3, _image1.cols*4, CV_8UC1);
+		cvNica::HomogeneousOperator(_gray2.data,_homo2.data,_image1.cols*2,_image1.rows*2);
+		resize(_homo2,_homo,size,0,0,INTER_LINEAR);
+
+		Mat right(im3, Rect(_image1.cols, 0, _image1.cols, _image1.rows));
+		_homo.copyTo(right);
+
+		for (int j=1; j<=8; j++) {
+			Mat _k=Mat::zeros(size,CV_8UC1);
+			Mat _h=Mat::zeros(size2,CV_8UC1);
+			cvNica::HomogeneousOperator(_gray2.data,_h.data,_image1.cols*2,_image1.rows*2,j);
+			resize(_h,_k,size,0,0,INTER_LINEAR);
+			Mat right(im3, Rect(_image1.cols*((j-1)%4), _image1.rows*((int)((j-1)/4)+1), _image1.cols, _image1.rows));
+			_k.copyTo(right);
+		}
+
+//		Mat skel( size, CV_8UC1, cv::Scalar(0));
+//		Mat temp( size, CV_8UC1);
+//		Mat element = getStructuringElement(cv::MORPH_CROSS, cv::Size(3, 3));
+//		bool done;
+//		do
+//		{
+//		  morphologyEx(_homo, temp, cv::MORPH_OPEN, element);
+//		  bitwise_not(temp, temp);
+//		  bitwise_and(_homo, temp, temp);
+//		  bitwise_or(skel, temp, skel);
+//		  erode(_homo, _homo, element);
+//
+//		  double max;
+//		  minMaxLoc(_homo, 0, &max);
+//		  done = (max == 0);
+//		} while (!done);
+
+
+		Mat left(im3, Rect(0, 0, _image1.cols, _image1.rows));
+		_gray.copyTo(left);
+
+
+
+		imwrite(dir+"/rdmqi/"+files[i]+".png",im3);
 	}
 }
 
@@ -122,6 +673,14 @@ int main(int argc, char* argv[] ){
 // /cygdrive/e/Documents/Nicatio/Research/DB/Face/yalebDB/smqi/ref_list2.txt
 
 int main(int argc, char* argv[] ){
+
+#ifdef DATA_TYPE_SELECT
+	string dataType;
+	if (DATA_TYPE == 0) dataType = "bmp";
+	else if (DATA_TYPE == 1) dataType = "png";
+	else if (DATA_TYPE == 2) dataType = "pgm";
+	else dataType = "bmp";
+#endif
 
 	#ifdef GF
 	CGuidedFilter guidedfilter;
@@ -258,7 +817,17 @@ int main(int argc, char* argv[] ){
 	#endif
 
 
+#ifdef DATA_TYPE_SELECT
+		string dir = string(argv[1]);
+		string refLocation = string(argv[2]);
 
+		vector<string> files = vector<string>();
+
+		if (nicatio::getdirType(dir,dataType,files,0)) {
+			cout<< "Error: Invalid file location \n" <<endl;
+			return -1;
+		}
+#endif
 
 
 #ifdef TXT
@@ -310,10 +879,10 @@ int main(int argc, char* argv[] ){
 #endif
 
 
-#ifdef FR
-		cvNica::FaceRecognition fr(dir,refLocation);
+#ifdef FR_for_integrated
+		cvNica::FaceRecognition fr(dir,refLocation,"integrated");
 		//fr.Recognition(dir,"pgm",DB_YALEB,METHOD_CORR,-45,0);
-		fr.Recognition(dir,"pgm",DB_YALEB,METHOD_CORR);
+		fr.Recognition(dir,dataType,DB_YALEB,METHOD_CORR);
 		cout<<"1 "<<fr.getAccuracy(files)<<" "<<endl;
 		cout<<"2 "<<fr.getAccuracyIncludingBadImages()<<" "<<endl;
 		fr.getAccuracyIncludingBadImagesSubset();
@@ -321,8 +890,25 @@ int main(int argc, char* argv[] ){
 		FileStorage abcd("dix.xml",FileStorage::WRITE);
 		abcd << "frRecognitionResult" << fr.RecognitionResult;
 		abcd.release();
+
+		///cygdrive/e/Documents/Nicatio/Research/DB/Face/yalebDB/smqi
+		///cygdrive/e/Documents/Nicatio/Research/DB/Face/yalebDB/smqi/ref_list2.txt
 #endif
 
+
+#ifdef FR_for_separated
+		cvNica::FaceRecognition fr(dir,refLocation,"separated");
+		string testDir = string(argv[3]);
+		//fr.Recognition(dir,"pgm",DB_YALEB,METHOD_CORR,-45,0);
+		fr.Recognition(testDir,dataType,DB_YALEB,METHOD_CORR);
+		//cout<<"1 "<<fr.getAccuracy(files)<<" "<<endl;
+		//cout<<"2 "<<fr.getAccuracyIncludingBadImages()<<" "<<endl;
+		//fr.getAccuracyIncludingBadImagesSubset();
+
+		FileStorage abcd("dix2.xml",FileStorage::WRITE);
+		abcd << "frRecognitionResult" << fr.RecognitionResult;
+		abcd.release();
+#endif
 
 
 #ifdef FA
@@ -936,9 +1522,17 @@ int main(int argc, char* argv[] ){
 			//cout << files[i] <<"\r"<< endl;
 			Mat _image1;
 			_image1 = imread( dir+"/"+files[i], -1 );
+			if (_image1.type()!= CV_8UC1) cvtColor(_image1, _image1, CV_RGB2GRAY);
 			Mat temp2;
 
 			cvNica::DoG(_image1,temp2,0.2,1,-2,0,0,0,10);
+
+
+			unsigned found = files[i].rfind("bad");
+						vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
+						imwrite(dir+"/dog/"+tokens[0]+"."+dataType,temp2);
+						if (found!=std::string::npos)
+							rename( string(dir+"/dog/"+tokens[0]+"."+dataType).c_str() , string(dir+"/smqi/"+tokens[0]+"."+dataType+".bad").c_str() );
 
 
 			//unsigned found = files[i].rfind("bad");
@@ -958,6 +1552,7 @@ int main(int argc, char* argv[] ){
 			//cout << files[i] <<"\r"<< endl;
 			Mat _image1;
 			_image1 = imread( dir+"\\"+files[i], -1 );
+			if (_image1.type()!= CV_8UC1) cvtColor(_image1, _image1, CV_RGB2GRAY);
 			Size size = _image1.size();
 			Mat _deno1(size,CV_8UC1);
 			Mat _deno2(size,CV_8UC1);
@@ -969,7 +1564,18 @@ int main(int argc, char* argv[] ){
 			//imwrite("ori.bmp",_image1);
 			//imwrite("deno.bmp",_deno1);
 			cvNica::DynamicMorphQuotImage(_deno1,_dmqi,0);
-			cvNica::RemoveGrainyNoise(_dmqi,_deno2,30);
+			//cvNica::RemoveGrainyNoise(_dmqi,_deno2,30);
+
+			cvNica::RemoveGrainyNoise(_dmqi,_histeq,30);
+			nicatio::HistEqualize(_dmqi.data,_deno2.data,_image1.cols,_image1.rows);
+
+			unsigned found = files[i].rfind("bad");
+						vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
+						imwrite(dir+"/dmqieq/"+tokens[0]+"."+dataType,_deno2);
+						if (found!=std::string::npos)
+							rename( string(dir+"/dmqieq/"+tokens[0]+"."+dataType).c_str() , string(dir+"/dmqieq/"+tokens[0]+"."+dataType+".bad").c_str() );
+
+
 			//imwrite("dmqi.bmp",_dmqi);
 			//nicatio::DynamicMorphQuotImage( _deno1.data,_dmqi.data,_image1.cols,_image1.rows, 0);
 			//nicatio::HistEqualize(_deno2.data,_histeq.data,_image1.cols,_image1.rows);
@@ -1000,6 +1606,8 @@ int main(int argc, char* argv[] ){
 			//cout << files[i] <<"\r"<< endl;
 			Mat _image1;
 			_image1 = imread( dir+"\\"+files[i], -1 );
+			//_image0.convertTo(_image1,CV_8UC1);
+			if (_image1.type()!= CV_8UC1) cvtColor(_image1, _image1, CV_RGB2GRAY);
 			Size size = _image1.size();
 			Mat _deno1(size,CV_8UC1);
 			Mat _deno2(size,CV_8UC1);
@@ -1041,18 +1649,18 @@ int main(int argc, char* argv[] ){
 
 
 
+			//Rect myROI(2, 2, 126, 146);
+			//Mat croppedImage;
+			//Mat(_histeq, myROI).copyTo(_deno2);
+			//imwrite(buffer5.str(),croppedImage);
+
 
 			unsigned found = files[i].rfind("bad");
-			if (found!=std::string::npos) {
-				vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
-				imwrite(dir+"\\smqi\\"+tokens[0]+".pgm",_deno2);
-				rename( string(dir+"\\smqi\\"+tokens[0]+".pgm").c_str() , string(dir+"\\smqi\\"+tokens[0]+".pgm.bad").c_str() );
+			vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
+			imwrite(dir+"/smqi/"+tokens[0]+"."+dataType,_deno2);
+			if (found!=std::string::npos)
+				rename( string(dir+"/smqi/"+tokens[0]+"."+dataType).c_str() , string(dir+"/smqi/"+tokens[0]+"."+dataType+".bad").c_str() );
 
-			} else {
-
-				imwrite(dir+"\\smqi\\"+files[i],_deno2);
-
-			}
 #endif
 
 #ifdef DMQIADVANCED
