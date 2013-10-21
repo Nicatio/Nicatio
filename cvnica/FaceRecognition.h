@@ -21,6 +21,7 @@
 #define METHOD_L2HYS	2
 #define METHOD_CORR		3
 #define METHOD_DIFF		4
+#define METHOD_PCA		5
 
 #define DB_YALEB		0
 
@@ -72,6 +73,9 @@ public:
 			const int						criterion,
 			const int						startAngle,
 			const int						endAngle);
+	void getPCAscore(
+			const Mat						inputB,
+			const int						nFileIndex);
 	float getAccuracy(
 			vector<string>						filess);
 	float getAccuracyIncludingBadImages();
@@ -82,6 +86,18 @@ public:
 	int getCorrects();
 	int getBadImages();
 	int getFiles();
+
+
+	Mat norm_0_255(
+			const Mat& 							src);
+
+	// Converts the images given in src into a row matrix.
+	Mat asRowMatrix(
+			const vector<Mat>& 					src,
+			int 								rtype,
+			double 								alpha = 1,
+			double 								beta = 0);
+
 	Mat RecognitionScore;
 	Mat RecognitionResult;
 	Mat RecognitionPositionX;
@@ -102,6 +118,10 @@ private:
 	vector<int> nBadImagesSubset;
 	string DirectoryLocation;
 	vector<Mat> refImage;
+
+	PCA pca;
+	vector<Mat> pcaRefCoeffs;
+
 	void _Recognition(
 			vector<Mat>						referenceImage,
 			vector<string>					files,

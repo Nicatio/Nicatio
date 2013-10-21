@@ -44,7 +44,7 @@ using namespace std;
 
 //#define CMUCROP
 //#define LINEHISTEQUALIZE
-#define DOG
+//#define DOG
 //#define DOGCIRCLE
 //#define DMQIDOG
 //#define DOGDMQI
@@ -61,28 +61,29 @@ using namespace std;
 
 //#define FERET_face_database_120x120_normalization
 
-#define illuminationNormalization
-//#define textDetection
-
+//#define illuminationNormalization
+#define textDetection
+//#define PCA_
 
 
 
 
 #ifdef FERET_face_database_120x120_normalization
 int main(int argc, char* argv[] ){
-	const float EYE_DISTANCE = 55;//70.0;	/* final distance between eyes		*/
-	const float EYEROW = 23;//45.0;		/* vertical position of eyes		*/
-	const int   NEW_ROW = 100;		/* size of images after normalization	*/
-	const int   NEW_COL = 100;
-	const float outw = 100;
-	const float outh = 100;
+	const float EYE_DISTANCE = 95;//70.0;	/* final distance between eyes		*/
+	const float EYEROW = 48;//45.0;		/* vertical position of eyes		*/
+	const int   NEW_ROW = 192;		/* size of images after normalization	*/
+	const int   NEW_COL = 168;
+	const float outw = 168;
+	const float outh = 192;
 
 	//string dir = "/cygdrive/e/Downloads/colorferet/colorferet/dvd2/gray_feret_cd2/partitions/by_previously_reported/feret/probe_fafc_diffcamera_diffillum.names";
 	//string refLocation = string(argv[2]);
 	//string names = "/cygdrive/e/Downloads/colorferet/colorferet/dvd2/gray_feret_cd2/partitions/by_previously_reported/feret/probe_fafc_diffcamera_diffillum.names";
 	string names = "/cygdrive/e/Downloads/colorferet/colorferet/dvd2/gray_feret_cd2/partitions/by_previously_reported/feret/gallery.names";
 	string gnd = "/cygdrive/e/Downloads/colorferet/colorferet/dvd2/gray_feret_cd1/data/ground_truths/name_value/";
-	string svloc = "/cygdrive/e/Documents/Nicatio/Research/DB/Face/feret/gallery3/";
+	string svloc = "/cygdrive/e/Documents/Nicatio/Research/DB/Face/feret/gallery4/";
+	//string svloc = "/cygdrive/e/Documents/Nicatio/Research/DB/Face/feret/illum4/";
 	//string svloc = "/cygdrive/e/Documents/Nicatio/Research/DB/Face/feret/gallery2/";
 	//string imgloc = "/cygdrive/e/Downloads/colorferet/colorferet/dvd2/gray_feret_cd1/data/images/e/";
 	string imgloc = "/cygdrive/e/Downloads/colorferet/colorferet/dvd2/gray_feret_cd1/data/images/e/";
@@ -95,7 +96,7 @@ int main(int argc, char* argv[] ){
 
 		do {
 			FileI.getline(buffer,256);								// get the entire line
-			cout<<" >< "<<buffer<<endl;
+			cout<<""<<buffer;
 
 			stringstream buffer2;
 			buffer2<<gnd<<buffer<<".gnd";
@@ -103,29 +104,40 @@ int main(int argc, char* argv[] ){
 			FileI2.open(buffer2.str().c_str(),ios::in | ios::app);
 			FileI2.seekg (0, FileI.beg);
 			char buffer3[256];
-			int lx=0, ly=0, rx=0, ry=0;
+			float lx=0, ly=0, rx=0, ry=0;
 			do {
 				FileI2.getline(buffer3,256);
 
 				if (buffer3[0]=='l' && buffer3[1]=='e' && buffer3[2]=='f' && buffer3[3]=='t') {
 					//cout<<buffer3<<endl;
 					vector<string> tokens = nicatio::StringTokenizer::getTokens(buffer3," ");
-					lx = atoi(tokens[1].c_str());
-					ly = atoi(tokens[2].c_str());
-					cout<<lx<<endl;
-					cout<<ly<<endl;
+					lx = atof(tokens[1].c_str());
+					ly = atof(tokens[2].c_str());
+					cout<<" "<<lx;
+					cout<<" "<<ly;
 
 
 				}
 				if (buffer3[0]=='r' && buffer3[1]=='i' && buffer3[2]=='g' && buffer3[3]=='h') {
 					//cout<<buffer3<<endl;
 					vector<string> tokens = nicatio::StringTokenizer::getTokens(buffer3," ");
-					rx = atoi(tokens[1].c_str());
-					ry = atoi(tokens[2].c_str());
-					cout<<rx<<endl;
-					cout<<ry<<endl;
+					rx = atof(tokens[1].c_str());
+					ry = atof(tokens[2].c_str());
+					cout<<" "<<rx;
+					cout<<" "<<ry;
 				}
-
+				if (buffer3[0]=='n' && buffer3[1]=='o' && buffer3[2]=='s' && buffer3[3]=='e') {
+					//cout<<buffer3<<endl;
+					vector<string> tokens = nicatio::StringTokenizer::getTokens(buffer3," ");
+					cout<<" "<<atof(tokens[1].c_str());
+					cout<<" "<<atof(tokens[2].c_str());
+				}
+				if (buffer3[0]=='m' && buffer3[1]=='o' && buffer3[2]=='u' && buffer3[3]=='t') {
+					//cout<<buffer3<<endl;
+					vector<string> tokens = nicatio::StringTokenizer::getTokens(buffer3," ");
+					cout<<" "<<atof(tokens[1].c_str());
+					cout<<" "<<atof(tokens[2].c_str());
+				}
 			} while (buffer3[0] != 0);
 			if (lx != 0) {
 				stringstream buffer4;
@@ -166,23 +178,23 @@ int main(int argc, char* argv[] ){
 				   double SIN = sin(angle);
 
 
-				  const int x0 = (int)((rx+lx)/2);
-				  const int y0 = (int)((ry+ly)/2);
-			      int xx = (int)(COS*(lx-x0) - SIN*(ly-y0) + x0);
-			      int yy = (int)(SIN*(lx-x0) + COS*(ly-y0) + y0);
+				  const float x0 = (int)((rx+lx)/2);
+				  const float y0 = (int)((ry+ly)/2);
+				  float xx = (COS*(lx-x0) - SIN*(ly-y0) + x0);
+				  float yy = (SIN*(lx-x0) + COS*(ly-y0) + y0);
 			      lx = xx;
 			      ly = yy;
 
 
-			      xx = (int)(COS*(rx-x0) - SIN*(ry-y0) + x0);
-			      yy = (int)(SIN*(rx-x0) + COS*(ry-y0) + y0);
+			      xx = (COS*(rx-x0) - SIN*(ry-y0) + x0);
+			      yy = (SIN*(rx-x0) + COS*(ry-y0) + y0);
 			      rx = xx;
 			      ry = yy;
-			      cout<<scale<<endl;
-					cout<<lx<<endl;
-					cout<<ly<<endl;
-					cout<<rx<<endl;
-					cout<<ry<<endl;
+//			      cout<<scale<<endl;
+//					cout<<lx<<endl;
+//					cout<<ly<<endl;
+//					cout<<rx<<endl;
+//					cout<<ry<<endl;
 
 				   float edgetoeyedistance = (outw - EYE_DISTANCE)/2.0;
 				   int lftcol = (int)(rx - edgetoeyedistance);
@@ -190,23 +202,23 @@ int main(int argc, char* argv[] ){
 				   int uprrow = (int)(ly - EYEROW);
 				   int btmrow = uprrow + outh;
 
-					cout<<lftcol<<endl;
-					cout<<rgtcol<<endl;
-					cout<<uprrow<<endl;
-					cout<<btmrow<<endl;
+//					cout<<lftcol<<endl;
+//					cout<<rgtcol<<endl;
+//					cout<<uprrow<<endl;
+//					cout<<btmrow<<endl;
 
-				   if (btmrow > im.rows)
+				   if (btmrow > im.rows*scale)
 				   {
 				      //fprintf(stderr, "%s: bottom row crop restricted\n", routine);
-				      btmrow = im.rows;
-				      uprrow = (im.rows < btmrow - outh)?im.rows: btmrow - outh;
+				      btmrow = im.rows*scale;
+				      uprrow = (im.rows*scale < btmrow - outh)?im.rows*scale: btmrow - outh;
 				   }
 
 				   if (uprrow < 0)
 				   {
 				      //fprintf(stderr, "%s: top row crop restricted\n", routine);
 				      uprrow = 0;
-				      btmrow = (im.rows < uprrow + outh)?im.rows : uprrow + outh;
+				      btmrow = (im.rows*scale < uprrow + outh)?im.rows*scale : uprrow + outh;
 				   }
 
 				   if (lftcol < 0)
@@ -215,22 +227,22 @@ int main(int argc, char* argv[] ){
 				      lftcol = 0;
 				   }
 
-				   if (rgtcol > im.cols)
+				   if (rgtcol > im.cols*scale)
 				   {
 				      //fprintf(stderr, "%s: right column crop restricted\n", routine);
-				      rgtcol = im.cols;
+				      rgtcol = im.cols*scale;
 				   }
 
-					cout<<lftcol<<endl;
-					cout<<rgtcol<<endl;
-					cout<<uprrow<<endl;
-					cout<<btmrow<<endl;
+//					cout<<lftcol<<endl;
+//					cout<<rgtcol<<endl;
+//					cout<<uprrow<<endl;
+//					cout<<btmrow<<endl;
 
 
 
 
-				cout<<angle*180/PI<<endl;
-
+//				cout<<angle*180/PI<<endl;
+				   cout<<endl;
 				Rect myROI(lftcol, uprrow, outw, outh);
 				Mat croppedImage;
 				Mat(rot, myROI).copyTo(croppedImage);
@@ -588,6 +600,11 @@ int main(int argc, char* argv[] ){
 		Mat _dmqi(size,CV_8UC1);
 		Mat _histeq(size,CV_8UC1);
 		Mat ccanny(size,CV_8UC1);
+		Mat sobelx(size,CV_8UC1);
+		Mat sobely(size,CV_8UC1);
+		Mat gradx(size,CV_8UC1);
+		Mat grady(size,CV_8UC1);
+		Mat sobel(size,CV_8UC1);
 		nicatio::Grayscale(_image1.data, _gray.data,_image1.cols,_image1.rows);
 
 
@@ -603,7 +620,12 @@ int main(int argc, char* argv[] ){
 		bitwise_or(_deno2,_deno3,_deno2);
 		//medianBlur(_histeq,_deno2,3);
 		//_deno2=_histeq;
-		//Canny(_gray,ccanny,70,150);
+		Canny(_gray,ccanny,70,150);
+		Sobel(_gray,sobelx,CV_16S,1,0,3,1, 0, BORDER_DEFAULT );
+		convertScaleAbs( sobelx, gradx );
+		Sobel(_gray,sobely,CV_16S,0,1,3,1, 0, BORDER_DEFAULT );
+		convertScaleAbs( sobely, grady );
+		addWeighted( gradx, 0.5, grady, 0.5, 0, sobel );
 		int kd=5;
 
 		//cvNica::DifferenceOfVariance(_bilateral,ccanny);
@@ -615,6 +637,33 @@ int main(int argc, char* argv[] ){
 		//namedWindow( "a", CV_WINDOW_AUTOSIZE );
 		//bitwise_and(ccanny,_homo,_homo);
 
+//131016
+//		Mat _gray2;
+//		medianBlur(_gray,_gray,3);
+//		bilateralFilter (_gray, _bilateral, kd, kd*2, kd/2 );
+//		resize(_bilateral,_gray2,Size(),2,2,INTER_LINEAR);
+//
+//
+//		Mat im3(_image1.rows*3, _image1.cols*4, CV_8UC1);
+//		cvNica::HomogeneousOperator(_gray2.data,_homo2.data,_image1.cols*2,_image1.rows*2);
+//		resize(_homo2,_homo,size,0,0,INTER_LINEAR);
+//
+//		Mat right(im3, Rect(_image1.cols, 0, _image1.cols, _image1.rows));
+//		_homo.copyTo(right);
+//
+//		for (int j=1; j<=8; j++) {
+//			Mat _k=Mat::zeros(size,CV_8UC1);
+//			Mat _h=Mat::zeros(size2,CV_8UC1);
+//			cvNica::HomogeneousOperator(_gray2.data,_h.data,_image1.cols*2,_image1.rows*2,j);
+//			resize(_h,_k,size,0,0,INTER_LINEAR);
+//			Mat right(im3, Rect(_image1.cols*((j-1)%4), _image1.rows*((int)((j-1)/4)+1), _image1.cols, _image1.rows));
+//			_k.copyTo(right);
+//		}
+
+
+
+
+		// 131023
 		Mat _gray2;
 		medianBlur(_gray,_gray,3);
 		bilateralFilter (_gray, _bilateral, kd, kd*2, kd/2 );
@@ -626,7 +675,10 @@ int main(int argc, char* argv[] ){
 		resize(_homo2,_homo,size,0,0,INTER_LINEAR);
 
 		Mat right(im3, Rect(_image1.cols, 0, _image1.cols, _image1.rows));
-		_homo.copyTo(right);
+		Mat right2(im3, Rect(_image1.cols*2, 0, _image1.cols, _image1.rows));
+		Mat right3(im3, Rect(_image1.cols*3, 0, _image1.cols, _image1.rows));
+
+
 
 		for (int j=1; j<=8; j++) {
 			Mat _k=Mat::zeros(size,CV_8UC1);
@@ -637,30 +689,35 @@ int main(int argc, char* argv[] ){
 			_k.copyTo(right);
 		}
 
-//		Mat skel( size, CV_8UC1, cv::Scalar(0));
-//		Mat temp( size, CV_8UC1);
-//		Mat element = getStructuringElement(cv::MORPH_CROSS, cv::Size(3, 3));
-//		bool done;
-//		do
-//		{
-//		  morphologyEx(_homo, temp, cv::MORPH_OPEN, element);
-//		  bitwise_not(temp, temp);
-//		  bitwise_and(_homo, temp, temp);
-//		  bitwise_or(skel, temp, skel);
-//		  erode(_homo, _homo, element);
-//
-//		  double max;
-//		  minMaxLoc(_homo, 0, &max);
-//		  done = (max == 0);
-//		} while (!done);
+		_homo.copyTo(right);
+
+		Mat skel( size, CV_8UC1, cv::Scalar(0));
+		Mat temp( size, CV_8UC1);
+		Mat element = getStructuringElement(cv::MORPH_CROSS, cv::Size(3, 3));
+		bool done;
+		do
+		{
+		  morphologyEx(_homo, temp, cv::MORPH_OPEN, element);
+		  bitwise_not(temp, temp);
+		  bitwise_and(_homo, temp, temp);
+		  bitwise_or(skel, temp, skel);
+		  erode(_homo, _homo, element);
+
+		  double max;
+		  minMaxLoc(_homo, 0, &max);
+		  done = (max == 0);
+		} while (!done);
 
 
 		Mat left(im3, Rect(0, 0, _image1.cols, _image1.rows));
 		_gray.copyTo(left);
 
+		//Mat right(im3, Rect(_image1.cols, 0, _image1.cols, _image1.rows));
 
-
-		imwrite(dir+"/rdmqi/"+files[i]+".png",im3);
+		skel.copyTo(right2);
+		sobel.copyTo(right3);
+		//ccanny.copyTo(right3);
+		imwrite(dir+"/set002/"+files[i]+".png",im3);
 	}
 }
 
@@ -901,13 +958,19 @@ int main(int argc, char* argv[] ){
 		string testDir = string(argv[3]);
 		//fr.Recognition(dir,"pgm",DB_YALEB,METHOD_CORR,-45,0);
 		fr.Recognition(testDir,dataType,DB_YALEB,METHOD_CORR);
-		//cout<<"1 "<<fr.getAccuracy(files)<<" "<<endl;
-		//cout<<"2 "<<fr.getAccuracyIncludingBadImages()<<" "<<endl;
-		//fr.getAccuracyIncludingBadImagesSubset();
+		//fr.Recognition(testDir,dataType,DB_YALEB,METHOD_PCA);
+		//fr.Recognition(testDir,dataType,DB_YALEB,METHOD_L2NORM);
+		cout<<"1 "<<fr.getAccuracy(files)<<" "<<endl;
+		cout<<"2 "<<fr.getAccuracyIncludingBadImages()<<" "<<endl;
+		fr.getAccuracyIncludingBadImagesSubset();
 
-		FileStorage abcd("dix2.xml",FileStorage::WRITE);
+		FileStorage abcd(argv[4],FileStorage::WRITE);
 		abcd << "frRecognitionResult" << fr.RecognitionResult;
 		abcd.release();
+
+		FileStorage abcd2(argv[5],FileStorage::WRITE);
+		abcd2 << "frRecognitionResult" << fr.RecognitionScore;
+		abcd2.release();
 #endif
 
 
@@ -1564,16 +1627,17 @@ int main(int argc, char* argv[] ){
 			//imwrite("ori.bmp",_image1);
 			//imwrite("deno.bmp",_deno1);
 			cvNica::DynamicMorphQuotImage(_deno1,_dmqi,0);
-			//cvNica::RemoveGrainyNoise(_dmqi,_deno2,30);
+			cvNica::RemoveGrainyNoise(_dmqi,_deno1,50);
+			cvNica::RemoveGrainyNoise(_deno1,_deno2,50);
 
-			cvNica::RemoveGrainyNoise(_dmqi,_histeq,30);
-			nicatio::HistEqualize(_dmqi.data,_deno2.data,_image1.cols,_image1.rows);
+			//cvNica::RemoveGrainyNoise(_dmqi,_histeq,30);
+			//nicatio::HistEqualize(_dmqi.data,_deno2.data,_image1.cols,_image1.rows);
 
 			unsigned found = files[i].rfind("bad");
 						vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
-						imwrite(dir+"/dmqieq/"+tokens[0]+"."+dataType,_deno2);
+						imwrite(dir+"/dmqi/"+tokens[0]+"."+dataType,_deno2);
 						if (found!=std::string::npos)
-							rename( string(dir+"/dmqieq/"+tokens[0]+"."+dataType).c_str() , string(dir+"/dmqieq/"+tokens[0]+"."+dataType+".bad").c_str() );
+							rename( string(dir+"/dmqi/"+tokens[0]+"."+dataType).c_str() , string(dir+"/dmqi/"+tokens[0]+"."+dataType+".bad").c_str() );
 
 
 			//imwrite("dmqi.bmp",_dmqi);
@@ -1913,4 +1977,232 @@ int main(int argc, char* argv[] ){
 }
 #endif
 
+
+
+#ifdef PCA_
+
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+
+#include <fstream>
+#include <sstream>
+
+using namespace cv;
+using namespace std;
+
+
+// Reads the images and labels from a given CSV file, a valid file would
+// look like this:
+//
+//      /path/to/person0/image0.jpg;0
+//      /path/to/person0/image1.jpg;0
+//      /path/to/person1/image0.jpg;1
+//      /path/to/person1/image1.jpg;1
+//      ...
+//
+void read_csv(const string& filename, vector<Mat>& images, vector<int>& labels) {
+    std::ifstream file(filename.c_str(), ifstream::in);
+    if(!file)
+        throw std::exception();
+    std::string line, path, classlabel;
+    // For each line in the given file:
+    while (std::getline(file, line)) {
+        // Get the current line:
+        std::stringstream liness(line);
+        // Split it at the semicolon:
+        std::getline(liness, path, ';');
+        std::getline(liness, classlabel);
+        // And push back the data into the result vectors:
+        images.push_back(imread(path, IMREAD_GRAYSCALE));
+        labels.push_back(atoi(classlabel.c_str()));
+    }
+}
+
+// Normalizes a given image into a value range between 0 and 255.
+Mat norm_0_255(const Mat& src) {
+    // Create and return normalized image:
+    Mat dst;
+    switch(src.channels()) {
+    case 1:
+        cv::normalize(src, dst, 0, 255, NORM_MINMAX, CV_8UC1);
+        break;
+    case 3:
+        cv::normalize(src, dst, 0, 255, NORM_MINMAX, CV_8UC3);
+        break;
+    default:
+        src.copyTo(dst);
+        break;
+    }
+    return dst;
+}
+
+// Converts the images given in src into a row matrix.
+Mat asRowMatrix(const vector<Mat>& src, int rtype, double alpha = 1, double beta = 0) {
+    // Number of samples:
+    size_t n = src.size();
+    // Return empty matrix if no matrices given:
+    if(n == 0)
+        return Mat();
+    // dimensionality of (reshaped) samples
+    size_t d = src[0].total();
+    // Create resulting data matrix:
+    Mat data(n, d, rtype);
+    // Now copy data:
+    for(int i = 0; i < n; i++) {
+        //
+        if(src[i].empty()) {
+            string error_message = format("Image number %d was empty, please check your input data.", i);
+            CV_Error(CV_StsBadArg, error_message);
+        }
+        // Make sure data can be reshaped, throw a meaningful exception if not!
+        if(src[i].total() != d) {
+            string error_message = format("Wrong number of elements in matrix #%d! Expected %d was %d.", i, d, src[i].total());
+            CV_Error(CV_StsBadArg, error_message);
+        }
+        // Get a hold of the current row:
+        Mat xi = data.row(i);
+        // Make reshape happy by cloning for non-continuous matrices:
+        if(src[i].isContinuous()) {
+            src[i].reshape(1, 1).convertTo(xi, rtype, alpha, beta);
+        } else {
+            src[i].clone().reshape(1, 1).convertTo(xi, rtype, alpha, beta);
+        }
+    }
+    return data;
+}
+
+int main(int argc, const char *argv[]) {
+
+
+    // Holds some images:
+    vector<Mat> db;
+
+    // Load the greyscale images. The images in the example are
+    // taken from the AT&T Facedatabase, which is publicly available
+    // at:
+    //
+    //      http://www.cl.cam.ac.uk/research/dtg/attarchive/facedatabase.html
+    //
+    // This is the path to where I stored the images, yours is different!
+    //
+    string prefix = "/cygdrive/e/Documents/Nicatio/Research/DB/Face/feret/kwonTT/smqi/";
+
+
+
+
+
+
+
+
+    db.push_back(imread(prefix + "00001fa010_930831.bmp", IMREAD_GRAYSCALE));
+    db.push_back(imread(prefix + "00002fa010_930831.bmp", IMREAD_GRAYSCALE));
+    db.push_back(imread(prefix + "00003fa010_930831.bmp", IMREAD_GRAYSCALE));
+
+    db.push_back(imread(prefix + "00004fa010_930831.bmp", IMREAD_GRAYSCALE));
+    db.push_back(imread(prefix + "00005fa010_930831.bmp", IMREAD_GRAYSCALE));
+    db.push_back(imread(prefix + "00006fa010_930831.bmp", IMREAD_GRAYSCALE));
+
+    db.push_back(imread(prefix + "00007fa010_930831.bmp", IMREAD_GRAYSCALE));
+    db.push_back(imread(prefix + "00008fa010_930831.bmp", IMREAD_GRAYSCALE));
+    db.push_back(imread(prefix + "00009fa010_930831.bmp", IMREAD_GRAYSCALE));
+
+    db.push_back(imread(prefix + "00010fa010_930831.bmp", IMREAD_GRAYSCALE));
+    db.push_back(imread(prefix + "00011fa010_930831.bmp", IMREAD_GRAYSCALE));
+    db.push_back(imread(prefix + "00012fa010_930831.bmp", IMREAD_GRAYSCALE));
+
+    // The following would read the images from a given CSV file
+    // instead, which would look like:
+    //
+    //      /path/to/person0/image0.jpg;0
+    //      /path/to/person0/image1.jpg;0
+    //      /path/to/person1/image0.jpg;1
+    //      /path/to/person1/image1.jpg;1
+    //      ...
+    //
+    // Uncomment this to load from a CSV file:
+    //
+
+    /*
+    vector<int> labels;
+    read_csv("/home/philipp/facerec/data/at.txt", db, labels);
+    */
+    //prefix = "/cygdrive/e/Documents/Nicatio/Research/DB/Face/feret/kwonTT/smqi/";
+
+    // Build a matrix with the observations in row:
+    Mat data = asRowMatrix(db, CV_32FC1);
+
+    // Number of components to keep for the PCA:
+    int num_components = 10;
+
+    // Perform a PCA:
+    PCA pca(data, Mat(), CV_PCA_DATA_AS_ROW, num_components);
+
+
+    Mat df = imread(prefix + "01014ba010_960521.bmp", IMREAD_GRAYSCALE);
+    Mat reconstructed;
+	Mat vec = df.reshape(1,1), coeffs;
+	pca.project(vec, coeffs);
+	pca.backProject(coeffs, reconstructed);
+	Mat vec2;
+	vec.convertTo(vec2,CV_32FC1);
+
+	  Mat df2 = imread(prefix + "01014bk010_960521.bmp", IMREAD_GRAYSCALE);
+	    Mat reconstructed2;
+		Mat vec3 = df2.reshape(1,1), coeffs2;
+		pca.project(vec3, coeffs2);
+		pca.backProject(coeffs2, reconstructed2);
+		Mat vec4;
+		vec3.convertTo(vec4,CV_32FC1);
+
+
+	Mat result,result2;
+	matchTemplate(df, df2, result2,CV_TM_CCOEFF_NORMED);
+	matchTemplate(coeffs, coeffs2, result,CV_TM_CCOEFF_NORMED);
+	cout<<"d:"<<result.at<float>(0,0)<<endl;
+	cout<<"d:"<<result2.at<float>(0,0)<<endl;
+	printf("%d. diff = %g\n", 1, norm(vec2, reconstructed, NORM_L2));
+
+
+    // And copy the PCA results:
+    Mat mean = pca.mean.clone();
+    Mat eigenvalues = pca.eigenvalues.clone();
+    Mat eigenvectors = pca.eigenvectors.clone();
+
+
+
+
+    namedWindow( "avg", CV_WINDOW_AUTOSIZE );
+    namedWindow( "pc1", CV_WINDOW_AUTOSIZE );
+    namedWindow( "pc2", CV_WINDOW_AUTOSIZE );
+    namedWindow( "pc3", CV_WINDOW_AUTOSIZE );
+    namedWindow( "pc4", CV_WINDOW_AUTOSIZE );
+    namedWindow( "pc5", CV_WINDOW_AUTOSIZE );
+    namedWindow( "pc6", CV_WINDOW_AUTOSIZE );
+    // The mean face:
+    imshow("avg", norm_0_255(mean.reshape(1, db[0].rows)));
+
+    // The first three eigenfaces:
+    imshow("pc1", norm_0_255(pca.eigenvectors.row(0)).reshape(1, db[0].rows));
+    imshow("pc2", norm_0_255(pca.eigenvectors.row(1)).reshape(1, db[0].rows));
+    imshow("pc3", norm_0_255(pca.eigenvectors.row(2)).reshape(1, db[0].rows));
+    imshow("pc4", norm_0_255(pca.eigenvectors.row(3)).reshape(1, db[0].rows));
+    imshow("pc5", norm_0_255(pca.eigenvectors.row(4)).reshape(1, db[0].rows));
+    imshow("pc6", norm_0_255(pca.eigenvectors.row(5)).reshape(1, db[0].rows));
+
+
+
+
+    // Show the images:
+    waitKey(0);
+
+
+
+
+    // Success!
+    return 0;
+}
+
+
+
+#endif
 

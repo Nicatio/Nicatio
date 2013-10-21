@@ -51,7 +51,7 @@ FaceRecognition::FaceRecognition(
 	nRefImagesPerSubject = 0;
 	nTestImageOrder = 0;
 	nRefImageOrder = 0;
-	nSearchRadius = 11;
+	nSearchRadius = 5;
 	nCorrect = 0;
 	nFiles = 0;
 	nBadImages = 0;
@@ -257,6 +257,64 @@ void FaceRecognition::getScoreTestImageBased(
 		}
 
 		RecognitionResult.at<ushort>(nFileIndex,0) = maxSubjectIndex;
+	} else if (criterion == METHOD_L2NORM){
+		max=1e100;
+		for (int j = 0; j < nTotalReferenceImages; j++,ptr_rpx++,ptr_rpy++,ptr_rs++){
+			float maxCorrCoef = 1e100;
+			int posX = 0;
+			int posY = 0;
+
+			if(inputA[j].type() != inputB.type()) return;
+			if(inputA[j].size() != inputB.size()) return;
+			// based on offset of the reference image
+
+			ptr_a_ = a__;
+			ptr_b_ = a__+sRsize;
+			ptr_c_ = ptr_b_+sRsize;
+			ptr_d_ = ptr_c_+sRsize;
+			ptr__a = ptr_d_+sRsize;
+			ptr__b = ptr__a+sRsize;
+			ptr_inputB_ = inputB_;
+			ptr_inputBB_ = inputB_+sRsize;
+
+
+			Mat inputA32; inputA[j].convertTo(inputA32,CV_32F);
+
+
+			for (int i=lower; i<=upper; i++) {
+				for (int j=lower; j<=upper; j++,ptr_a_++,ptr_b_++,ptr_c_++,ptr_d_++,ptr__a++,ptr__b++,ptr_inputB_++,ptr_inputBB_++) {
+					float Asq,Bsq,Ms;
+					float As,Bs;
+
+					int a_=*(ptr_a_),b_=*(ptr_b_),c_=*(ptr_c_),d_=*(ptr_d_);
+					int _a=*(ptr__a),_b=*(ptr__b);
+
+					Mat inputACrop=inputA32(Rect (a_,b_,c_,d_));
+					Mat inputBCrop=inputB32(Rect (_a,_b,c_,d_));
+					Mat diff = inputACrop-inputBCrop;
+					Mat multResult(c_,d_,CV_32F);
+					multiply (diff,diff,multResult);
+
+					Ms = sum(multResult)[0];
+
+					if (maxCorrCoef > Ms) {
+						maxCorrCoef = Ms;
+						posX = i;
+						posY = j;
+					}
+				}
+			}
+
+			*(ptr_rpx) = posX;
+			*(ptr_rpy) = posY;
+			*(ptr_rs)  = maxCorrCoef;
+			if (maxCorrCoef<max) {
+				max = maxCorrCoef;
+				maxSubjectIndex = j;
+			}
+		}
+
+		RecognitionResult.at<ushort>(nFileIndex,0) = maxSubjectIndex;
 	}
 }
 
@@ -397,6 +455,46 @@ void FaceRecognition::getScoreTestImageBasedRotation(
 }
 
 
+void FaceRecognition::getPCAscore(
+		const Mat						inputB,
+		const int						nFileIndex)
+{
+	int nTotalReferenceImages = nSubject*nRefImagesPerSubject;
+	Mat vec = inputB.reshape(1,1), coeffs;
+	pca.project(vec, coeffs);
+
+	char *ptr_rpx = &(RecognitionPositionX.at<char>(nFileIndex,0));
+	char *ptr_rpy = &(RecognitionPositionY.at<char>(nFileIndex,0));
+	float *ptr_rs = &(RecognitionScore.at<float>(nFileIndex,0));
+
+	float maxCorrCoef = -1;
+	ushort maxSubjectIndex = 0;
+
+	for (int j = 0; j < nTotalReferenceImages; j++) {
+		Mat result;
+		matchTemplate(coeffs, pcaRefCoeffs[j], result, CV_TM_CCOEFF_NORMED);
+		//matchTemplate(coeffs, pcaRefCoeffs[j], result, CV_TM_SQDIFF_NORMED);
+//		Mat temp = coeffs - pcaRefCoeffs[j];
+//		Mat tempsq;
+//		multiply(temp,temp,tempsq);
+//		Scalar ttt = sum(tempsq);
+//		float r = (float)ttt.val[0];
+		float r = result.at<float>(0,0);
+		//cout <<"D- "<< r<<endl;
+		if (r > maxCorrCoef) {
+			maxCorrCoef = r;
+			maxSubjectIndex = (ushort) j;
+			*(ptr_rs)  = maxCorrCoef;
+		}
+	}
+
+	*(ptr_rpx) = 0;
+	*(ptr_rpy) = 0;
+
+	RecognitionResult.at<ushort>(nFileIndex,0) = maxSubjectIndex;
+
+}
+
 void FaceRecognition::_Recognition(
 		vector<Mat>						referenceImage,
 		vector<string>					files,
@@ -417,23 +515,50 @@ void FaceRecognition::_Recognition(
 		nImagesSubset.assign(nis,nis+5);
 		getBadImageInfo(files,1);
 	}
-	if (startAngle == endAngle) {
+	if (criterion == METHOD_PCA) {
+		Mat data = asRowMatrix(referenceImage, CV_32FC1);
+		int num_components = nTotalReferenceImages-1;
+		pcaRefCoeffs.resize(nTotalReferenceImages);
+
+		cout << "PCA Training";
+		pca(data, Mat(), CV_PCA_DATA_AS_ROW, num_components);
+		cout << " ... Done" << endl;
+
+		for (int i = 0; i < nTotalReferenceImages; i++) {
+			cout << "PCA coeffs: "<< i;
+			pcaRefCoeffs[i] = Mat(1, num_components, CV_32FC1);
+			Mat vec = refImage[i].reshape(1,1), coeffs;
+			pca.project(vec, pcaRefCoeffs[i]);
+			cout << " ...Done"<< endl;
+			//vec.convertTo(pcaRefVec[i],CV_32FC1);
+		}
 		for (int i = 0; i < nFiles; i++) {
 			cout << files[i] << endl;
 			Mat testImage = imread( DirectoryLocation+"/"+files[i], -1 );
 			double t=(double)getTickCount();
-			getScoreTestImageBased(referenceImage, testImage, i, nSearchRadius, criterion);
+			getPCAscore(testImage, i);
 			t = ((double)getTickCount() - t)/getTickFrequency();
-			cout << "Registration Time : " << t << " sec" << endl;
+			cout << "Matching Time : " << t << " sec" << endl;
 		}
 	} else {
-		for (int i = 0; i < nFiles; i++) {
-			cout << files[i] << endl;
-			Mat testImage = imread( DirectoryLocation+"/"+files[i], -1 );
-			double t=(double)getTickCount();
-			getScoreTestImageBasedRotation(referenceImage, testImage, i, nSearchRadius, criterion, startAngle, endAngle);
-			t = ((double)getTickCount() - t)/getTickFrequency();
-			cout << "Registration Time : " << t << " sec" << endl;
+		if (startAngle == endAngle) {
+			for (int i = 0; i < nFiles; i++) {
+				cout << files[i] << endl;
+				Mat testImage = imread( DirectoryLocation+"/"+files[i], -1 );
+				double t=(double)getTickCount();
+				getScoreTestImageBased(referenceImage, testImage, i, nSearchRadius, criterion);
+				t = ((double)getTickCount() - t)/getTickFrequency();
+				cout << "Registration Time : " << t << " sec" << endl;
+			}
+		} else {
+			for (int i = 0; i < nFiles; i++) {
+				cout << files[i] << endl;
+				Mat testImage = imread( DirectoryLocation+"/"+files[i], -1 );
+				double t=(double)getTickCount();
+				getScoreTestImageBasedRotation(referenceImage, testImage, i, nSearchRadius, criterion, startAngle, endAngle);
+				t = ((double)getTickCount() - t)/getTickFrequency();
+				cout << "Registration Time : " << t << " sec" << endl;
+			}
 		}
 	}
 	cout <<"done"<<endl;
@@ -723,6 +848,69 @@ int FaceRecognition::getBadImages(){
 int FaceRecognition::getFiles(){
 	return nFiles;
 }
+
+
+
+// Normalizes a given image into a value range between 0 and 255.
+Mat FaceRecognition::norm_0_255(
+		const Mat& 							src)
+{
+    // Create and return normalized image:
+    Mat dst;
+    switch(src.channels()) {
+    case 1:
+        cv::normalize(src, dst, 0, 255, NORM_MINMAX, CV_8UC1);
+        break;
+    case 3:
+        cv::normalize(src, dst, 0, 255, NORM_MINMAX, CV_8UC3);
+        break;
+    default:
+        src.copyTo(dst);
+        break;
+    }
+    return dst;
+}
+
+// Converts the images given in src into a row matrix.
+Mat FaceRecognition::asRowMatrix(
+		const vector<Mat>& 					src,
+		int 								rtype,
+		double 								alpha,
+		double 								beta)
+{
+    // Number of samples:
+    int n = src.size();
+    // Return empty matrix if no matrices given:
+    if(n == 0)
+        return Mat();
+    // dimensionality of (reshaped) samples
+    size_t d = src[0].total();
+    // Create resulting data matrix:
+    Mat data(n, d, rtype);
+    // Now copy data:
+    for(int i = 0; i < n; i++) {
+        //
+        if(src[i].empty()) {
+            string error_message = format("Image number %d was empty, please check your input data.", i);
+            CV_Error(CV_StsBadArg, error_message);
+        }
+        // Make sure data can be reshaped, throw a meaningful exception if not!
+        if(src[i].total() != d) {
+            string error_message = format("Wrong number of elements in matrix #%d! Expected %d was %d.", i, d, src[i].total());
+            CV_Error(CV_StsBadArg, error_message);
+        }
+        // Get a hold of the current row:
+        Mat xi = data.row(i);
+        // Make reshape happy by cloning for non-continuous matrices:
+        if(src[i].isContinuous()) {
+            src[i].reshape(1, 1).convertTo(xi, rtype, alpha, beta);
+        } else {
+            src[i].clone().reshape(1, 1).convertTo(xi, rtype, alpha, beta);
+        }
+    }
+    return data;
+}
+
 
 
 }
