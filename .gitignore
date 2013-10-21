@@ -1,6 +1,11 @@
 /Debug
 /.settings
 /ipch
+/Release
+*.bmp
+*.xml
+*.txt
+*.psd
 *.stackdump
 .cproject
 *.sdf
