@@ -702,8 +702,8 @@ int main(int argc, char* argv[] ){
 		  bitwise_and(_homo, temp, temp);
 		  bitwise_or(skel, temp, skel);
 		  erode(_homo, _homo, element);
-
 		  double max;
+
 		  minMaxLoc(_homo, 0, &max);
 		  done = (max == 0);
 		} while (!done);
