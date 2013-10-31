@@ -1050,6 +1050,816 @@ namespace cvNica {
 
 
 //131023
+//void HomogeneousOperator(
+//		const unsigned char 			*inputImg,
+//		unsigned char					*outputImg,
+//		const int&						width,
+//		const int&						height,
+//		const int&						type)
+//{
+//	int p;
+//	int varth=200.0;
+//	int meanth=0;
+//
+//	//int sz = width*height;
+//
+//	for(int y = 2; y < height-2; y++ ) {
+//		for(int x = 2; x < width-2; x++ ) {
+//			p = x+y*width;
+//			double var [8];
+//			double mean [8] = {0};
+//			int sum [8] = {0};
+//			int sqsum [8] = {0};
+//			for(int v = -2; v <= 2; v++ ) {
+//				for(int u = -2; u <= 2; u++ ) {
+//					int a = inputImg[p+u+v*width];
+//					if(u<0 && v<0) {
+//						sum[0] += a;
+//						sqsum[0] += a*a;
+//					} else if(u>0 || v>0) {
+//						sum[1] += a;
+//						sqsum[1] += a*a;
+//					}
+//					if(u>0 && v<0) {
+//						sum[2] += a;
+//						sqsum[2] += a*a;
+//					} else if(u<0 || v>0) {
+//						sum[3] += a;
+//						sqsum[3] += a*a;
+//					}
+//					if(u<0 && v>0) {
+//						sum[4] += a;
+//						sqsum[4] += a*a;
+//					} else if(u>0 || v<0) {
+//						sum[5] += a;
+//						sqsum[5] += a*a;
+//					}
+//					if(u>0 && v>0) {
+//						sum[6] += a;
+//						sqsum[6] += a*a;
+//					} else if(u<0 || v<0) {
+//						sum[7] += a;
+//						sqsum[7] += a*a;
+//					}
+//				}
+//			}
+//			for (int i=0; i<8; i++) {
+//				if (i%2==0) {
+//					mean[i] = sum[i]/4;
+//					var[i] = (sqsum[i]/4-mean[i]*mean[i]);////sqrt(mean[i]);
+//				} else {
+//					mean[i] = sum[i]/16;
+//					var[i] = (sqsum[i]/16-mean[i]*mean[i]);////sqrt(mean[i]);
+//				}
+//				//std::cout<<"d"<<var[i]<<std::endl;
+//			}
+//
+//			for (int i=0; i<8; i+=2) {
+//				if (!type || type == (i/2+1)) {
+//					if ((mean[i]-mean[i+1])> meanth ) {
+//						if (outputImg[p]+(mean[i]-mean[i+1])>255)outputImg[p]=255;
+//						else {outputImg[p]+=(mean[i]-mean[i+1]);}
+//					}
+//					else if ((mean[i+1]-mean[i])> meanth ) {
+//						if (outputImg[p]+(mean[i+1]-mean[i])>255)outputImg[p]=255;
+//						else {outputImg[p]+=(mean[i+1]-mean[i]);}
+//					}
+//				}
+//			}
+//		}
+//	}
+//
+//	for(int y = 3; y < height-3; y++ ) {
+//		for(int x = 3; x < width-3; x++ ) {
+//			p = x+y*width;
+//			double var [8];
+//			double mean [8] = {0};
+//			int sum [8] = {0};
+//			int sqsum [8] = {0};
+//			for(int v = -3; v <= 3; v++ ) {
+//				for(int u = -3; u <= 3; u++ ) {
+//					if(u<0 && v<0) {
+//						int a = inputImg[p+u+v*width];
+//						sum[0] += a;
+//						sqsum[0] += a*a;
+//					} else if(u>0 || v>0) {
+//						int a = inputImg[p+u+v*width];
+//						sum[1] += a;
+//						sqsum[1] += a*a;
+//					}
+//					if(u>0 && v<0) {
+//						int a = inputImg[p+u+v*width];
+//						sum[2] += a;
+//						sqsum[2] += a*a;
+//					} else if(u<0 || v>0) {
+//						int a = inputImg[p+u+v*width];
+//						sum[3] += a;
+//						sqsum[3] += a*a;
+//					}
+//					if(u<0 && v>0) {
+//						int a = inputImg[p+u+v*width];
+//						sum[4] += a;
+//						sqsum[4] += a*a;
+//					} else if(u>0 || v<0) {
+//						int a = inputImg[p+u+v*width];
+//						sum[5] += a;
+//						sqsum[5] += a*a;
+//					}
+//					if(u>0 && v>0) {
+//						int a = inputImg[p+u+v*width];
+//						sum[6] += a;
+//						sqsum[6] += a*a;
+//					} else if(u<0 || v<0) {
+//						int a = inputImg[p+u+v*width];
+//						sum[7] += a;
+//						sqsum[7] += a*a;
+//					}
+//				}
+//			}
+//			for (int i=0; i<8; i++) {
+//				if (i%2==0) {
+//					mean[i] = sum[i]/9;
+//					var[i] = (sqsum[i]/9-mean[i]*mean[i]);////sqrt(mean[i]);
+//				} else {
+//					mean[i] = sum[i]/33;
+//					var[i] = (sqsum[i]/33-mean[i]*mean[i]);////sqrt(mean[i]);
+//				}
+//				//std::cout<<"d"<<var[i]<<std::endl;
+//			}
+//
+//			for (int i=0; i<8; i+=2) {
+//				if (!type || type == (i/2+1)+4) {
+//					if ((mean[i]-mean[i+1])> meanth ) {
+//						if (outputImg[p]+(mean[i]-mean[i+1])>255)outputImg[p]=255;
+//						else {outputImg[p]+=(mean[i]-mean[i+1]);}
+//					}
+//					else if ((mean[i+1]-mean[i])> meanth ) {
+//						if (outputImg[p]+(mean[i+1]-mean[i])>255)outputImg[p]=255;
+//						else {outputImg[p]+=(mean[i+1]-mean[i]);}
+//					}
+//				}
+//			}
+//		}
+//	}
+//}
+
+//131030 9~12
+//void HomogeneousOperator(
+//		const unsigned char 			*inputImg,
+//		unsigned char					*outputImg,
+//		const int&						width,
+//		const int&						height,
+//		const int&						type)
+//{
+//	int p;
+//	int varth=3600.0;
+//	int meanth=0;
+//
+//	//int sz = width*height;
+//
+//	for(int y = 2; y < height-2; y++ ) {
+//		for(int x = 2; x < width-2; x++ ) {
+//			p = x+y*width;
+//			double var [8];
+//			double mean [8] = {0};
+//			int sum [8] = {0};
+//			int sqsum [8] = {0};
+//			for(int v = -2; v <= 2; v++ ) {
+//				for(int u = -2; u <= 2; u++ ) {
+//					int a = inputImg[p+u+v*width];
+//					if(u<0 && v<0) {
+//						sum[0] += a;
+//						sqsum[0] += a*a;
+//					} else if(u>0 || v>0) {
+//						sum[1] += a;
+//						sqsum[1] += a*a;
+//					}
+//					if(u>0 && v<0) {
+//						sum[2] += a;
+//						sqsum[2] += a*a;
+//					} else if(u<0 || v>0) {
+//						sum[3] += a;
+//						sqsum[3] += a*a;
+//					}
+//					if(u<0 && v>0) {
+//						sum[4] += a;
+//						sqsum[4] += a*a;
+//					} else if(u>0 || v<0) {
+//						sum[5] += a;
+//						sqsum[5] += a*a;
+//					}
+//					if(u>0 && v>0) {
+//						sum[6] += a;
+//						sqsum[6] += a*a;
+//					} else if(u<0 || v<0) {
+//						sum[7] += a;
+//						sqsum[7] += a*a;
+//					}
+//				}
+//			}
+//			for (int i=0; i<8; i++) {
+//				if (i%2==0) {
+//					mean[i] = sum[i]/4;
+//					var[i] = (sqsum[i]/4-mean[i]*mean[i]);////sqrt(mean[i]);
+//				} else {
+//					mean[i] = sum[i]/16;
+//					var[i] = (sqsum[i]/16-mean[i]*mean[i]);////sqrt(mean[i]);
+//				}
+//				//std::cout<<"d"<<var[i]<<std::endl;
+//			}
+//
+//			for (int i=0; i<8; i+=2) {
+//				if (!type || type == (i/2+1)) {
+//					if ((mean[i]-mean[i+1])> meanth && var[i]<varth && var[i+1]<varth) {
+//						if (outputImg[p]<(mean[i]-mean[i+1]))outputImg[p]=(mean[i]-mean[i+1]);
+//						//else {outputImg[p]+=(mean[i]-mean[i+1]);}
+//
+////						if (outputImg[p]+(mean[i]-mean[i+1])>255)outputImg[p]=255;
+////						else {outputImg[p]+=(mean[i]-mean[i+1]);}
+//					}
+//					else if ((mean[i+1]-mean[i])> meanth  && var[i]<varth && var[i+1]<varth) {
+//						if (outputImg[p]<(mean[i+1]-mean[i]))outputImg[p]=(mean[i+1]-mean[i]);
+//
+////						if (outputImg[p]+(mean[i+1]-mean[i])>255)outputImg[p]=255;
+////						else {outputImg[p]+=(mean[i+1]-mean[i]);}
+//					}
+//				}
+//			}
+//		}
+//	}
+
+//	for(int y = 3; y < height-3; y++ ) {
+//		for(int x = 3; x < width-3; x++ ) {
+//			p = x+y*width;
+//			double var [8];
+//			double mean [8] = {0};
+//			int sum [8] = {0};
+//			int sqsum [8] = {0};
+//			for(int v = -3; v <= 3; v++ ) {
+//				for(int u = -3; u <= 3; u++ ) {
+//					if(u<0 && v<0) {
+//						int a = inputImg[p+u+v*width];
+//						sum[0] += a;
+//						sqsum[0] += a*a;
+//					} else if(u>0 || v>0) {
+//						int a = inputImg[p+u+v*width];
+//						sum[1] += a;
+//						sqsum[1] += a*a;
+//					}
+//					if(u>0 && v<0) {
+//						int a = inputImg[p+u+v*width];
+//						sum[2] += a;
+//						sqsum[2] += a*a;
+//					} else if(u<0 || v>0) {
+//						int a = inputImg[p+u+v*width];
+//						sum[3] += a;
+//						sqsum[3] += a*a;
+//					}
+//					if(u<0 && v>0) {
+//						int a = inputImg[p+u+v*width];
+//						sum[4] += a;
+//						sqsum[4] += a*a;
+//					} else if(u>0 || v<0) {
+//						int a = inputImg[p+u+v*width];
+//						sum[5] += a;
+//						sqsum[5] += a*a;
+//					}
+//					if(u>0 && v>0) {
+//						int a = inputImg[p+u+v*width];
+//						sum[6] += a;
+//						sqsum[6] += a*a;
+//					} else if(u<0 || v<0) {
+//						int a = inputImg[p+u+v*width];
+//						sum[7] += a;
+//						sqsum[7] += a*a;
+//					}
+//				}
+//			}
+//			for (int i=0; i<8; i++) {
+//				if (i%2==0) {
+//					mean[i] = sum[i]/9.;
+//					var[i] = (sqsum[i]/9.-mean[i]*mean[i]);////sqrt(mean[i]);
+//				} else {
+//					mean[i] = sum[i]/33.;
+//					var[i] = (sqsum[i]/33.-mean[i]*mean[i]);////sqrt(mean[i]);
+//				}
+//				//std::cout<<"d"<<var[i]<<std::endl;
+//			}
+//
+//			for (int i=0; i<8; i+=2) {
+//				if (!type || type == (i/2+1)) {
+//					if ((mean[i]-mean[i+1])> meanth && var[i]>varth && var[i+1]>varth) {
+//						//int t = (mean[i]-mean[i+1]);//*
+//						int t =sqrt((double)var[i+1]*(double)var[i]) ;//- 100000/sqrt((double)var[i+1]*(double)var[i]);
+//						if (t>255) t=255;
+//						if (outputImg[p]<t)outputImg[p]=t;
+//						//else {outputImg[p]+=(mean[i]-mean[i+1]);}
+//
+////						if (outputImg[p]+(mean[i]-mean[i+1])>255)outputImg[p]=255;
+////						else {outputImg[p]+=(mean[i]-mean[i+1]);}
+//					}
+//					else if ((mean[i+1]-mean[i])> meanth  && var[i]>varth && var[i+1]>varth) {
+//						//int t = (mean[i]-mean[i+1]);//*
+//						int t = sqrt((double)var[i+1]*(double)var[i]) ;//- 100000/sqrt((double)var[i+1]*(double)var[i]);
+//						if (t>255) t=255;
+//						if (outputImg[p]<t)outputImg[p]=t;
+//
+////						if (outputImg[p]+(mean[i+1]-mean[i])>255)outputImg[p]=255;
+////						else {outputImg[p]+=(mean[i+1]-mean[i]);}
+//					}
+//
+//				}
+//			}
+//		}
+//	}
+//}
+
+// 131030 5~8 set 007
+//void HomogeneousOperator(
+//		const unsigned char 			*inputImg,
+//		unsigned char					*outputImg,
+//		const int&						width,
+//		const int&						height,
+//		const int&						type)
+//{
+//	int p;
+//	int varth=25.0;
+//	int meanth=0;
+//
+//	for(int y = 1; y < height-2; y++ ) {
+//		for(int x = 1; x < width-2; x++ ) {
+//			p = x+y*width;
+//			double var [2];
+//			double mean [2] = {0};
+//			int sum [2] = {0};
+//			int sqsum [2] = {0};
+//			for(int v = -1; v <= 2; v++ ) {
+//				for(int u = -1; u <= 2; u++ ) {
+//					if(u>0 && v>0) {
+//						int a = inputImg[p+u+v*width];
+//						sum[0] += a;
+//						sqsum[0] += a*a;
+//					} else if(u<0 || v<0) {
+//						int a = inputImg[p+u+v*width];
+//						sum[1] += a;
+//						sqsum[1] += a*a;
+//					}
+//				}
+//			}
+//
+//			for (int i=0; i<2; i++) {
+//				if (i%2==0) {
+//					mean[i] = sum[i]/4.;
+//					var[i] = (sqsum[i]/4.-mean[i]*mean[i]);////sqrt(mean[i]);
+//				} else {
+//					mean[i] = sum[i]/7.;
+//					var[i] = (sqsum[i]/7.-mean[i]*mean[i]);////sqrt(mean[i]);
+//				}
+//				//std::cout<<"d"<<var[i]<<std::endl;
+//			}
+//
+//			for (int i=0; i<2; i+=2) {
+//				if (!type || type == (i/2+1)) {
+//					if ((mean[i]-mean[i+1])> meanth && var[i]<varth && var[i+1]<varth) {
+//						if (outputImg[p]<(mean[i]-mean[i+1]))outputImg[p]=(mean[i]-mean[i+1]);
+//					}
+//					else if ((mean[i+1]-mean[i])> meanth  && var[i]<varth && var[i+1]<varth) {
+//						if (outputImg[p]<(mean[i+1]-mean[i]))outputImg[p]=(mean[i+1]-mean[i]);
+//					}
+//				}
+//			}
+//		}
+//	}
+//
+//	for(int y = 1; y < height-2; y++ ) {
+//		for(int x = 2; x < width-1; x++ ) {
+//			p = x+y*width;
+//			double var [2];
+//			double mean [2] = {0};
+//			int sum [2] = {0};
+//			int sqsum [2] = {0};
+//			for(int v = -1; v <= 2; v++ ) {
+//				for(int u = -2; u <= 1; u++ ) {
+//					if(u<0 && v>0) {
+//						int a = inputImg[p+u+v*width];
+//						sum[0] += a;
+//						sqsum[0] += a*a;
+//					} else if(u>0 || v<0) {
+//						int a = inputImg[p+u+v*width];
+//						sum[1] += a;
+//						sqsum[1] += a*a;
+//					}
+//				}
+//			}
+//
+//			for (int i=0; i<2; i++) {
+//				if (i%2==0) {
+//					mean[i] = sum[i]/4.;
+//					var[i] = (sqsum[i]/4.-mean[i]*mean[i]);////sqrt(mean[i]);
+//				} else {
+//					mean[i] = sum[i]/7.;
+//					var[i] = (sqsum[i]/7.-mean[i]*mean[i]);////sqrt(mean[i]);
+//				}
+//				//std::cout<<"d"<<var[i]<<std::endl;
+//			}
+//
+//			for (int i=0; i<2; i+=2) {
+//				if (!type || type == (i/2+1)+1) {
+//					if ((mean[i]-mean[i+1])> meanth && var[i]<varth && var[i+1]<varth) {
+//						if (outputImg[p]<(mean[i]-mean[i+1]))outputImg[p]=(mean[i]-mean[i+1]);
+//					}
+//					else if ((mean[i+1]-mean[i])> meanth  && var[i]<varth && var[i+1]<varth) {
+//						if (outputImg[p]<(mean[i+1]-mean[i]))outputImg[p]=(mean[i+1]-mean[i]);
+//					}
+//				}
+//			}
+//		}
+//	}
+//
+//
+//
+//	for(int y = 2; y < height-1; y++ ) {
+//		for(int x = 1; x < width-2; x++ ) {
+//			p = x+y*width;
+//			double var [2];
+//			double mean [2] = {0};
+//			int sum [2] = {0};
+//			int sqsum [2] = {0};
+//			for(int v = -2; v <= 1; v++ ) {
+//				for(int u = -1; u <= 2; u++ ) {
+//					if(u>0 && v<0) {
+//						int a = inputImg[p+u+v*width];
+//						sum[0] += a;
+//						sqsum[0] += a*a;
+//					} else if(u<0 || v>0) {
+//						int a = inputImg[p+u+v*width];
+//						sum[1] += a;
+//						sqsum[1] += a*a;
+//					}
+//				}
+//			}
+//
+//			for (int i=0; i<2; i++) {
+//				if (i%2==0) {
+//					mean[i] = sum[i]/4.;
+//					var[i] = (sqsum[i]/4.-mean[i]*mean[i]);////sqrt(mean[i]);
+//				} else {
+//					mean[i] = sum[i]/7.;
+//					var[i] = (sqsum[i]/7.-mean[i]*mean[i]);////sqrt(mean[i]);
+//				}
+//				//std::cout<<"d"<<var[i]<<std::endl;
+//			}
+//
+//			for (int i=0; i<2; i+=2) {
+//				if (!type || type == (i/2+1)+2) {
+//					if ((mean[i]-mean[i+1])> meanth && var[i]<varth && var[i+1]<varth) {
+//						if (outputImg[p]<(mean[i]-mean[i+1]))outputImg[p]=(mean[i]-mean[i+1]);
+//					}
+//					else if ((mean[i+1]-mean[i])> meanth  && var[i]<varth && var[i+1]<varth) {
+//						if (outputImg[p]<(mean[i+1]-mean[i]))outputImg[p]=(mean[i+1]-mean[i]);
+//					}
+//				}
+//			}
+//		}
+//	}
+//
+//	for(int y = 2; y < height-1; y++ ) {
+//		for(int x = 2; x < width-1; x++ ) {
+//			p = x+y*width;
+//			double var [2];
+//			double mean [2] = {0};
+//			int sum [2] = {0};
+//			int sqsum [2] = {0};
+//			for(int v = -2; v <= 1; v++ ) {
+//				for(int u = -2; u <= 1; u++ ) {
+//					if(u<0 && v<0) {
+//						int a = inputImg[p+u+v*width];
+//						sum[0] += a;
+//						sqsum[0] += a*a;
+//					} else if(u>0 || v>0) {
+//						int a = inputImg[p+u+v*width];
+//						sum[1] += a;
+//						sqsum[1] += a*a;
+//					}
+//				}
+//			}
+//
+//			for (int i=0; i<2; i++) {
+//				if (i%2==0) {
+//					mean[i] = sum[i]/4.;
+//					var[i] = (sqsum[i]/4.-mean[i]*mean[i]);////sqrt(mean[i]);
+//				} else {
+//					mean[i] = sum[i]/7;
+//					var[i] = (sqsum[i]/7-mean[i]*mean[i]);////sqrt(mean[i]);
+//				}
+//				//std::cout<<"d"<<var[i]<<std::endl;
+//			}
+//
+//			for (int i=0; i<2; i+=2) {
+//				if (!type || type == (i/2+1)+3) {
+//					if ((mean[i]-mean[i+1])> meanth && var[i]<varth && var[i+1]<varth) {
+//						if (outputImg[p]<(mean[i]-mean[i+1]))outputImg[p]=(mean[i]-mean[i+1]);
+//					}
+//					else if ((mean[i+1]-mean[i])> meanth  && var[i]<varth && var[i+1]<varth) {
+//						if (outputImg[p]<(mean[i+1]-mean[i]))outputImg[p]=(mean[i+1]-mean[i]);
+//					}
+//				}
+//			}
+//		}
+//	}
+//}
+
+
+// 131030 5~8
+//void HomogeneousOperator(
+//		const unsigned char 			*inputImg,
+//		unsigned char					*outputImg,
+//		const int&						width,
+//		const int&						height,
+//		const int&						type)
+//{
+//	int p;
+//	int varth=64.0;
+//	int meanth=0;
+//
+//	for(int y = 2; y < height-2; y++ ) {
+//		for(int x = 2; x < width-2; x++ ) {
+//			p = x+y*width;
+//			double var [8];
+//			double mean [8] = {0};
+//			int sum [8] = {0};
+//			int sqsum [8] = {0};
+//			for(int v = -2; v <= 2; v++ ) {
+//				for(int u = -2; u <= 2; u++ ) {
+//					if(u+v == -2) {
+//						int a = inputImg[p+u+v*width];
+//						sum[0] += a;
+//						sqsum[0] += a*a;
+//					} else if(u+v == 2) {
+//						int a = inputImg[p+u+v*width];
+//						sum[1] += a;
+//						sqsum[1] += a*a;
+//					}
+//					if(u-v == -2) {
+//						int a = inputImg[p+u+v*width];
+//						sum[2] += a;
+//						sqsum[2] += a*a;
+//					} else if(u-v == 2) {
+//						int a = inputImg[p+u+v*width];
+//						sum[3] += a;
+//						sqsum[3] += a*a;
+//					}
+//					if(u+v == -2 || u+v == -3) {
+//						int a = inputImg[p+u+v*width];
+//						sum[4] += a;
+//						sqsum[4] += a*a;
+//					} else if(u+v == 2 || u+v == 3) {
+//						int a = inputImg[p+u+v*width];
+//						sum[5] += a;
+//						sqsum[5] += a*a;
+//					}
+//					if(u-v == -2 || u-v == -3) {
+//						int a = inputImg[p+u+v*width];
+//						sum[6] += a;
+//						sqsum[6] += a*a;
+//					} else if(u-v == 2 || u-v == 3) {
+//						int a = inputImg[p+u+v*width];
+//						sum[7] += a;
+//						sqsum[7] += a*a;
+//					}
+//				}
+//			}
+//
+//			for (int i=0; i<4; i++) {
+//				if (i%2==0) {
+//					mean[i] = sum[i]/3.;
+//					var[i] = (sqsum[i]/3.-mean[i]*mean[i]);////sqrt(mean[i]);
+//				} else {
+//					mean[i] = sum[i]/3.;
+//					var[i] = (sqsum[i]/3.-mean[i]*mean[i]);////sqrt(mean[i]);
+//				}
+//				//std::cout<<"d"<<var[i]<<std::endl;
+//			}
+//			for (int i=4; i<8; i++) {
+//				if (i%2==0) {
+//					mean[i] = sum[i]/5.;
+//					var[i] = (sqsum[i]/5.-mean[i]*mean[i]);////sqrt(mean[i]);
+//				} else {
+//					mean[i] = sum[i]/5.;
+//					var[i] = (sqsum[i]/5.-mean[i]*mean[i]);////sqrt(mean[i]);
+//				}
+//				//std::cout<<"d"<<var[i]<<std::endl;
+//			}
+//			for (int i=0; i<8; i+=2) {
+//				if (!type || type == (i/2+1)) {
+//					if ((mean[i]-mean[i+1])> meanth && var[i]<varth && var[i+1]>varth) {
+//						if (outputImg[p]<(mean[i]-mean[i+1]))outputImg[p]=(mean[i]-mean[i+1]);
+//					} else if ((mean[i+1]-mean[i])> meanth  && var[i]<varth && var[i+1]>varth) {
+//						if (outputImg[p]<(mean[i+1]-mean[i]))outputImg[p]=(mean[i+1]-mean[i]);
+//					}
+//				}
+//			}
+//		}
+//	}
+//}
+
+// 131030 5~8 set 008
+//void HomogeneousOperator(
+//		const unsigned char 			*inputImg,
+//		unsigned char					*outputImg,
+//		const int&						width,
+//		const int&						height,
+//		const int&						type)
+//{
+//	int p;
+//	int varth=5.0;
+//	int meanth=0;
+//
+//	for(int y = 1; y < height-2; y++ ) {
+//		for(int x = 1; x < width-2; x++ ) {
+//			p = x+y*width;
+//			double var [2];
+//			double mean [2] = {0};
+//			int sum [2] = {0};
+//			int sqsum [2] = {0};
+//			for(int v = -1; v <= 2; v++ ) {
+//				for(int u = -1; u <= 2; u++ ) {
+//					if(u>0 && v>0) {
+//						int a = inputImg[p+u+v*width];
+//						sum[0] += a;
+//						sqsum[0] += a*a;
+//					} else if(u<0 || v<0) {
+//						int a = inputImg[p+u+v*width];
+//						sum[1] += a;
+//						sqsum[1] += a*a;
+//					}
+//				}
+//			}
+//
+//			for (int i=0; i<2; i++) {
+//				if (i%2==0) {
+//					mean[i] = sum[i]/4.;
+//					var[i] = (sqsum[i]/4.-mean[i]*mean[i]);////sqrt(mean[i]);
+//				} else {
+//					mean[i] = sum[i]/7.;
+//					var[i] = (sqsum[i]/7.-mean[i]*mean[i]);////sqrt(mean[i]);
+//				}
+//				//std::cout<<"d"<<var[i]<<std::endl;
+//			}
+//
+//			for (int i=0; i<2; i+=2) {
+//				if (!type || type == (i/2+1)) {
+//					if ((mean[i]-mean[i+1])> meanth && var[i]<varth && var[i+1]>varth) {
+//						if (outputImg[p]<(mean[i]-mean[i+1]))outputImg[p]=(mean[i]-mean[i+1]);
+//					}
+//					else if ((mean[i+1]-mean[i])> meanth  && var[i]<varth && var[i+1]>varth) {
+//						if (outputImg[p]<(mean[i+1]-mean[i]))outputImg[p]=(mean[i+1]-mean[i]);
+//					}
+//				}
+//			}
+//		}
+//	}
+//
+//	for(int y = 1; y < height-2; y++ ) {
+//		for(int x = 2; x < width-1; x++ ) {
+//			p = x+y*width;
+//			double var [2];
+//			double mean [2] = {0};
+//			int sum [2] = {0};
+//			int sqsum [2] = {0};
+//			for(int v = -1; v <= 2; v++ ) {
+//				for(int u = -2; u <= 1; u++ ) {
+//					if(u<0 && v>0) {
+//						int a = inputImg[p+u+v*width];
+//						sum[0] += a;
+//						sqsum[0] += a*a;
+//					} else if(u>0 || v<0) {
+//						int a = inputImg[p+u+v*width];
+//						sum[1] += a;
+//						sqsum[1] += a*a;
+//					}
+//				}
+//			}
+//
+//			for (int i=0; i<2; i++) {
+//				if (i%2==0) {
+//					mean[i] = sum[i]/4.;
+//					var[i] = (sqsum[i]/4.-mean[i]*mean[i]);////sqrt(mean[i]);
+//				} else {
+//					mean[i] = sum[i]/7.;
+//					var[i] = (sqsum[i]/7.-mean[i]*mean[i]);////sqrt(mean[i]);
+//				}
+//				//std::cout<<"d"<<var[i]<<std::endl;
+//			}
+//
+//			for (int i=0; i<2; i+=2) {
+//				if (!type || type == (i/2+1)+1) {
+//					if ((mean[i]-mean[i+1])> meanth && var[i]<varth && var[i+1]>varth) {
+//						if (outputImg[p]<(mean[i]-mean[i+1]))outputImg[p]=(mean[i]-mean[i+1]);
+//					}
+//					else if ((mean[i+1]-mean[i])> meanth  && var[i]<varth && var[i+1]>varth) {
+//						if (outputImg[p]<(mean[i+1]-mean[i]))outputImg[p]=(mean[i+1]-mean[i]);
+//					}
+//				}
+//			}
+//		}
+//	}
+//
+//
+//
+//	for(int y = 2; y < height-1; y++ ) {
+//		for(int x = 1; x < width-2; x++ ) {
+//			p = x+y*width;
+//			double var [2];
+//			double mean [2] = {0};
+//			int sum [2] = {0};
+//			int sqsum [2] = {0};
+//			for(int v = -2; v <= 1; v++ ) {
+//				for(int u = -1; u <= 2; u++ ) {
+//					if(u>0 && v<0) {
+//						int a = inputImg[p+u+v*width];
+//						sum[0] += a;
+//						sqsum[0] += a*a;
+//					} else if(u<0 || v>0) {
+//						int a = inputImg[p+u+v*width];
+//						sum[1] += a;
+//						sqsum[1] += a*a;
+//					}
+//				}
+//			}
+//
+//			for (int i=0; i<2; i++) {
+//				if (i%2==0) {
+//					mean[i] = sum[i]/4.;
+//					var[i] = (sqsum[i]/4.-mean[i]*mean[i]);////sqrt(mean[i]);
+//				} else {
+//					mean[i] = sum[i]/7.;
+//					var[i] = (sqsum[i]/7.-mean[i]*mean[i]);////sqrt(mean[i]);
+//				}
+//				//std::cout<<"d"<<var[i]<<std::endl;
+//			}
+//
+//			for (int i=0; i<2; i+=2) {
+//				if (!type || type == (i/2+1)+2) {
+//					if ((mean[i]-mean[i+1])> meanth && var[i]<varth && var[i+1]>varth) {
+//						if (outputImg[p]<(mean[i]-mean[i+1]))outputImg[p]=(mean[i]-mean[i+1]);
+//					}
+//					else if ((mean[i+1]-mean[i])> meanth  && var[i]<varth && var[i+1]>varth) {
+//						if (outputImg[p]<(mean[i+1]-mean[i]))outputImg[p]=(mean[i+1]-mean[i]);
+//					}
+//				}
+//			}
+//		}
+//	}
+//
+//	for(int y = 2; y < height-1; y++ ) {
+//		for(int x = 2; x < width-1; x++ ) {
+//			p = x+y*width;
+//			double var [2];
+//			double mean [2] = {0};
+//			int sum [2] = {0};
+//			int sqsum [2] = {0};
+//			for(int v = -2; v <= 1; v++ ) {
+//				for(int u = -2; u <= 1; u++ ) {
+//					if(u<0 && v<0) {
+//						int a = inputImg[p+u+v*width];
+//						sum[0] += a;
+//						sqsum[0] += a*a;
+//					} else if(u>0 || v>0) {
+//						int a = inputImg[p+u+v*width];
+//						sum[1] += a;
+//						sqsum[1] += a*a;
+//					}
+//				}
+//			}
+//
+//			for (int i=0; i<2; i++) {
+//				if (i%2==0) {
+//					mean[i] = sum[i]/4.;
+//					var[i] = (sqsum[i]/4.-mean[i]*mean[i]);////sqrt(mean[i]);
+//				} else {
+//					mean[i] = sum[i]/7;
+//					var[i] = (sqsum[i]/7-mean[i]*mean[i]);////sqrt(mean[i]);
+//				}
+//				//std::cout<<"d"<<var[i]<<std::endl;
+//			}
+//
+//			for (int i=0; i<2; i+=2) {
+//				if (!type || type == (i/2+1)+3) {
+//					if ((mean[i]-mean[i+1])> meanth && var[i]<varth && var[i+1]>varth) {
+//						if (outputImg[p]<(mean[i]-mean[i+1]))outputImg[p]=(mean[i]-mean[i+1]);
+//					}
+//					else if ((mean[i+1]-mean[i])> meanth  && var[i]<varth && var[i+1]>varth) {
+//						if (outputImg[p]<(mean[i+1]-mean[i]))outputImg[p]=(mean[i+1]-mean[i]);
+//					}
+//				}
+//			}
+//		}
+//	}
+//}
+
+
+// 9~12 set 011 var 25
 void HomogeneousOperator(
 		const unsigned char 			*inputImg,
 		unsigned char					*outputImg,
@@ -1058,7 +1868,7 @@ void HomogeneousOperator(
 		const int&						type)
 {
 	int p;
-	int varth=200.0;
+	int varth=4.0;
 	int meanth=0;
 
 	//int sz = width*height;
@@ -1105,103 +1915,129 @@ void HomogeneousOperator(
 			}
 			for (int i=0; i<8; i++) {
 				if (i%2==0) {
-					mean[i] = sum[i]/4;
-					var[i] = (sqsum[i]/4-mean[i]*mean[i]);////sqrt(mean[i]);
+					mean[i] = sum[i]/4.;
+					var[i] = (sqsum[i]/4.-mean[i]*mean[i]);////sqrt(mean[i]);
 				} else {
-					mean[i] = sum[i]/16;
-					var[i] = (sqsum[i]/16-mean[i]*mean[i]);////sqrt(mean[i]);
+					mean[i] = sum[i]/16.;
+					var[i] = (sqsum[i]/16.-mean[i]*mean[i]);////sqrt(mean[i]);
 				}
 				//std::cout<<"d"<<var[i]<<std::endl;
 			}
 
 			for (int i=0; i<8; i+=2) {
 				if (!type || type == (i/2+1)) {
-					if ((mean[i]-mean[i+1])> meanth ) {
-						if (outputImg[p]+(mean[i]-mean[i+1])>255)outputImg[p]=255;
-						else {outputImg[p]+=(mean[i]-mean[i+1]);}
-					}
-					else if ((mean[i+1]-mean[i])> meanth ) {
-						if (outputImg[p]+(mean[i+1]-mean[i])>255)outputImg[p]=255;
-						else {outputImg[p]+=(mean[i+1]-mean[i]);}
-					}
-				}
-			}
-		}
-	}
+					if ((mean[i]-mean[i+1])> meanth && var[i]<varth && var[i+1]>varth) {
+						if (outputImg[p]<(mean[i]-mean[i+1]))outputImg[p]=(mean[i]-mean[i+1]);
+						//else {outputImg[p]+=(mean[i]-mean[i+1]);}
 
-	for(int y = 3; y < height-3; y++ ) {
-		for(int x = 3; x < width-3; x++ ) {
-			p = x+y*width;
-			double var [8];
-			double mean [8] = {0};
-			int sum [8] = {0};
-			int sqsum [8] = {0};
-			for(int v = -3; v <= 3; v++ ) {
-				for(int u = -3; u <= 3; u++ ) {
-					if(u<0 && v<0) {
-						int a = inputImg[p+u+v*width];
-						sum[0] += a;
-						sqsum[0] += a*a;
-					} else if(u>0 || v>0) {
-						int a = inputImg[p+u+v*width];
-						sum[1] += a;
-						sqsum[1] += a*a;
+//						if (outputImg[p]+(mean[i]-mean[i+1])>255)outputImg[p]=255;
+//						else {outputImg[p]+=(mean[i]-mean[i+1]);}
 					}
-					if(u>0 && v<0) {
-						int a = inputImg[p+u+v*width];
-						sum[2] += a;
-						sqsum[2] += a*a;
-					} else if(u<0 || v>0) {
-						int a = inputImg[p+u+v*width];
-						sum[3] += a;
-						sqsum[3] += a*a;
-					}
-					if(u<0 && v>0) {
-						int a = inputImg[p+u+v*width];
-						sum[4] += a;
-						sqsum[4] += a*a;
-					} else if(u>0 || v<0) {
-						int a = inputImg[p+u+v*width];
-						sum[5] += a;
-						sqsum[5] += a*a;
-					}
-					if(u>0 && v>0) {
-						int a = inputImg[p+u+v*width];
-						sum[6] += a;
-						sqsum[6] += a*a;
-					} else if(u<0 || v<0) {
-						int a = inputImg[p+u+v*width];
-						sum[7] += a;
-						sqsum[7] += a*a;
-					}
-				}
-			}
-			for (int i=0; i<8; i++) {
-				if (i%2==0) {
-					mean[i] = sum[i]/9;
-					var[i] = (sqsum[i]/9-mean[i]*mean[i]);////sqrt(mean[i]);
-				} else {
-					mean[i] = sum[i]/33;
-					var[i] = (sqsum[i]/33-mean[i]*mean[i]);////sqrt(mean[i]);
-				}
-				//std::cout<<"d"<<var[i]<<std::endl;
-			}
+					else if ((mean[i+1]-mean[i])> meanth  && var[i]<varth && var[i+1]>varth) {
+						if (outputImg[p]<(mean[i+1]-mean[i]))outputImg[p]=(mean[i+1]-mean[i]);
 
-			for (int i=0; i<8; i+=2) {
-				if (!type || type == (i/2+1)+4) {
-					if ((mean[i]-mean[i+1])> meanth ) {
-						if (outputImg[p]+(mean[i]-mean[i+1])>255)outputImg[p]=255;
-						else {outputImg[p]+=(mean[i]-mean[i+1]);}
-					}
-					else if ((mean[i+1]-mean[i])> meanth ) {
-						if (outputImg[p]+(mean[i+1]-mean[i])>255)outputImg[p]=255;
-						else {outputImg[p]+=(mean[i+1]-mean[i]);}
+//						if (outputImg[p]+(mean[i+1]-mean[i])>255)outputImg[p]=255;
+//						else {outputImg[p]+=(mean[i+1]-mean[i]);}
 					}
 				}
 			}
 		}
 	}
 }
+
+
+// 131030 5~8 set009 set010
+//void HomogeneousOperator(
+//		const unsigned char 			*inputImg,
+//		unsigned char					*outputImg,
+//		const int&						width,
+//		const int&						height,
+//		const int&						type)
+//{
+//	int p;
+//	int varth=64.0;
+//	int meanth=0;
+//
+//	for(int y = 2; y < height-2; y++ ) {
+//		for(int x = 2; x < width-2; x++ ) {
+//			p = x+y*width;
+//			double var [8];
+//			double mean [8] = {0};
+//			int sum [8] = {0};
+//			int sqsum [8] = {0};
+//			for(int v = -2; v <= 2; v++ ) {
+//				for(int u = -2; u <= 2; u++ ) {
+//					if(u+v == -2) {
+//						int a = inputImg[p+u+v*width];
+//						sum[0] += a;
+//						sqsum[0] += a*a;
+//					} else if(u+v == 2) {
+//						int a = inputImg[p+u+v*width];
+//						sum[1] += a;
+//						sqsum[1] += a*a;
+//					}
+//					if(u-v == -2) {
+//						int a = inputImg[p+u+v*width];
+//						sum[2] += a;
+//						sqsum[2] += a*a;
+//					} else if(u-v == 2) {
+//						int a = inputImg[p+u+v*width];
+//						sum[3] += a;
+//						sqsum[3] += a*a;
+//					}
+//					if(u+v == -2 || u+v == -3) {
+//						int a = inputImg[p+u+v*width];
+//						sum[4] += a;
+//						sqsum[4] += a*a;
+//					} else if(u+v == 2 || u+v == 3) {
+//						int a = inputImg[p+u+v*width];
+//						sum[5] += a;
+//						sqsum[5] += a*a;
+//					}
+//					if(u-v == -2 || u-v == -3) {
+//						int a = inputImg[p+u+v*width];
+//						sum[6] += a;
+//						sqsum[6] += a*a;
+//					} else if(u-v == 2 || u-v == 3) {
+//						int a = inputImg[p+u+v*width];
+//						sum[7] += a;
+//						sqsum[7] += a*a;
+//					}
+//				}
+//			}
+//
+//			for (int i=0; i<4; i++) {
+//				if (i%2==0) {
+//					mean[i] = sum[i]/3.;
+//					var[i] = (sqsum[i]/3.-mean[i]*mean[i]);////sqrt(mean[i]);
+//				} else {
+//					mean[i] = sum[i]/3.;
+//					var[i] = (sqsum[i]/3.-mean[i]*mean[i]);////sqrt(mean[i]);
+//				}
+//				//std::cout<<"d"<<var[i]<<std::endl;
+//			}
+//			for (int i=4; i<8; i++) {
+//				if (i%2==0) {
+//					mean[i] = sum[i]/5.;
+//					var[i] = (sqsum[i]/5.-mean[i]*mean[i]);////sqrt(mean[i]);
+//				} else {
+//					mean[i] = sum[i]/5.;
+//					var[i] = (sqsum[i]/5.-mean[i]*mean[i]);////sqrt(mean[i]);
+//				}
+//				//std::cout<<"d"<<var[i]<<std::endl;
+//			}
+//			for (int i=0; i<8; i+=2) {
+//				if (!type || type == (i/2+1)) {
+//					if ((mean[i]-mean[i+1])> meanth && var[i]<varth && var[i+1]<varth) {
+//						if (outputImg[p]<(mean[i]-mean[i+1]))outputImg[p]=(mean[i]-mean[i+1]);
+//					} else if ((mean[i+1]-mean[i])> meanth  && var[i]<varth && var[i+1]<varth) {
+//						if (outputImg[p]<(mean[i+1]-mean[i]))outputImg[p]=(mean[i+1]-mean[i]);
+//					}
+//				}
+//			}
+//		}
+//	}
+//}
 
 void VarianceFilter(
 		InputArray 						_src,
@@ -1227,9 +2063,12 @@ void DifferenceOfVariance(
 	VarianceFilter(_src,var3,3);
 	VarianceFilter(_src,var5,5);
 
+	Mat var3_,var5_;
+	var3.convertTo(var3_,CV_32FC1);
+	var5.convertTo(var5_,CV_32FC1);
 	//diff = (1./var5-1./var3);
 	//diff = (1./(var5+1));
-	diff = (var3);
+	diff = (var5_-var3_);
 
 	double mn,mx;
 	minMaxIdx(diff,&mn,&mx);

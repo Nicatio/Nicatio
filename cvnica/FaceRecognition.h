@@ -42,7 +42,7 @@ public:
 	FaceRecognition(
 			string							dir,
 			string							referenceInfoFileLocation,
-			string							databaseType);
+			string							databaseType="integrated");
 	~FaceRecognition(void);
 	void DirectoryRegister(
 			string							dir);
@@ -52,14 +52,41 @@ public:
 			vector<string>					files,
 			int								DBname,
 			int								criterion=METHOD_CORR);
+//	void Recognition(
+//			string							dir,
+//			string							type,
+//			int								DBname,
+//			int								criterion=METHOD_CORR,
+//			int								startAngle=0,
+//			int								endAngle=0);
 	void Recognition(
 			string							dir,
 			string							type,
 			int								DBname,
 			int								criterion=METHOD_CORR,
 			int								startAngle=0,
-			int								endAngle=0);
+			int								endAngle=0,
+			int								startX=0,
+			int								startY=0,
+			int								endX=0,
+			int								endY=0);
 	void getScoreTestImageBased(
+			const vector<Mat>				inputA,
+			const Mat						inputB,
+			const int						nFileIndex,
+			const int						searchRadius,
+			const int						criterion);
+	void getScoreTestImageBasedCrop(
+			const vector<Mat>				inputA,
+			const Mat						inputB,
+			const int						nFileIndex,
+			const int						searchRadius,
+			const int						criterion,
+			int								startX,
+			int								startY,
+			int								endX,
+			int								endY);
+	void getScoreTestImageBasedWeight(
 			const vector<Mat>				inputA,
 			const Mat						inputB,
 			const int						nFileIndex,
@@ -80,6 +107,7 @@ public:
 			vector<string>						filess);
 	float getAccuracyIncludingBadImages();
 	vector<float> getAccuracyIncludingBadImagesSubset();
+	vector<float> getAccuracyIncludingBadImagesSubset(ofstream &fw);
 	void getBadImageInfo (
 			vector<string>						files,
 			const int							subsetCount=0);
@@ -128,7 +156,11 @@ private:
 			int								DBname,
 			int								criterion,
 			int								startAngle=0,
-			int								endAngle=0);
+			int								endAngle=0,
+			int								startX=0,
+			int								startY=0,
+			int								endX=0,
+			int								endY=0);
 	vector<int> vectorStretch(
 			vector<int>							input);
 };

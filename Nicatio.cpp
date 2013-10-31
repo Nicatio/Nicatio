@@ -40,6 +40,7 @@ using namespace std;
 
 //#define FR_for_integrated
 //#define FR_for_separated
+#define FR_REGION
 //#define Fileout
 
 //#define CMUCROP
@@ -669,8 +670,15 @@ int main(int argc, char* argv[] ){
 		bilateralFilter (_gray, _bilateral, kd, kd*2, kd/2 );
 		resize(_bilateral,_gray2,Size(),2,2,INTER_LINEAR);
 
+		Mat varF,varF2;
+		//cvNica::VarianceFilter(_gray2,varF2,3);
+		cvNica::DifferenceOfVariance(_gray2,varF2);
+		varF2.convertTo(varF2,CV_8UC1);
+		normalize(varF2, varF2, 0, 255, NORM_MINMAX, CV_8UC1);
 
-		Mat im3(_image1.rows*3, _image1.cols*4, CV_8UC1);
+		resize(varF2,varF,size,0,0,INTER_LINEAR);
+
+		Mat im3(_image1.rows*2, _image1.cols*4, CV_8UC1);
 		cvNica::HomogeneousOperator(_gray2.data,_homo2.data,_image1.cols*2,_image1.rows*2);
 		resize(_homo2,_homo,size,0,0,INTER_LINEAR);
 
@@ -680,7 +688,7 @@ int main(int argc, char* argv[] ){
 
 
 
-		for (int j=1; j<=8; j++) {
+		for (int j=1; j<=4; j++) {
 			Mat _k=Mat::zeros(size,CV_8UC1);
 			Mat _h=Mat::zeros(size2,CV_8UC1);
 			cvNica::HomogeneousOperator(_gray2.data,_h.data,_image1.cols*2,_image1.rows*2,j);
@@ -688,9 +696,9 @@ int main(int argc, char* argv[] ){
 			Mat right(im3, Rect(_image1.cols*((j-1)%4), _image1.rows*((int)((j-1)/4)+1), _image1.cols, _image1.rows));
 			_k.copyTo(right);
 		}
-
+		//normalize(_homo, _homo, 0, 255, NORM_MINMAX, CV_8UC1);
 		_homo.copyTo(right);
-
+		normalize(_homo, varF, 0, 255, NORM_MINMAX, CV_8UC1);
 		Mat skel( size, CV_8UC1, cv::Scalar(0));
 		Mat temp( size, CV_8UC1);
 		Mat element = getStructuringElement(cv::MORPH_CROSS, cv::Size(3, 3));
@@ -702,8 +710,8 @@ int main(int argc, char* argv[] ){
 		  bitwise_and(_homo, temp, temp);
 		  bitwise_or(skel, temp, skel);
 		  erode(_homo, _homo, element);
-		  double max;
 
+		  double max;
 		  minMaxLoc(_homo, 0, &max);
 		  done = (max == 0);
 		} while (!done);
@@ -714,10 +722,13 @@ int main(int argc, char* argv[] ){
 
 		//Mat right(im3, Rect(_image1.cols, 0, _image1.cols, _image1.rows));
 
-		skel.copyTo(right2);
+		//skel.copyTo(right2);
+
+		varF.copyTo(right2);
 		sobel.copyTo(right3);
 		//ccanny.copyTo(right3);
-		imwrite(dir+"/set002/"+files[i]+".png",im3);
+		imwrite(dir+"/set012/"+files[i]+".png",im3);
+		cout<<files[i]<<endl;
 	}
 }
 
@@ -972,6 +983,56 @@ int main(int argc, char* argv[] ){
 		abcd2 << "frRecognitionResult" << fr.RecognitionScore;
 		abcd2.release();
 #endif
+
+
+
+#ifdef FR_REGION
+		int pos[52]= {0,0,167,10,	 // ÀÌ¸¶
+		0,11,64,65,	 // ¿Þ´«
+		65,11,102,65,	 // ¹Ì°£
+		103,11,167,65,	 // ¿À¸¥´«
+		0,66,50,114,	 // ÄÚ ¿ÞÂÊ
+		51,66,116,114,	 // ÄÚ
+		117,66,167,114,	 // ÄÚ ¿À¸¥ÂÊ
+		0,115,83,134,	 // ÀÎÁß ¿ÞÂÊ
+		84,115,167,134,   // ÀÎÁß ¿À¸¥ÂÊ
+		0,135,39,162,	 // ÀÔ ¿ÞÂÊ
+		40,135,127,162,	 // ÀÔ
+		128,135,167,162,	 // ÀÔ ¿À¸¥ÂÊ
+		0,163,167,191};	 // ÅÎ
+		for (int i=0; i<13; i++) {
+		ofstream fw;
+		stringstream df;
+		vector<string> tokens = nicatio::StringTokenizer::getTokens(dir,"/");
+
+		df<<tokens[tokens.size()-1]<<i<<"_result.txt";
+		string dff = df.str().c_str();
+
+
+		cvNica::FaceRecognition fr(dir,refLocation);
+		//fr.Recognition(dir,"pgm",DB_YALEB,METHOD_CORR,-45,0);
+		fr.Recognition(dir,dataType,DB_YALEB,METHOD_CORR,0,0,pos[i*4],pos[i*4+1],pos[i*4+2],pos[i*4+3]);
+		//fr.Recognition(dir,"pgm",DB_YALEB,METHOD_CORR);
+
+		float ra = fr.getAccuracy(files);
+		float rb = fr.getAccuracyIncludingBadImages();
+
+		fw.open(df.str().c_str(),ios::out);
+		fw<<"1 "<<ra<<" "<<endl;
+		fw<<"2 "<<rb<<" "<<endl;
+		fr.getAccuracyIncludingBadImagesSubset(fw);
+		fw.close();
+		FileStorage abcd("dix.xml",FileStorage::WRITE);
+		abcd << "frRecognitionResult" << fr.RecognitionResult;
+		stringstream adf;
+		adf<<i<<"n.xml";
+		FileStorage abcd2(adf.str(),FileStorage::WRITE);
+		abcd2 << "frRecognitionScore" << fr.RecognitionScore;
+		abcd2.release();
+		abcd.release();
+		}
+#endif
+
 
 
 #ifdef FA
