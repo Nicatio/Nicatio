@@ -181,7 +181,10 @@ void SelectiveClosing(
 		else *(ptrDst) = 0xff;*/
 	}
 
-
+	imwrite("k1.bmp",src);
+	imwrite("k5.bmp",_s);
+	imwrite("k9.bmp",_l);
+	imwrite("kk.bmp",dst);
 }
 
 void NormDynamicMorphQuotImage(

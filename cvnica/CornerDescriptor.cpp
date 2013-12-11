@@ -1860,93 +1860,6 @@ namespace cvNica {
 
 
 // 9~12 set 011 var 25
-void HomogeneousOperator(
-		const unsigned char 			*inputImg,
-		unsigned char					*outputImg,
-		const int&						width,
-		const int&						height,
-		const int&						type)
-{
-	int p;
-	int varth=4.0;
-	int meanth=0;
-
-	//int sz = width*height;
-
-	for(int y = 2; y < height-2; y++ ) {
-		for(int x = 2; x < width-2; x++ ) {
-			p = x+y*width;
-			double var [8];
-			double mean [8] = {0};
-			int sum [8] = {0};
-			int sqsum [8] = {0};
-			for(int v = -2; v <= 2; v++ ) {
-				for(int u = -2; u <= 2; u++ ) {
-					int a = inputImg[p+u+v*width];
-					if(u<0 && v<0) {
-						sum[0] += a;
-						sqsum[0] += a*a;
-					} else if(u>0 || v>0) {
-						sum[1] += a;
-						sqsum[1] += a*a;
-					}
-					if(u>0 && v<0) {
-						sum[2] += a;
-						sqsum[2] += a*a;
-					} else if(u<0 || v>0) {
-						sum[3] += a;
-						sqsum[3] += a*a;
-					}
-					if(u<0 && v>0) {
-						sum[4] += a;
-						sqsum[4] += a*a;
-					} else if(u>0 || v<0) {
-						sum[5] += a;
-						sqsum[5] += a*a;
-					}
-					if(u>0 && v>0) {
-						sum[6] += a;
-						sqsum[6] += a*a;
-					} else if(u<0 || v<0) {
-						sum[7] += a;
-						sqsum[7] += a*a;
-					}
-				}
-			}
-			for (int i=0; i<8; i++) {
-				if (i%2==0) {
-					mean[i] = sum[i]/4.;
-					var[i] = (sqsum[i]/4.-mean[i]*mean[i]);////sqrt(mean[i]);
-				} else {
-					mean[i] = sum[i]/16.;
-					var[i] = (sqsum[i]/16.-mean[i]*mean[i]);////sqrt(mean[i]);
-				}
-				//std::cout<<"d"<<var[i]<<std::endl;
-			}
-
-			for (int i=0; i<8; i+=2) {
-				if (!type || type == (i/2+1)) {
-					if ((mean[i]-mean[i+1])> meanth && var[i]<varth && var[i+1]>varth) {
-						if (outputImg[p]<(mean[i]-mean[i+1]))outputImg[p]=(mean[i]-mean[i+1]);
-						//else {outputImg[p]+=(mean[i]-mean[i+1]);}
-
-//						if (outputImg[p]+(mean[i]-mean[i+1])>255)outputImg[p]=255;
-//						else {outputImg[p]+=(mean[i]-mean[i+1]);}
-					}
-					else if ((mean[i+1]-mean[i])> meanth  && var[i]<varth && var[i+1]>varth) {
-						if (outputImg[p]<(mean[i+1]-mean[i]))outputImg[p]=(mean[i+1]-mean[i]);
-
-//						if (outputImg[p]+(mean[i+1]-mean[i])>255)outputImg[p]=255;
-//						else {outputImg[p]+=(mean[i+1]-mean[i]);}
-					}
-				}
-			}
-		}
-	}
-}
-
-
-// 131030 5~8 set009 set010
 //void HomogeneousOperator(
 //		const unsigned char 			*inputImg,
 //		unsigned char					*outputImg,
@@ -1955,7 +1868,94 @@ void HomogeneousOperator(
 //		const int&						type)
 //{
 //	int p;
-//	int varth=64.0;
+//	int varth=4.0;
+//	int meanth=0;
+//
+//	//int sz = width*height;
+//
+//	for(int y = 2; y < height-2; y++ ) {
+//		for(int x = 2; x < width-2; x++ ) {
+//			p = x+y*width;
+//			double var [8];
+//			double mean [8] = {0};
+//			int sum [8] = {0};
+//			int sqsum [8] = {0};
+//			for(int v = -2; v <= 2; v++ ) {
+//				for(int u = -2; u <= 2; u++ ) {
+//					int a = inputImg[p+u+v*width];
+//					if(u<0 && v<0) {
+//						sum[0] += a;
+//						sqsum[0] += a*a;
+//					} else if(u>0 || v>0) {
+//						sum[1] += a;
+//						sqsum[1] += a*a;
+//					}
+//					if(u>0 && v<0) {
+//						sum[2] += a;
+//						sqsum[2] += a*a;
+//					} else if(u<0 || v>0) {
+//						sum[3] += a;
+//						sqsum[3] += a*a;
+//					}
+//					if(u<0 && v>0) {
+//						sum[4] += a;
+//						sqsum[4] += a*a;
+//					} else if(u>0 || v<0) {
+//						sum[5] += a;
+//						sqsum[5] += a*a;
+//					}
+//					if(u>0 && v>0) {
+//						sum[6] += a;
+//						sqsum[6] += a*a;
+//					} else if(u<0 || v<0) {
+//						sum[7] += a;
+//						sqsum[7] += a*a;
+//					}
+//				}
+//			}
+//			for (int i=0; i<8; i++) {
+//				if (i%2==0) {
+//					mean[i] = sum[i]/4.;
+//					var[i] = (sqsum[i]/4.-mean[i]*mean[i]);////sqrt(mean[i]);
+//				} else {
+//					mean[i] = sum[i]/16.;
+//					var[i] = (sqsum[i]/16.-mean[i]*mean[i]);////sqrt(mean[i]);
+//				}
+//				//std::cout<<"d"<<var[i]<<std::endl;
+//			}
+//
+//			for (int i=0; i<8; i+=2) {
+//				if (!type || type == (i/2+1)) {
+//					if ((mean[i]-mean[i+1])> meanth && var[i]<varth && var[i+1]>varth) {
+//						if (outputImg[p]<(mean[i]-mean[i+1]))outputImg[p]=(mean[i]-mean[i+1]);
+//						//else {outputImg[p]+=(mean[i]-mean[i+1]);}
+//
+////						if (outputImg[p]+(mean[i]-mean[i+1])>255)outputImg[p]=255;
+////						else {outputImg[p]+=(mean[i]-mean[i+1]);}
+//					}
+//					else if ((mean[i+1]-mean[i])> meanth  && var[i]<varth && var[i+1]>varth) {
+//						if (outputImg[p]<(mean[i+1]-mean[i]))outputImg[p]=(mean[i+1]-mean[i]);
+//
+////						if (outputImg[p]+(mean[i+1]-mean[i])>255)outputImg[p]=255;
+////						else {outputImg[p]+=(mean[i+1]-mean[i]);}
+//					}
+//				}
+//			}
+//		}
+//	}
+//}
+
+
+//// 131030 5~8 set009 set010
+//void HomogeneousOperator(
+//		const unsigned char 			*inputImg,
+//		unsigned char					*outputImg,
+//		const int&						width,
+//		const int&						height,
+//		const int&						type)
+//{
+//	int p;
+//	int varth=25.0;
 //	int meanth=0;
 //
 //	for(int y = 2; y < height-2; y++ ) {
@@ -2039,6 +2039,99 @@ void HomogeneousOperator(
 //	}
 //}
 
+// 131030 5~8 set013
+void HomogeneousOperator(
+		const unsigned char 			*inputImg,
+		unsigned char					*outputImg,
+		const int&						width,
+		const int&						height,
+		const int&						type)
+{
+	int p;
+	int varth=25.0;
+	int meanth=0;
+
+	for(int y = 2; y < height-2; y++ ) {
+		for(int x = 2; x < width-2; x++ ) {
+			p = x+y*width;
+			double var [8];
+			double mean [8] = {0};
+			int sum [8] = {0};
+			int sqsum [8] = {0};
+			for(int v = -2; v <= 2; v++ ) {
+				for(int u = -2; u <= 2; u++ ) {
+					if(u+v == -2) {
+						int a = inputImg[p+u+v*width];
+						sum[0] += a;
+						sqsum[0] += a*a;
+					} else if(u+v == 2) {
+						int a = inputImg[p+u+v*width];
+						sum[1] += a;
+						sqsum[1] += a*a;
+					}
+					if(u-v == -2) {
+						int a = inputImg[p+u+v*width];
+						sum[2] += a;
+						sqsum[2] += a*a;
+					} else if(u-v == 2) {
+						int a = inputImg[p+u+v*width];
+						sum[3] += a;
+						sqsum[3] += a*a;
+					}
+					if(u+v == -2 || u+v == -3) {
+						int a = inputImg[p+u+v*width];
+						sum[4] += a;
+						sqsum[4] += a*a;
+					} else if(u+v == 2 || u+v == 3) {
+						int a = inputImg[p+u+v*width];
+						sum[5] += a;
+						sqsum[5] += a*a;
+					}
+					if(u-v == -2 || u-v == -3) {
+						int a = inputImg[p+u+v*width];
+						sum[6] += a;
+						sqsum[6] += a*a;
+					} else if(u-v == 2 || u-v == 3) {
+						int a = inputImg[p+u+v*width];
+						sum[7] += a;
+						sqsum[7] += a*a;
+					}
+				}
+			}
+
+			for (int i=0; i<4; i++) {
+				if (i%2==0) {
+					mean[i] = sum[i]/3.;
+					var[i] = (sqsum[i]/3.-mean[i]*mean[i]);////sqrt(mean[i]);
+				} else {
+					mean[i] = sum[i]/3.;
+					var[i] = (sqsum[i]/3.-mean[i]*mean[i]);////sqrt(mean[i]);
+				}
+				//std::cout<<"d"<<var[i]<<std::endl;
+			}
+			for (int i=4; i<8; i++) {
+				if (i%2==0) {
+					mean[i] = sum[i]/5.;
+					var[i] = (sqsum[i]/5.-mean[i]*mean[i]);////sqrt(mean[i]);
+				} else {
+					mean[i] = sum[i]/5.;
+					var[i] = (sqsum[i]/5.-mean[i]*mean[i]);////sqrt(mean[i]);
+				}
+				//std::cout<<"d"<<var[i]<<std::endl;
+			}
+			for (int i=0; i<8; i+=2) {
+				if (!type || type == (i/2+1)) {
+					if ((mean[i]-mean[i+1])> meanth && var[i]<varth && var[i+1]<varth) {
+						if (outputImg[p]<(mean[i]-mean[i+1]))outputImg[p]=(mean[i]-mean[i+1]);
+					} else if ((mean[i+1]-mean[i])> meanth  && var[i]<varth && var[i+1]<varth) {
+						if (outputImg[p]<(mean[i+1]-mean[i]))outputImg[p]=(mean[i+1]-mean[i]);
+					}
+				}
+			}
+		}
+	}
+}
+
 void VarianceFilter(
 		InputArray 						_src,
 		OutputArray						_dst,
@@ -2052,6 +2145,840 @@ void VarianceFilter(
 	cv::sqrt(mu2 - mu.mul(mu), _dst);
 }
 
+Mat kernels(
+		int								type,
+		Point&							point)
+{
+	Mat kernel;
+	if (type==0){
+		kernel = (Mat_<float>(5,5) << 1,1,1,1,1 , 1,1,1,1,1 , 1,1,0,0,0 , 1,1,0,0,0 , 1,1,0,0,0);
+		point = Point(-1,-1);
+	} else if (type==1){
+		kernel = (Mat_<float>(5,5) << 0,0,0,0,0 , 0,0,0,0,0 , 0,0,0,0,0 , 0,0,0,1,1 , 0,0,0,1,1);
+		point = Point(-1,-1);
+	} else if (type==2){
+		kernel = (Mat_<float>(5,5) << 1,1,1,1,1 , 1,1,1,1,1 , 0,0,0,1,1 , 0,0,0,1,1 , 0,0,0,1,1);
+		point = Point(-1,-1);
+	} else if (type==3){
+		kernel = (Mat_<float>(5,5) << 0,0,0,0,0 , 0,0,0,0,0 , 0,0,0,0,0 , 1,1,0,0,0 , 1,1,0,0,0);
+		point = Point(-1,-1);
+	} else if (type==4){
+		kernel = (Mat_<float>(5,5) << 1,1,0,0,0 , 1,1,0,0,0 , 1,1,0,0,0 , 1,1,1,1,1 , 1,1,1,1,1);
+		point = Point(-1,-1);
+	} else if (type==5){
+		kernel = (Mat_<float>(5,5) << 0,0,0,1,1 , 0,0,0,1,1 , 0,0,0,0,0 , 0,0,0,0,0 , 0,0,0,0,0);
+		point = Point(-1,-1);
+	} else if (type==6){
+		kernel = (Mat_<float>(5,5) << 0,0,0,1,1 , 0,0,0,1,1 , 0,0,0,1,1 , 1,1,1,1,1 , 1,1,1,1,1);
+		point = Point(-1,-1);
+	} else if (type==7){
+		kernel = (Mat_<float>(5,5) << 1,1,0,0,0 , 1,1,0,0,0 , 0,0,0,0,0 , 0,0,0,0,0 , 0,0,0,0,0);
+		point = Point(-1,-1);
+	}
+
+
+	else if (type==8){
+		kernel = (Mat_<float>(6,6) << 1,1,1,1,1,0 , 1,1,1,1,1,0 , 1,1,0,0,0,0 , 1,1,0,0,0,0 , 1,1,0,0,0,0 , 0,0,0,0,0,0);
+		point = Point(-1,-1);
+	} else if (type==9){
+		kernel = (Mat_<float>(6,6) << 0,0,0,0,0,0 , 0,0,0,0,0,0 , 0,0,0,0,0,0 , 0,0,0,0,0,0 , 0,0,0,0,1,1 , 0,0,0,0,1,1);
+		point = Point(-1,-1);
+	} else if (type==10){
+		kernel = (Mat_<float>(6,6) << 1,1,1,1,1,0 , 1,1,1,1,1,0 , 0,0,0,0,1,1 , 0,0,0,0,1,1 , 0,0,0,0,1,1 , 0,0,0,0,0,0);
+		point = Point(3,3);
+	} else if (type==11){
+		kernel = (Mat_<float>(6,6) << 0,0,0,0,0,0 , 0,0,0,0,0,0 , 0,0,0,0,0,0 , 0,0,0,0,0,0 , 1,1,0,0,0,0 , 1,1,0,0,0,0);
+		point = Point(3,3);
+	} else if (type==12){
+		kernel = (Mat_<float>(6,6) << 0,0,0,0,0,0 , 1,1,0,0,0,0 , 1,1,0,0,0,0 , 1,1,0,0,0,0 , 1,1,1,1,1,0 , 1,1,1,1,1,0);
+		point = Point(-1,-1);
+	} else if (type==13){
+		kernel = (Mat_<float>(6,6) << 0,0,0,0,1,1 , 0,0,0,0,1,1 , 0,0,0,0,0,0 , 0,0,0,0,0,0 , 0,0,0,0,0,0 , 0,0,0,0,0,0);
+		point = Point(-1,-1);
+	} else if (type==14){
+		kernel = (Mat_<float>(6,6) << 0,0,0,0,0,0 , 0,0,0,0,1,1 , 0,0,0,0,1,1 , 0,0,0,0,1,1 , 0,1,1,1,1,1 , 0,1,1,1,1,1);
+		point = Point(-1,-1);
+	} else if (type==15){
+		kernel = (Mat_<float>(6,6) << 1,1,0,0,0,0 , 1,1,0,0,0,0 , 0,0,0,0,0,0 , 0,0,0,0,0,0 , 0,0,0,0,0,0 , 0,0,0,0,0,0);
+		point = Point(-1,-1);
+	}
+
+
+	else if (type==16){
+		kernel = (Mat_<float>(7,7) << 1,1,1,1,1,0,0 , 1,1,1,1,1,0,0 , 1,1,0,0,0,0,0 , 1,1,0,0,0,0,0 , 1,1,0,0,0,0,0 , 0,0,0,0,0,0,0 , 0,0,0,0,0,0,0);
+		point = Point(-1,-1);
+	} else if (type==17){
+		kernel = (Mat_<float>(7,7) << 0,0,0,0,0,0,0 , 0,0,0,0,0,0,0 , 0,0,0,0,0,0,0 , 0,0,0,0,0,0,0 , 0,0,0,0,0,0,0 , 0,0,0,0,0,1,1 , 0,0,0,0,0,1,1);
+		point = Point(-1,-1);
+	} else if (type==18){
+		kernel = (Mat_<float>(7,7) << 0,0,1,1,1,1,1 , 0,0,1,1,1,1,1 , 0,0,0,0,0,1,1 , 0,0,0,0,0,1,1 , 0,0,0,0,0,1,1 , 0,0,0,0,0,0,0 , 0,0,0,0,0,0,0);
+		point = Point(-1,-1);
+	} else if (type==19){
+		kernel = (Mat_<float>(7,7) << 0,0,0,0,0,0,0 , 0,0,0,0,0,0,0 , 0,0,0,0,0,0,0 , 0,0,0,0,0,0,0 , 0,0,0,0,0,0,0 , 1,1,0,0,0,0,0 , 1,1,0,0,0,0,0);
+		point = Point(-1,-1);
+	} else if (type==20){
+		kernel = (Mat_<float>(7,7) << 0,0,0,0,0,0,0 , 0,0,0,0,0,0,0 , 1,1,0,0,0,0,0 , 1,1,0,0,0,0,0 , 1,1,0,0,0,0,0 , 1,1,1,1,1,0,0 , 1,1,1,1,1,0,0);
+		point = Point(-1,-1);
+	} else if (type==21){
+		kernel = (Mat_<float>(7,7) << 0,0,0,0,0,1,1 , 0,0,0,0,0,1,1 , 0,0,0,0,0,0,0 , 0,0,0,0,0,0,0 , 0,0,0,0,0,0,0 , 0,0,0,0,0,0,0 , 0,0,0,0,0,0,0);
+		point = Point(-1,-1);
+	} else if (type==22){
+		kernel = (Mat_<float>(7,7) << 0,0,0,0,0,0,0 , 0,0,0,0,0,0,0 , 0,0,0,0,0,1,1 , 0,0,0,0,0,1,1 , 0,0,0,0,0,1,1 , 0,0,1,1,1,1,1 , 0,0,1,1,1,1,1);
+		point = Point(-1,-1);
+	} else if (type==23){
+		kernel = (Mat_<float>(7,7) << 1,1,0,0,0,0,0 , 1,1,0,0,0,0,0 , 0,0,0,0,0,0,0 , 0,0,0,0,0,0,0 , 0,0,0,0,0,0,0 , 0,0,0,0,0,0,0 , 0,0,0,0,0,0,0);
+		point = Point(-1,-1);
+	}
+
+
+	else if (type==24){
+		kernel = (Mat_<float>(5,5) << 0,0,1,0,0 , 0,0,0,1,0 , 0,0,0,0,1 , 0,0,0,0,0 , 0,0,0,0,0);
+		point = Point(-1,-1);
+	} else if (type==25){
+		kernel = (Mat_<float>(5,5) << 0,0,0,0,0 , 0,0,0,0,0 , 1,0,0,0,0 , 0,1,0,0,0 , 0,0,1,0,0);
+		point = Point(-1,-1);
+	} else if (type==26){
+		kernel = (Mat_<float>(5,5) << 0,0,1,0,0 , 0,1,0,0,0 , 1,0,0,0,0 , 0,0,0,0,0 , 0,0,0,0,0);
+		point = Point(-1,-1);
+	} else if (type==27){
+		kernel = (Mat_<float>(5,5) << 0,0,0,0,0 , 0,0,0,0,0 , 0,0,0,0,1 , 0,0,0,1,0 , 0,0,1,0,0);
+		point = Point(-1,-1);
+	} else if (type==28){
+		kernel = (Mat_<float>(5,5) << 0,0,1,1,0 , 0,0,0,1,1 , 0,0,0,0,1 , 0,0,0,0,0 , 0,0,0,0,0);
+		point = Point(-1,-1);
+	} else if (type==29){
+		kernel = (Mat_<float>(5,5) << 0,0,0,0,0 , 0,0,0,0,0 , 1,0,0,0,0 , 1,1,0,0,0 , 0,1,1,0,0);
+		point = Point(-1,-1);
+	} else if (type==30){
+		kernel = (Mat_<float>(5,5) << 0,1,1,0,0 , 1,1,0,0,0 , 1,0,0,0,0 , 0,0,0,0,0 , 0,0,0,0,0);
+		point = Point(-1,-1);
+	} else if (type==31){
+		kernel = (Mat_<float>(5,5) << 0,0,0,0,0 , 0,0,0,0,0 , 0,0,0,0,1 , 0,0,0,1,1 , 0,0,1,1,0);
+		point = Point(-1,-1);
+	}
+
+
+	else if (type==32){
+		kernel = (Mat_<float>(5,5) << 0,0,0,0,0 , 0,0,0,0,0 , 0,0,1,1,1 , 0,0,1,0,0 , 0,0,1,0,0);
+		point = Point(-1,-1);
+	} else if (type==33){
+		kernel = (Mat_<float>(5,5) << 0,0,0,0,0 , 0,0,0,0,0 , 1,1,1,0,0 , 0,0,1,0,0 , 0,0,1,0,0);
+		point = Point(-1,-1);
+	} else if (type==34){
+		kernel = (Mat_<float>(5,5) << 0,0,1,0,0 , 0,0,1,0,0 , 0,0,1,1,1 , 0,0,0,0,0 , 0,0,0,0,0);
+		point = Point(-1,-1);
+	} else if (type==35){
+		kernel = (Mat_<float>(5,5) << 0,0,1,0,0 , 0,0,1,0,0 , 1,1,1,0,0 , 0,0,0,0,0 , 0,0,0,0,0);
+		point = Point(-1,-1);
+	}
+
+	else if (type==36){
+		kernel = (Mat_<float>(7,7) << 0,0,0,0,0,0,0 , 0,0,0,0,0,0,0 , 0,0,0,0,0,0,0 , 0,0,0,1,1,1,1 , 0,0,0,1,1,1,1 , 0,0,0,1,1,0,0 , 0,0,0,1,1,0,0);
+		point = Point(-1,-1);
+	} else if (type==37){
+		kernel = (Mat_<float>(7,7) << 0,0,0,0,0,0,0 , 0,0,0,0,0,0,0 , 0,0,0,0,0,0,0 , 1,1,1,1,0,0,0 , 1,1,1,1,0,0,0 , 0,0,1,1,0,0,0 , 0,0,1,1,0,0,0);
+		point = Point(-1,-1);
+	} else if (type==38){
+		kernel = (Mat_<float>(7,7) << 0,0,0,1,1,0,0 , 0,0,0,1,1,0,0 , 0,0,0,1,1,1,1 , 0,0,0,1,1,1,1 , 0,0,0,0,0,0,0 , 0,0,0,0,0,0,0 , 0,0,0,0,0,0,0);
+		point = Point(-1,-1);
+	} else if (type==39){
+		kernel = (Mat_<float>(7,7) << 0,0,1,1,0,0,0 , 0,0,1,1,0,0,0 , 1,1,1,1,0,0,0 , 1,1,1,1,0,0,0 , 0,0,0,0,0,0,0 , 0,0,0,0,0,0,0 , 0,0,0,0,0,0,0);
+		point = Point(-1,-1);
+	}
+
+	else if (type==40){
+		kernel = (Mat_<float>(7,7) << 0,0,0,0,0,0,0 , 0,0,0,0,0,0,0 , 0,0,0,0,0,0,0 , 0,0,0,1,1,1,1 , 0,0,0,1,0,0,0 , 0,0,0,1,0,0,0 , 0,0,0,1,0,0,0);
+		point = Point(-1,-1);
+	} else if (type==41){
+		kernel = (Mat_<float>(7,7) << 0,0,0,0,0,0,0 , 0,0,0,0,0,0,0 , 0,0,0,0,0,0,0 , 1,1,1,1,0,0,0 , 0,0,0,1,0,0,0 , 0,0,0,1,0,0,0 , 0,0,0,1,0,0,0);
+		point = Point(-1,-1);
+	} else if (type==42){
+		kernel = (Mat_<float>(7,7) << 0,0,0,1,0,0,0 , 0,0,0,1,0,0,0 , 0,0,0,1,0,0,0 , 0,0,0,1,1,1,1 , 0,0,0,0,0,0,0 , 0,0,0,0,0,0,0 , 0,0,0,0,0,0,0);
+		point = Point(-1,-1);
+	} else if (type==43){
+		kernel = (Mat_<float>(7,7) << 0,0,0,1,0,0,0 , 0,0,0,1,0,0,0 , 0,0,0,1,0,0,0 , 1,1,1,1,0,0,0 , 0,0,0,0,0,0,0 , 0,0,0,0,0,0,0 , 0,0,0,0,0,0,0);
+		point = Point(-1,-1);
+	}
+
+	else if (type==44){
+		kernel = (Mat_<float>(11,7) <<  1,1,1,0,0,0,0 ,
+										1,1,1,0,0,0,0 ,
+										1,1,1,0,0,0,0 ,
+										1,1,1,0,0,0,0 ,
+										1,1,1,0,0,0,0 ,
+										1,1,1,0,0,0,0 ,
+										1,1,1,0,0,0,0 ,
+										1,1,1,0,0,0,0 ,
+										1,1,1,0,0,0,0 ,
+										1,1,1,0,0,0,0 ,
+										1,1,1,0,0,0,0);
+		point = Point(-1,-1);
+	} else if (type==45){
+		kernel = (Mat_<float>(11,7) <<  0,0,0,0,1,1,1 ,
+										0,0,0,0,1,1,1 ,
+										0,0,0,0,1,1,1 ,
+										0,0,0,0,1,1,1 ,
+										0,0,0,0,1,1,1 ,
+										0,0,0,0,1,1,1 ,
+										0,0,0,0,1,1,1 ,
+										0,0,0,0,1,1,1 ,
+										0,0,0,0,1,1,1 ,
+										0,0,0,0,1,1,1 ,
+										0,0,0,0,1,1,1);
+		point = Point(-1,-1);
+	} else if (type==46){
+		kernel = (Mat_<float>(7,11) <<  1,1,1,1,1,1,1,1,1,1,1 ,
+										1,1,1,1,1,1,1,1,1,1,1 ,
+										1,1,1,1,1,1,1,1,1,1,1 ,
+										0,0,0,0,0,0,0,0,0,0,0 ,
+										0,0,0,0,0,0,0,0,0,0,0 ,
+										0,0,0,0,0,0,0,0,0,0,0 ,
+										0,0,0,0,0,0,0,0,0,0,0);
+		point = Point(-1,-1);
+	} else if (type==47){
+		kernel = (Mat_<float>(7,11) <<  0,0,0,0,0,0,0,0,0,0,0 ,
+										0,0,0,0,0,0,0,0,0,0,0 ,
+										0,0,0,0,0,0,0,0,0,0,0 ,
+										0,0,0,0,0,0,0,0,0,0,0 ,
+										1,1,1,1,1,1,1,1,1,1,1 ,
+										1,1,1,1,1,1,1,1,1,1,1 ,
+										1,1,1,1,1,1,1,1,1,1,1);
+		point = Point(-1,-1);
+	}
+
+	else if (type==48){
+		kernel = (Mat_<float>(11,10) << 1,1,1,0,0,0,0,0,0,0 ,
+										1,1,1,0,0,0,0,0,0,0 ,
+										1,1,1,0,0,0,0,0,0,0 ,
+										1,1,1,0,0,0,0,0,0,0 ,
+										1,1,1,0,0,0,0,0,0,0 ,
+										1,1,1,0,0,0,0,0,0,0 ,
+										1,1,1,0,0,0,0,0,0,0 ,
+										1,1,1,0,0,0,0,0,0,0 ,
+										1,1,1,0,0,0,0,0,0,0 ,
+										1,1,1,0,0,0,0,0,0,0 ,
+										1,1,1,0,0,0,0,0,0,0);
+		point = Point(-1,-1);
+	} else if (type==49){
+		kernel = (Mat_<float>(11,10) << 0,0,0,0,1,1,0,0,0,0 ,
+										0,0,0,0,1,1,0,0,0,0 ,
+										0,0,0,0,1,1,0,0,0,0 ,
+										0,0,0,0,1,1,0,0,0,0 ,
+										0,0,0,0,1,1,0,0,0,0 ,
+										0,0,0,0,1,1,0,0,0,0 ,
+										0,0,0,0,1,1,0,0,0,0 ,
+										0,0,0,0,1,1,0,0,0,0 ,
+										0,0,0,0,1,1,0,0,0,0 ,
+										0,0,0,0,1,1,0,0,0,0 ,
+										0,0,0,0,1,1,0,0,0,0);
+		point = Point(-1,-1);
+	} else if (type==50){
+		kernel = (Mat_<float>(11,10) << 0,0,0,0,0,0,0,1,1,1 ,
+										0,0,0,0,0,0,0,1,1,1 ,
+										0,0,0,0,0,0,0,1,1,1 ,
+										0,0,0,0,0,0,0,1,1,1 ,
+										0,0,0,0,0,0,0,1,1,1 ,
+										0,0,0,0,0,0,0,1,1,1 ,
+										0,0,0,0,0,0,0,1,1,1 ,
+										0,0,0,0,0,0,0,1,1,1 ,
+										0,0,0,0,0,0,0,1,1,1 ,
+										0,0,0,0,0,0,0,1,1,1 ,
+										0,0,0,0,0,0,0,1,1,1);
+		point = Point(-1,-1);
+	} else if (type==51){
+		kernel = (Mat_<float>(10,11) << 1,1,1,1,1,1,1,1,1,1,1 ,
+										1,1,1,1,1,1,1,1,1,1,1 ,
+										1,1,1,1,1,1,1,1,1,1,1 ,
+										0,0,0,0,0,0,0,0,0,0,0 ,
+										0,0,0,0,0,0,0,0,0,0,0 ,
+										0,0,0,0,0,0,0,0,0,0,0 ,
+										0,0,0,0,0,0,0,0,0,0,0 ,
+										0,0,0,0,0,0,0,0,0,0,0 ,
+										0,0,0,0,0,0,0,0,0,0,0 ,
+										0,0,0,0,0,0,0,0,0,0,0);
+		point = Point(-1,-1);
+	} else if (type==52){
+		kernel = (Mat_<float>(10,11) << 0,0,0,0,0,0,0,0,0,0,0 ,
+										0,0,0,0,0,0,0,0,0,0,0 ,
+										0,0,0,0,0,0,0,0,0,0,0 ,
+										0,0,0,0,0,0,0,0,0,0,0 ,
+										1,1,1,1,1,1,1,1,1,1,1 ,
+										1,1,1,1,1,1,1,1,1,1,1 ,
+										0,0,0,0,0,0,0,0,0,0,0 ,
+										0,0,0,0,0,0,0,0,0,0,0 ,
+										0,0,0,0,0,0,0,0,0,0,0 ,
+										0,0,0,0,0,0,0,0,0,0,0);
+		point = Point(-1,-1);
+	} else if (type==53){
+		kernel = (Mat_<float>(10,11) << 0,0,0,0,0,0,0,0,0,0,0 ,
+										0,0,0,0,0,0,0,0,0,0,0 ,
+										0,0,0,0,0,0,0,0,0,0,0 ,
+										0,0,0,0,0,0,0,0,0,0,0 ,
+										0,0,0,0,0,0,0,0,0,0,0 ,
+										0,0,0,0,0,0,0,0,0,0,0 ,
+										0,0,0,0,0,0,0,0,0,0,0 ,
+										1,1,1,1,1,1,1,1,1,1,1 ,
+										1,1,1,1,1,1,1,1,1,1,1 ,
+										1,1,1,1,1,1,1,1,1,1,1);
+		point = Point(-1,-1);
+	}
+
+	else if (type==54){
+		kernel = (Mat_<float>(11,8) <<  1,1,1,0,0,0,0,0 ,
+										1,1,1,0,0,0,0,0 ,
+										1,1,1,0,0,0,0,0 ,
+										1,1,1,0,0,0,0,0 ,
+										1,1,1,0,0,0,0,0 ,
+										1,1,1,0,0,0,0,0 ,
+										1,1,1,0,0,0,0,0 ,
+										1,1,1,0,0,0,0,0 ,
+										1,1,1,0,0,0,0,0 ,
+										1,1,1,0,0,0,0,0 ,
+										1,1,1,0,0,0,0,0);
+		point = Point(-1,-1);
+	} else if (type==55){
+		kernel = (Mat_<float>(11,8) <<  0,0,0,0,0,1,1,1 ,
+										0,0,0,0,0,1,1,1 ,
+										0,0,0,0,0,1,1,1 ,
+										0,0,0,0,0,1,1,1 ,
+										0,0,0,0,0,1,1,1 ,
+										0,0,0,0,0,1,1,1 ,
+										0,0,0,0,0,1,1,1 ,
+										0,0,0,0,0,1,1,1 ,
+										0,0,0,0,0,1,1,1 ,
+										0,0,0,0,0,1,1,1 ,
+										0,0,0,0,0,1,1,1);
+		point = Point(-1,-1);
+	} else if (type==56){
+		kernel = (Mat_<float>(8,11) <<  1,1,1,1,1,1,1,1,1,1,1 ,
+										1,1,1,1,1,1,1,1,1,1,1 ,
+										1,1,1,1,1,1,1,1,1,1,1 ,
+										0,0,0,0,0,0,0,0,0,0,0 ,
+										0,0,0,0,0,0,0,0,0,0,0 ,
+										0,0,0,0,0,0,0,0,0,0,0 ,
+										0,0,0,0,0,0,0,0,0,0,0 ,
+										0,0,0,0,0,0,0,0,0,0,0);
+		point = Point(-1,-1);
+	} else if (type==57){
+		kernel = (Mat_<float>(8,11) <<  0,0,0,0,0,0,0,0,0,0,0 ,
+										0,0,0,0,0,0,0,0,0,0,0 ,
+										0,0,0,0,0,0,0,0,0,0,0 ,
+										0,0,0,0,0,0,0,0,0,0,0 ,
+										0,0,0,0,0,0,0,0,0,0,0 ,
+										1,1,1,1,1,1,1,1,1,1,1 ,
+										1,1,1,1,1,1,1,1,1,1,1 ,
+										1,1,1,1,1,1,1,1,1,1,1);
+		point = Point(-1,-1);
+	}
+
+
+	else if (type==58){
+		kernel = (Mat_<float>(11,12) << 1,1,1,0,0,0,0,0,0,0,0,0 ,
+										1,1,1,0,0,0,0,0,0,0,0,0 ,
+										1,1,1,0,0,0,0,0,0,0,0,0 ,
+										1,1,1,0,0,0,0,0,0,0,0,0 ,
+										1,1,1,0,0,0,0,0,0,0,0,0 ,
+										1,1,1,0,0,0,0,0,0,0,0,0 ,
+										1,1,1,0,0,0,0,0,0,0,0,0 ,
+										1,1,1,0,0,0,0,0,0,0,0,0 ,
+										1,1,1,0,0,0,0,0,0,0,0,0 ,
+										1,1,1,0,0,0,0,0,0,0,0,0 ,
+										1,1,1,0,0,0,0,0,0,0,0,0);
+		point = Point(-1,-1);
+	} else if (type==59){
+		kernel = (Mat_<float>(11,12) << 0,0,0,0,0,1,1,0,0,0,0,0 ,
+										0,0,0,0,0,1,1,0,0,0,0,0 ,
+										0,0,0,0,0,1,1,0,0,0,0,0 ,
+										0,0,0,0,0,1,1,0,0,0,0,0 ,
+										0,0,0,0,0,1,1,0,0,0,0,0 ,
+										0,0,0,0,0,1,1,0,0,0,0,0 ,
+										0,0,0,0,0,1,1,0,0,0,0,0 ,
+										0,0,0,0,0,1,1,0,0,0,0,0 ,
+										0,0,0,0,0,1,1,0,0,0,0,0 ,
+										0,0,0,0,0,1,1,0,0,0,0,0 ,
+										0,0,0,0,0,1,1,0,0,0,0,0);
+		point = Point(-1,-1);
+	} else if (type==60){
+		kernel = (Mat_<float>(11,12) << 0,0,0,0,0,0,0,0,0,1,1,1 ,
+										0,0,0,0,0,0,0,0,0,1,1,1 ,
+										0,0,0,0,0,0,0,0,0,1,1,1 ,
+										0,0,0,0,0,0,0,0,0,1,1,1 ,
+										0,0,0,0,0,0,0,0,0,1,1,1 ,
+										0,0,0,0,0,0,0,0,0,1,1,1 ,
+										0,0,0,0,0,0,0,0,0,1,1,1 ,
+										0,0,0,0,0,0,0,0,0,1,1,1 ,
+										0,0,0,0,0,0,0,0,0,1,1,1 ,
+										0,0,0,0,0,0,0,0,0,1,1,1 ,
+										0,0,0,0,0,0,0,0,0,1,1,1);
+		point = Point(-1,-1);
+	} else if (type==61){
+		kernel = (Mat_<float>(12,11) << 1,1,1,1,1,1,1,1,1,1,1 ,
+										1,1,1,1,1,1,1,1,1,1,1 ,
+										1,1,1,1,1,1,1,1,1,1,1 ,
+										0,0,0,0,0,0,0,0,0,0,0 ,
+										0,0,0,0,0,0,0,0,0,0,0 ,
+										0,0,0,0,0,0,0,0,0,0,0 ,
+										0,0,0,0,0,0,0,0,0,0,0 ,
+										0,0,0,0,0,0,0,0,0,0,0 ,
+										0,0,0,0,0,0,0,0,0,0,0 ,
+										0,0,0,0,0,0,0,0,0,0,0 ,
+										0,0,0,0,0,0,0,0,0,0,0 ,
+										0,0,0,0,0,0,0,0,0,0,0);
+		point = Point(-1,-1);
+	} else if (type==62){
+		kernel = (Mat_<float>(12,11) << 0,0,0,0,0,0,0,0,0,0,0 ,
+										0,0,0,0,0,0,0,0,0,0,0 ,
+										0,0,0,0,0,0,0,0,0,0,0 ,
+										0,0,0,0,0,0,0,0,0,0,0 ,
+										0,0,0,0,0,0,0,0,0,0,0 ,
+										1,1,1,1,1,1,1,1,1,1,1 ,
+										1,1,1,1,1,1,1,1,1,1,1 ,
+										0,0,0,0,0,0,0,0,0,0,0 ,
+										0,0,0,0,0,0,0,0,0,0,0 ,
+										0,0,0,0,0,0,0,0,0,0,0 ,
+										0,0,0,0,0,0,0,0,0,0,0 ,
+										0,0,0,0,0,0,0,0,0,0,0);
+		point = Point(-1,-1);
+	} else if (type==63){
+		kernel = (Mat_<float>(12,11) << 0,0,0,0,0,0,0,0,0,0,0 ,
+										0,0,0,0,0,0,0,0,0,0,0 ,
+										0,0,0,0,0,0,0,0,0,0,0 ,
+										0,0,0,0,0,0,0,0,0,0,0 ,
+										0,0,0,0,0,0,0,0,0,0,0 ,
+										0,0,0,0,0,0,0,0,0,0,0 ,
+										0,0,0,0,0,0,0,0,0,0,0 ,
+										0,0,0,0,0,0,0,0,0,0,0 ,
+										0,0,0,0,0,0,0,0,0,0,0 ,
+										1,1,1,1,1,1,1,1,1,1,1 ,
+										1,1,1,1,1,1,1,1,1,1,1 ,
+										1,1,1,1,1,1,1,1,1,1,1);
+		point = Point(-1,-1);
+	}
+
+
+	else if (type==64){
+			kernel = (Mat_<float>(7,7) << 0,0,0,0,0,0,0 , 0,1,1,1,1,0,0 , 0,1,0,0,0,0,0 , 0,1,0,0,0,0,0 , 0,1,0,0,0,0,0 , 0,0,0,0,0,0,0 , 0,0,0,0,0,0,0);
+			point = Point(-1,-1);
+		} else if (type==65){
+			kernel = (Mat_<float>(7,7) << 0,0,0,0,0,0,0 , 0,0,0,0,0,0,0 , 0,0,0,0,0,0,0 , 0,0,0,0,0,0,0 , 0,0,0,0,0,0,0 , 0,0,0,0,0,1,1 , 0,0,0,0,0,1,1);
+			point = Point(-1,-1);
+		} else if (type==66){
+			kernel = (Mat_<float>(7,7) << 0,0,0,0,0,0,0 , 0,0,1,1,1,1,0 , 0,0,0,0,0,1,0 , 0,0,0,0,0,1,0 , 0,0,0,0,0,1,0 , 0,0,0,0,0,0,0 , 0,0,0,0,0,0,0);
+			point = Point(-1,-1);
+		} else if (type==67){
+			kernel = (Mat_<float>(7,7) << 0,0,0,0,0,0,0 , 0,0,0,0,0,0,0 , 0,0,0,0,0,0,0 , 0,0,0,0,0,0,0 , 0,0,0,0,0,0,0 , 1,1,0,0,0,0,0 , 1,1,0,0,0,0,0);
+			point = Point(-1,-1);
+		} else if (type==68){
+			kernel = (Mat_<float>(7,7) << 0,0,0,0,0,0,0 , 0,0,0,0,0,0,0 , 0,1,0,0,0,0,0 , 0,1,0,0,0,0,0 , 0,1,0,0,0,0,0 , 0,1,1,1,1,0,0 , 0,0,0,0,0,0,0);
+			point = Point(-1,-1);
+		} else if (type==69){
+			kernel = (Mat_<float>(7,7) << 0,0,0,0,0,1,1 , 0,0,0,0,0,1,1 , 0,0,0,0,0,0,0 , 0,0,0,0,0,0,0 , 0,0,0,0,0,0,0 , 0,0,0,0,0,0,0 , 0,0,0,0,0,0,0);
+			point = Point(-1,-1);
+		} else if (type==70){
+			kernel = (Mat_<float>(7,7) << 0,0,0,0,0,0,0 , 0,0,0,0,0,0,0 , 0,0,0,0,0,1,0 , 0,0,0,0,0,1,0 , 0,0,0,0,0,1,0 , 0,0,1,1,1,1,0 , 0,0,0,0,0,0,0);
+			point = Point(-1,-1);
+		} else if (type==71){
+			kernel = (Mat_<float>(7,7) << 1,1,0,0,0,0,0 , 1,1,0,0,0,0,0 , 0,0,0,0,0,0,0 , 0,0,0,0,0,0,0 , 0,0,0,0,0,0,0 , 0,0,0,0,0,0,0 , 0,0,0,0,0,0,0);
+			point = Point(-1,-1);
+		}
+
+	return kernel;
+}
+
+void CornerDetectorBasedOnEdge(
+		InputArray 						_src,
+		OutputArray						_dst,
+		int								type)
+{
+	Mat src,__src = _src.getMat();
+	Mat kernel;
+	Mat mean;
+	Mat thr;
+	Mat meanDiff;
+	Point point;
+	double min, max;
+	//double varth=187./255;
+	double varth=187./255;
+	int meanth=0;
+
+	Mat frame (__src.size(),CV_32FC1);
+	//Mat frame_ = Mat(frame, Rect(2, 2, __src.cols-4, __src.rows-4));
+	Mat frame_ = Mat(frame, Rect(3, 3, __src.cols-6, __src.rows-6));
+	//type = 21;
+	__src.convertTo(src,CV_32FC1);
+	kernel = kernels(type,point);
+
+	//MeanMap32bit(src,mean,kernel,point);
+
+	matchTemplate (src,kernel,mean,CV_TM_CCOEFF_NORMED);
+//	namedWindow( "c", CV_WINDOW_AUTOSIZE );
+//	minMaxLoc (mean,&min,&max);
+//	imshow( "c", mean);//thrCrCb[0] );
+//	waitKey(0);
+
+	threshold(mean,thr,varth,255.0,THRESH_BINARY);
+	thr.copyTo(frame_);
+	frame.convertTo(_dst,CV_8UC1);
+
+//	minMaxLoc (thr,&min,&max);
+//	//mean/=max;
+//			namedWindow( "d", CV_WINDOW_AUTOSIZE );
+//			imshow( "d", thr);//thrCrCb[0] );
+//			waitKey(0);
+//
+//
+//	threshold(mean,thr,varth,1.0,THRESH_BINARY_INV);
+//	threshold(varI,thrI,varth,1.0,THRESH_BINARY_INV);
+//
+//	absdiff(meanO, meanI, meanDiff);
+//
+//	meanDiff = meanDiff.mul(thrO);
+//	meanDiff = meanDiff.mul(thrI);
+//
+//	meanDiff /= 2;
+//	meanDiff.convertTo(_dst,CV_8UC1);
+}
+
+
+void CornerDetector(
+		InputArray 						_src,
+		OutputArray						_dst,
+		int								type,
+		int								nPart)
+{
+	Mat src,__src = _src.getMat();
+	Mat kernel[nPart];
+	Mat var[nPart];
+	Mat mean[nPart];
+	Mat thr[nPart];
+	Mat meanDiff[nPart];
+	Point point[nPart];
+	double min_, max_;
+	double varth=16.0;
+	int meanth=0;
+
+	//type = 21;
+	__src.convertTo(src,CV_32F);
+	if(type == 9) {
+		kernel[0] = kernels(0,point[0]);
+		kernel[1] = kernels(1,point[1]);
+	} else if (type == 10) {
+		kernel[0] = kernels(2,point[0]);
+		kernel[1] = kernels(3,point[1]);
+	} else if (type == 11) {
+		kernel[0] = kernels(4,point[0]);
+		kernel[1] = kernels(5,point[1]);
+	} else if (type == 12) {
+		kernel[0] = kernels(6,point[0]);
+		kernel[1] = kernels(7,point[1]);
+	} else if (type == 17) {
+		kernel[0] = kernels(8,point[0]);
+		kernel[1] = kernels(9,point[1]);
+	} else if (type == 18) {
+		kernel[0] = kernels(10,point[0]);
+		kernel[1] = kernels(11,point[1]);
+	} else if (type == 19) {
+		kernel[0] = kernels(12,point[0]);
+		kernel[1] = kernels(13,point[1]);
+	} else if (type == 20) {
+		kernel[0] = kernels(14,point[0]);
+		kernel[1] = kernels(15,point[1]);
+	} else if (type == 21) {
+		kernel[0] = kernels(16,point[0]);
+		kernel[1] = kernels(17,point[1]);
+	} else if (type == 22) {
+		kernel[0] = kernels(18,point[0]);
+		kernel[1] = kernels(19,point[1]);
+	} else if (type == 23) {
+		kernel[0] = kernels(20,point[0]);
+		kernel[1] = kernels(21,point[1]);
+	} else if (type == 24) {
+		kernel[0] = kernels(22,point[0]);
+		kernel[1] = kernels(23,point[1]);
+	} else if (type == 5) {
+		kernel[0] = kernels(24,point[0]);
+		kernel[1] = kernels(25,point[1]);
+	} else if (type == 6) {
+		kernel[0] = kernels(26,point[0]);
+		kernel[1] = kernels(27,point[1]);
+	} else if (type == 7) {
+		kernel[0] = kernels(28,point[0]);
+		kernel[1] = kernels(29,point[1]);
+	} else if (type == 8) {
+		kernel[0] = kernels(30,point[0]);
+		kernel[1] = kernels(31,point[1]);
+	} else if (type == 33) {
+		kernel[0] = kernels(44,point[0]);
+		kernel[1] = kernels(45,point[1]);
+	} else if (type == 34) {
+		kernel[0] = kernels(46,point[0]);
+		kernel[1] = kernels(47,point[1]);
+	} else if (type == 35) {
+		kernel[0] = kernels(48,point[0]);
+		kernel[1] = kernels(49,point[1]);
+		kernel[2] = kernels(50,point[2]);
+	} else if (type == 36) {
+		kernel[0] = kernels(51,point[0]);
+		kernel[1] = kernels(52,point[1]);
+		kernel[2] = kernels(53,point[2]);
+	} else if (type == 37) {
+		kernel[0] = kernels(54,point[0]);
+		kernel[1] = kernels(55,point[1]);
+	} else if (type == 38) {
+		kernel[0] = kernels(56,point[0]);
+		kernel[1] = kernels(57,point[1]);
+	} else if (type == 39) {
+		kernel[0] = kernels(58,point[0]);
+		kernel[1] = kernels(59,point[1]);
+		kernel[2] = kernels(60,point[2]);
+	} else if (type == 40) {
+		kernel[0] = kernels(61,point[0]);
+		kernel[1] = kernels(62,point[1]);
+		kernel[2] = kernels(63,point[2]);
+	} else if (type == 41) {
+		kernel[0] = kernels(64,point[0]);
+		kernel[1] = kernels(65,point[1]);
+	} else if (type == 42) {
+		kernel[0] = kernels(66,point[0]);
+		kernel[1] = kernels(67,point[1]);
+	} else if (type == 43) {
+		kernel[0] = kernels(68,point[0]);
+		kernel[1] = kernels(69,point[1]);
+	} else if (type == 44) {
+		kernel[0] = kernels(70,point[0]);
+		kernel[1] = kernels(71,point[1]);
+	}
+	for (int i=0; i<nPart; i++) {
+		MeanMap32bit(src,mean[i],kernel[i],point[i]);
+		VarianceMap32bit(src,var[i],kernel[i],point[i]);
+		threshold(var[i],thr[i],varth,1.0,THRESH_BINARY_INV);
+	}
+
+//	MeanMap32bit(src,mean[0],kernel[0],point[0]);
+//	MeanMap32bit(src,mean[1],kernel[1],point[1]);
+//	VarianceMap32bit(src,var[0],kernel[0],point[0]);
+//	VarianceMap32bit(src,var[1],kernel[1],point[1]);
+//	minMaxLoc(var[0],&min,&max);
+//	threshold(var[0],thr[0],varth,1.0,THRESH_BINARY_INV);
+//	threshold(var[1],thr[1],varth,1.0,THRESH_BINARY_INV);
+
+	if (nPart==3) {
+		absdiff(mean[0], mean[1], meanDiff[0]);
+		absdiff(mean[2], mean[1], meanDiff[1]);
+
+		min (meanDiff[1],meanDiff[0],meanDiff[2]);
+
+		meanDiff[2] = meanDiff[2].mul(thr[0]);
+		meanDiff[2] = meanDiff[2].mul(thr[1]);
+		meanDiff[2] = meanDiff[2].mul(thr[2]);
+
+		meanDiff[2] /= 4;
+		meanDiff[2].convertTo(_dst,CV_8UC1);
+	} else {
+		absdiff(mean[0], mean[1], meanDiff[0]);
+
+		meanDiff[0] = meanDiff[0].mul(thr[0]);
+		meanDiff[0] = meanDiff[0].mul(thr[1]);
+
+		meanDiff[0] /= 2;
+		meanDiff[0].convertTo(_dst,CV_8UC1);
+	}
+}
+
+void RGBhistogram(
+		Mat								__src,
+		Mat								points,
+		Vector< Vector<int> >&			cornerpoints,
+		int								type,
+		int								nPart)
+{
+		Mat src;
+		Mat kernel[nPart];
+		Mat var[nPart];
+		Mat mean[nPart];
+		Mat thr[nPart];
+		Mat meanDiff[nPart];
+		Point point[nPart];
+		double min_, max_;
+		double varth=16.0;
+		int meanth=0;
+
+		//type = 21;
+		__src.convertTo(src,CV_32F);
+		if(type == 9) {
+			kernel[0] = kernels(0,point[0]);
+			kernel[1] = kernels(1,point[1]);
+		} else if (type == 10) {
+			kernel[0] = kernels(2,point[0]);
+			kernel[1] = kernels(3,point[1]);
+		} else if (type == 11) {
+			kernel[0] = kernels(4,point[0]);
+			kernel[1] = kernels(5,point[1]);
+		} else if (type == 12) {
+			kernel[0] = kernels(6,point[0]);
+			kernel[1] = kernels(7,point[1]);
+		} else if (type == 17) {
+			kernel[0] = kernels(8,point[0]);
+			kernel[1] = kernels(9,point[1]);
+		} else if (type == 18) {
+			kernel[0] = kernels(10,point[0]);
+			kernel[1] = kernels(11,point[1]);
+		} else if (type == 19) {
+			kernel[0] = kernels(12,point[0]);
+			kernel[1] = kernels(13,point[1]);
+		} else if (type == 20) {
+			kernel[0] = kernels(14,point[0]);
+			kernel[1] = kernels(15,point[1]);
+		} else if (type == 21) {
+			kernel[0] = kernels(16,point[0]);
+			kernel[1] = kernels(17,point[1]);
+		} else if (type == 22) {
+			kernel[0] = kernels(18,point[0]);
+			kernel[1] = kernels(19,point[1]);
+		} else if (type == 23) {
+			kernel[0] = kernels(20,point[0]);
+			kernel[1] = kernels(21,point[1]);
+		} else if (type == 24) {
+			kernel[0] = kernels(22,point[0]);
+			kernel[1] = kernels(23,point[1]);
+		} else if (type == 5) {
+			kernel[0] = kernels(24,point[0]);
+			kernel[1] = kernels(25,point[1]);
+		} else if (type == 6) {
+			kernel[0] = kernels(26,point[0]);
+			kernel[1] = kernels(27,point[1]);
+		} else if (type == 7) {
+			kernel[0] = kernels(28,point[0]);
+			kernel[1] = kernels(29,point[1]);
+		} else if (type == 8) {
+			kernel[0] = kernels(30,point[0]);
+			kernel[1] = kernels(31,point[1]);
+		} else if (type == 33) {
+			kernel[0] = kernels(44,point[0]);
+			kernel[1] = kernels(45,point[1]);
+		} else if (type == 34) {
+			kernel[0] = kernels(46,point[0]);
+			kernel[1] = kernels(47,point[1]);
+		} else if (type == 35) {
+			kernel[0] = kernels(48,point[0]);
+			kernel[1] = kernels(49,point[1]);
+			kernel[2] = kernels(50,point[2]);
+		} else if (type == 36) {
+			kernel[0] = kernels(51,point[0]);
+			kernel[1] = kernels(52,point[1]);
+			kernel[2] = kernels(53,point[2]);
+		} else if (type == 37) {
+			kernel[0] = kernels(54,point[0]);
+			kernel[1] = kernels(55,point[1]);
+		} else if (type == 38) {
+			kernel[0] = kernels(56,point[0]);
+			kernel[1] = kernels(57,point[1]);
+		} else if (type == 39) {
+			kernel[0] = kernels(58,point[0]);
+			kernel[1] = kernels(59,point[1]);
+			kernel[2] = kernels(60,point[2]);
+		} else if (type == 40) {
+			kernel[0] = kernels(61,point[0]);
+			kernel[1] = kernels(62,point[1]);
+			kernel[2] = kernels(63,point[2]);
+		} else if (type == 41) {
+			kernel[0] = kernels(64,point[0]);
+			kernel[1] = kernels(65,point[1]);
+		} else if (type == 42) {
+			kernel[0] = kernels(66,point[0]);
+			kernel[1] = kernels(67,point[1]);
+		} else if (type == 43) {
+			kernel[0] = kernels(68,point[0]);
+			kernel[1] = kernels(69,point[1]);
+		} else if (type == 44) {
+			kernel[0] = kernels(70,point[0]);
+			kernel[1] = kernels(71,point[1]);
+		}
+		for (int i=0; i<nPart; i++) {
+			MeanMap32bit(src,mean[i],kernel[i],point[i]);
+		}
+		int count=0;
+	for(int y=0; y < points.rows; y++) {
+		for(int x=0; x < points.cols; x++) {
+			if((int)points.at<uint>(y,x) != 255) {
+				continue;
+			}
+			for (int i=0; i<nPart; i++) {
+				Vector<int> temp;
+				temp.push_back(x);
+				temp.push_back(y);
+				temp.push_back((int)mean[i].at<uint>(y,x));
+				cornerpoints.push_back(temp);
+			}
+			count++;
+		}
+	}
+	std::cout<<" count: "<<count<<std::endl;
+}
+
+void VarianceMap32bit(
+		InputArray 						_src,
+		OutputArray						_dst,
+		Mat								kernel,
+		Point							point)
+{
+	Mat src = _src.getMat(),temp,temp2,var;
+	src.convertTo(src,CV_32F);
+
+	filter2D (src,temp,CV_32F,kernel,point,0,BORDER_CONSTANT);
+	filter2D (src.mul(src),temp2,CV_32F,kernel,point,0,BORDER_CONSTANT);
+
+	temp /= sum(kernel)[0];
+	temp2 /= sum(kernel)[0];
+
+	var = temp2 -  temp.mul(temp);
+	var.convertTo(_dst,CV_32F);
+}
+
+void MeanMap32bit(
+		InputArray 						_src,
+		OutputArray						_dst,
+		Mat								kernel,
+		Point							point)
+{
+	Mat src = _src.getMat(),temp;
+
+	src.convertTo(src,CV_32F);
+
+	filter2D (src,temp,CV_32F,kernel,point,0,BORDER_CONSTANT);
+	temp /= sum(kernel)[0];
+	temp.convertTo(_dst,CV_32F);
+}
+
+void VarianceMap(
+		InputArray 						_src,
+		OutputArray						_dst,
+		int								type)
+{
+	Mat src = _src.getMat(),temp,temp2,kernel,var;
+	Point point;
+	double min, max;
+
+	src.convertTo(src,CV_32F);
+
+	kernel = kernels(type,point);
+
+	filter2D (src,temp,CV_32F,kernel,point,0,BORDER_CONSTANT);
+	filter2D (src.mul(src),temp2,CV_32F,kernel,point,0,BORDER_CONSTANT);
+
+	temp /= sum(kernel)[0];
+	temp2 /= sum(kernel)[0];
+
+	var = temp2 -  temp.mul(temp);
+	var /= 255/4;
+
+	minMaxLoc(var,&min,&max);
+	var.convertTo(_dst,CV_8UC1);
+
+//	namedWindow( "c", CV_WINDOW_AUTOSIZE );
+//	imshow( "c", _dst);//thrCrCb[0] );
+//	waitKey(0);
+}
 
 void DifferenceOfVariance(
 		InputArray 						_src,

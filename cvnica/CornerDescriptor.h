@@ -38,6 +38,45 @@ void VarianceFilter(
 		OutputArray						_dst,
 		int								size);
 
+Mat kernels(
+		int								type,
+		Point&							point);
+
+void CornerDetectorBasedOnEdge(
+		InputArray 						_src,
+		OutputArray						_dst,
+		int								type);
+
+void CornerDetector(
+		InputArray 						_src,
+		OutputArray						_dst,
+		int								type,
+		int								nPart=2);
+
+void RGBhistogram(
+		Mat								__src,
+		Mat								points,
+		Vector< Vector<int> >&			cornerpoints,
+		int								type,
+		int								nPart=2);
+
+void VarianceMap32bit(
+		InputArray 						_src,
+		OutputArray						_dst,
+		Mat								kernel,
+		Point							point);
+
+void MeanMap32bit(
+		InputArray 						_src,
+		OutputArray						_dst,
+		Mat								kernel,
+		Point							point);
+
+void VarianceMap(
+		InputArray 						_src,
+		OutputArray						_dst,
+		int								type);
+
 void DifferenceOfVariance(
 		InputArray 						_src,
 		OutputArray						_dst);
