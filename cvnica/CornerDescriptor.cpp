@@ -2785,6 +2785,33 @@ void CornerDetector(
 	}
 }
 
+Mat RGBThresholdPoint(
+		Size							size,
+		Vector< Vector<int> >&			cornerpoints,
+		int								r,
+		int								g,
+		int								b,
+		int								tolerance)
+{
+	Mat temp (size,CV_8UC1);
+	size_t s = cornerpoints.size();
+	int rb = r - tolerance; if(rb<0) rb=0; if(rb>255) rb=255;
+	int ru = r + tolerance; if(ru<0) ru=0; if(ru>255) ru=255;
+	int gb = g - tolerance; if(gb<0) gb=0; if(gb>255) gb=255;
+	int gu = g + tolerance; if(gu<0) gu=0; if(gu>255) gu=255;
+	int bb = b - tolerance; if(bb<0) bb=0; if(bb>255) bb=255;
+	int bu = b + tolerance; if(bu<0) bu=0; if(bu>255) bu=255;
+
+	for (size_t i=0; i<s; i++){
+		if (cornerpoints[i][2] >= rb && cornerpoints[i][2] <= ru
+				&& cornerpoints[i][3] >= gb && cornerpoints[i][3] <= gu
+				&& cornerpoints[i][4] >= bb && cornerpoints[i][4] <= bu) {
+			temp.at<uchar>(cornerpoints[i][1],cornerpoints[i][0]) = 255;
+		}
+	}
+	return temp;
+}
+
 void RGBhistogram(
 		Mat								__src,
 		Mat								points,
@@ -2802,9 +2829,10 @@ void RGBhistogram(
 		double min_, max_;
 		double varth=16.0;
 		int meanth=0;
-
+		int dx[2], dy[2];
 		//type = 21;
 		__src.convertTo(src,CV_32F);
+
 		if(type == 9) {
 			kernel[0] = kernels(0,point[0]);
 			kernel[1] = kernels(1,point[1]);
@@ -2884,36 +2912,64 @@ void RGBhistogram(
 		} else if (type == 41) {
 			kernel[0] = kernels(64,point[0]);
 			kernel[1] = kernels(65,point[1]);
+			dx[0]=-2;	dy[0]=-2;
+			dx[1]=2;	dy[1]=2;
 		} else if (type == 42) {
 			kernel[0] = kernels(66,point[0]);
 			kernel[1] = kernels(67,point[1]);
+			dx[0]=2;	dy[0]=-2;
+			dx[1]=-2;	dy[1]=2;
 		} else if (type == 43) {
 			kernel[0] = kernels(68,point[0]);
 			kernel[1] = kernels(69,point[1]);
+			dx[0]=-2;	dy[0]=2;
+			dx[1]=2;	dy[1]=-2;
 		} else if (type == 44) {
 			kernel[0] = kernels(70,point[0]);
 			kernel[1] = kernels(71,point[1]);
+			dx[0]=2;	dy[0]=2;
+			dx[1]=-2;	dy[1]=-2;
 		}
 		for (int i=0; i<nPart; i++) {
 			MeanMap32bit(src,mean[i],kernel[i],point[i]);
 		}
+
+		//std::cout<<": "<<mean[1].channels()<<std::endl;
+		//std::cout<<": "<<points.type()<<std::endl;
+
+		//Mat df; mean[1].convertTo(df,CV_8U);
+//		namedWindow( "c", CV_WINDOW_AUTOSIZE );
+//		imshow( "c", mean[0]/255);//thrCrCb[0] );
+//		namedWindow( "d", CV_WINDOW_AUTOSIZE );
+//		imshow( "d", mean[1]/255);//thrCrCb[0] );
+//
+//		namedWindow( "e", CV_WINDOW_AUTOSIZE );
+//		imshow( "e", points);//thrCrCb[0] );
+//		waitKey(0);
+
+	Mat mean8[2]; mean[0].convertTo(mean8[0],CV_8UC1);
+	mean[1].convertTo(mean8[1],CV_8UC1);
+		//mean[1]/=255;
 		int count=0;
 	for(int y=0; y < points.rows; y++) {
 		for(int x=0; x < points.cols; x++) {
-			if((int)points.at<uint>(y,x) != 255) {
+			if((int)points.at<uchar>(y,x) != 255) {
 				continue;
 			}
 			for (int i=0; i<nPart; i++) {
 				Vector<int> temp;
-				temp.push_back(x);
-				temp.push_back(y);
-				temp.push_back((int)mean[i].at<uint>(y,x));
+				temp.push_back(x+dx[i]);
+				temp.push_back(y+dy[i]);
+				temp.push_back((int)(mean8[i].at<Vec3b>(y,x)[0]));
+				temp.push_back((int)(mean8[i].at<Vec3b>(y,x)[1]));
+				temp.push_back((int)(mean8[i].at<Vec3b>(y,x)[2]));
 				cornerpoints.push_back(temp);
+				std::cout<<": "<<temp[0]<<","<<temp[1]<<","<<temp[2]<<","<<temp[3]<<","<<temp[4]<<std::endl;
 			}
 			count++;
 		}
 	}
-	std::cout<<" count: "<<count<<std::endl;
+	///std::cout<<" count: "<<count<<std::endl;
 }
 
 void VarianceMap32bit(

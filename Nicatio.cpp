@@ -19,7 +19,7 @@ using namespace std;
 //#define PGM
 
 #define DATA_TYPE_SELECT
-#define DATA_TYPE 2
+#define DATA_TYPE 0
 // 0: bmp
 // 1: png
 // 2: pgm
@@ -1203,36 +1203,39 @@ int main(int argc, char* argv[] ){
 		Mat sobelColor;
 		Mat merged(_image1.rows*2, _image1.cols*4, CV_8UC3);
 		Mat _image1_split[3];
+		Mat _bilateral3 (size,CV_8UC3);
+		bilateralFilter (_image1, _bilateral3 , kd, kd*2, kd/2 );
+		medianBlur(_bilateral3,_bilateral3,3);
 
-		split (_image1,_image1_split);
+		split (_bilateral3,_image1_split);
 
 
 
 
-		//grayscale
-		cvtColor(_image1,_gray,CV_RGB2GRAY);
-		cvtColor(_gray,_grayRGB,CV_GRAY2RGB);
-
-		Canny(_gray,canny,60,120);
-
-//					namedWindow( "c", CV_WINDOW_AUTOSIZE );
-//					imshow( "c", canny);//thrCrCb[0] );
-//					waitKey(0);
-
-		//bilateral + 2x
-//		Mat _gray2;
-//		medianBlur(_gray,_gray,5);
-		Mat _gray2; _gray.copyTo(_gray2);
-		bilateralFilter (_gray2, _gray, kd, kd*2, kd/2 );
-//		resize(_bilateral,_gray2,Size(),2,2,INTER_LINEAR);
-		medianBlur(_gray,_gray,3);
-		//sobel
-		Sobel(_gray,sobelx,CV_16S,1,0,3,1, 0, BORDER_DEFAULT );
-		convertScaleAbs( sobelx, gradx );
-		Sobel(_gray,sobely,CV_16S,0,1,3,1, 0, BORDER_DEFAULT );
-		convertScaleAbs( sobely, grady );
-		addWeighted( gradx, 0.5, grady, 0.5, 0, sobel );
-		cvtColor(sobel,sobelColor,CV_GRAY2RGB);
+//		//grayscale
+//		cvtColor(_image1,_gray,CV_RGB2GRAY);
+//		cvtColor(_gray,_grayRGB,CV_GRAY2RGB);
+//
+//		Canny(_gray,canny,60,120);
+//
+////					namedWindow( "c", CV_WINDOW_AUTOSIZE );
+////					imshow( "c", canny);//thrCrCb[0] );
+////					waitKey(0);
+//
+//		//bilateral + 2x
+////		Mat _gray2;
+////		medianBlur(_gray,_gray,5);
+//		Mat _gray2; _gray.copyTo(_gray2);
+//		bilateralFilter (_gray2, _gray, kd, kd*2, kd/2 );
+////		resize(_bilateral,_gray2,Size(),2,2,INTER_LINEAR);
+//		medianBlur(_gray,_gray,3);
+//		//sobel
+//		Sobel(_gray,sobelx,CV_16S,1,0,3,1, 0, BORDER_DEFAULT );
+//		convertScaleAbs( sobelx, gradx );
+//		Sobel(_gray,sobely,CV_16S,0,1,3,1, 0, BORDER_DEFAULT );
+//		convertScaleAbs( sobely, grady );
+//		addWeighted( gradx, 0.5, grady, 0.5, 0, sobel );
+//		cvtColor(sobel,sobelColor,CV_GRAY2RGB);
 
 
 		Mat mergePos [8];
@@ -1249,14 +1252,14 @@ int main(int argc, char* argv[] ){
 
 			for (int k=0; k<3; k++) {
 				Mat temp;
-				_image1_split[k].copyTo(temp);
+				//_image1_split[k].copyTo(temp);
 						//medianBlur(_image1_split[k],_image1_split[k],5);
-						bilateralFilter (temp, _image1_split[k], kd, kd*2, kd/2 );
-						medianBlur(_image1_split[k],_image1_split[k],3);
+
 
 				cvNica::CornerDetector(_image1_split[k],varmap_[k],j+41);
 				Canny(_image1_split[k],ccanny[k],70,120);
 				cvNica::CornerDetectorBasedOnEdge(ccanny[k],varmap__[k],j+40);
+
 //				namedWindow( "c", CV_WINDOW_AUTOSIZE );
 //				imshow( "c", varmap_[k]);//thrCrCb[0] );
 //				waitKey(0);
@@ -1268,21 +1271,68 @@ int main(int argc, char* argv[] ){
 
 //			max(varmap_[0],varmap_[1],varmap_[3]);
 //			max(varmap_[3],varmap_[2],varmap_[3]);
+			max(varmap[0],varmap[1],varmap[3]);
+			max(varmap[3],varmap[2],varmap[3]);
 			max(varmap__[0],varmap__[1],varmap__[3]);
 			max(varmap__[3],varmap__[2],varmap__[3]);
 //			max(ccanny[0],ccanny[1],ccanny[3]);
 //			max(ccanny[3],ccanny[2],ccanny[3]);
+//			namedWindow( "c", CV_WINDOW_AUTOSIZE );
+//			imshow( "c", varmap[3]);//thrCrCb[0] );
+//			waitKey(0);
+			cvNica::RGBhistogram(_bilateral3,varmap[3],cornerpoints,j+41,2);
 
+			Mat km1,km2,km3,pp1,pp2,pp3;
+			km1 = cvNica::RGBThreshold(_bilateral3,214,186,187,30);
+			km2 = cvNica::RGBThreshold(_bilateral3,155, 78,120,30);
+			km3 = cvNica::RGBThreshold(_bilateral3,123, 57,124,30);
+			pp1 = cvNica::RGBThresholdPoint(size,cornerpoints,214,186,187,30);
+			pp2 = cvNica::RGBThresholdPoint(size,cornerpoints,155, 78,120,30);
+			pp3 = cvNica::RGBThresholdPoint(size,cornerpoints,123, 57,124,30);
+//			namedWindow( "a", CV_WINDOW_AUTOSIZE );
+//			imshow( "a", km1);//thrCrCb[0] );
+//			namedWindow( "b", CV_WINDOW_AUTOSIZE );
+//			imshow( "b", km2);//thrCrCb[0] );
+//			namedWindow( "c", CV_WINDOW_AUTOSIZE );
+//			imshow( "c", km3);//thrCrCb[0] );
+//			namedWindow( "d", CV_WINDOW_AUTOSIZE );
+//			imshow( "d", pp1);//thrCrCb[0] );
+//			namedWindow( "e", CV_WINDOW_AUTOSIZE );
+//			imshow( "e", pp2);//thrCrCb[0] );
+//			namedWindow( "f", CV_WINDOW_AUTOSIZE );
+//			imshow( "f", pp3);//thrCrCb[0] );
+//			waitKey(0);
+			  //214.0000  186.0000  187.0000
+			  //155.0000   78.0000  120.5000
+			  //123.0000   57.0000  124.0000
 
-
+			Mat kmColor1;
+			Mat kmColor1_[3] = {pp1,km1-127,pp1};
+			merge(kmColor1_,3,kmColor1);
+			Mat kmColor2;
+			Mat kmColor2_[3] = {pp2,km2-127,pp2};
+			merge(kmColor2_,3,kmColor2);
+			Mat kmColor3;
+			Mat kmColor3_[3] = {pp3,km3-127,pp3};
+			merge(kmColor3_,3,kmColor3);
+			namedWindow( "a", CV_WINDOW_AUTOSIZE );
+			imshow( "a", kmColor1);//thrCrCb[0] );
+			namedWindow( "b", CV_WINDOW_AUTOSIZE );
+			imshow( "b", kmColor2);//thrCrCb[0] );
+			namedWindow( "c", CV_WINDOW_AUTOSIZE );
+			imshow( "c", kmColor3);//thrCrCb[0] );
+			waitKey(0);
 			max(varmap[0],varmap[1],varmap[3]);
 			max(varmap[3],varmap[2],varmap[3]);
-							namedWindow( "c", CV_WINDOW_AUTOSIZE );
-							imshow( "c", varmap[3]);//thrCrCb[0] );
-							waitKey(0);
-			cvNica::RGBhistogram(_image1,varmap[3],cornerpoints,j+41);
+//							namedWindow( "c", CV_WINDOW_AUTOSIZE );
+//							imshow( "c", varmap[3]);//thrCrCb[0] );
+//							waitKey(0);
+
 			//varmap = varmap__;
 			//varmap_.convertTo(varmap,CV_8UC1);
+//							cout<<"D "<<varmap__[3].depth()<<endl;
+//							cout<<"D "<<varmap[3].depth()<<endl;
+							//cout<<"D "<<size.width<<size.height<<endl;
 			Mat varmapColor_[3] = {Mat::zeros(size,CV_8UC1),varmap__[3],varmap[3]};
 			merge(varmapColor_,3,varmapColor);
 			varmapColor = varmapColor*0.9 + _grayRGB*0.1;

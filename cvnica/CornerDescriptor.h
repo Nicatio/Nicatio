@@ -53,6 +53,14 @@ void CornerDetector(
 		int								type,
 		int								nPart=2);
 
+Mat RGBThresholdPoint(
+		Size							size,
+		Vector< Vector<int> >&			cornerpoints,
+		int								r,
+		int								g,
+		int								b,
+		int								tolerance);
+
 void RGBhistogram(
 		Mat								__src,
 		Mat								points,
