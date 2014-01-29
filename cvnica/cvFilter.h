@@ -28,12 +28,8 @@ Mat rotateImage(
 		int								borderType=0,
 		int								borderColor=0x000000);
 
-Mat RGBThreshold(
-		const Mat						&src,
-		int								r,
-		int								g,
-		int								b,
-		int								tolerance);
+
+
 
 void FindBlobs(
 		const Mat &binary,

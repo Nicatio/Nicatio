@@ -17,4 +17,7 @@
 #include "cvFilter.h"
 #include "FaceAnalysis.h"
 #include "CornerDescriptor.h"
+#include "LineTracker.h"
+#include "uhd.h"
+#include "FRID.h"
 #endif /* CVNICA_H_ */

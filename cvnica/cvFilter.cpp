@@ -111,38 +111,6 @@ void FindBlobs(
     }
 }
 
-Mat RGBThreshold(
-		const Mat						&src,
-		int								r,
-		int								g,
-		int								b,
-		int								tolerance)
-{
-	Mat srcRGB[3],th[6],th_;
-	double rb = r - tolerance; if(rb<0) rb=0; if(rb>255) rb=255;
-	double ru = r + tolerance; if(ru<0) ru=0; if(ru>255) ru=255;
-	double gb = g - tolerance; if(gb<0) gb=0; if(gb>255) gb=255;
-	double gu = g + tolerance; if(gu<0) gu=0; if(gu>255) gu=255;
-	double bb = b - tolerance; if(bb<0) bb=0; if(bb>255) bb=255;
-	double bu = b + tolerance; if(bu<0) bu=0; if(bu>255) bu=255;
-
-	split(src,srcRGB);
-	threshold(srcRGB[0],th[0],rb,255,THRESH_BINARY);
-	threshold(srcRGB[0],th[1],ru,255,THRESH_BINARY_INV);
-	threshold(srcRGB[1],th[2],gb,255,THRESH_BINARY);
-	threshold(srcRGB[1],th[3],gu,255,THRESH_BINARY_INV);
-	threshold(srcRGB[2],th[4],bb,255,THRESH_BINARY);
-	threshold(srcRGB[2],th[5],bu,255,THRESH_BINARY_INV);
-
-	bitwise_and(th[0],th[1],th_);
-	bitwise_and(th_,th[2],th_);
-	bitwise_and(th_,th[3],th_);
-	bitwise_and(th_,th[4],th_);
-	bitwise_and(th_,th[5],th_);
-	//merge(th,3,th_);
-	return th_;
-
-}
 
 
 
