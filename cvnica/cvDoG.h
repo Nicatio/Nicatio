@@ -64,6 +64,10 @@ float FaceRollAngleDetection(
 		InputArray 						_src,
 		OutputArray						_dst);
 
+void FourierLaplacian(
+		InputArray 						_src,
+		OutputArray						_dst);
+
 }
 
 

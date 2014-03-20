@@ -74,9 +74,10 @@ void DoG(
 		divide((resultExpP - resultExpM),(resultExpP + resultExpM),dog);
 
 		dog *= trim;
-		minMaxLoc(dog,&min_,&max_);
+
 	}
 
+	minMaxLoc(dog,&min_,&max_);
 	max_ = 255/(max_-min_);
 
 	dog-=min_;
@@ -234,6 +235,161 @@ float FaceRollAngleDetection(
 
 }
 
+void FourierLaplacian(
+		InputArray 						_src,
+		OutputArray						_dst)
+{
+	Mat src = _src.getMat();
+	Size srcSize = src.size();
+	Mat padded;                            //expand input image to optimal size
+
+	int m = getOptimalDFTSize( srcSize.height );
+	int n = getOptimalDFTSize( srcSize.width ); // on the border add zero values
+	copyMakeBorder(src, padded, 0, m - srcSize.height, 0, n - srcSize.width, BORDER_CONSTANT, Scalar::all(0));
+
+	Mat planes[] = {Mat_<float>(padded), Mat::zeros(padded.size(), CV_32F)};
+	Mat complexI;
+	Mat u2v2 = Mat::zeros(padded.size(), CV_32F);
+	merge(planes, 2, complexI);         // Add to the expanded another plane with zeros
+
+	dft(complexI, complexI);            // this way the result may fit in the source matrix
+
+	// compute the magnitude and switch to logarithmic scale
+	// => log(1 + sqrt(Re(DFT(I))^2 + Im(DFT(I))^2))
+
+    int cx = complexI.cols/2;
+    int cy = complexI.rows/2;
+
+    Mat q0(complexI, Rect(0, 0, cx, cy));   // Top-Left - Create a ROI per quadrant
+    Mat q1(complexI, Rect(cx, 0, cx, cy));  // Top-Right
+    Mat q2(complexI, Rect(0, cy, cx, cy));  // Bottom-Left
+    Mat q3(complexI, Rect(cx, cy, cx, cy)); // Bottom-Right
+
+    Mat tmp;                           // swap quadrants (Top-Left with Bottom-Right)
+    q0.copyTo(tmp);
+    q3.copyTo(q0);
+    tmp.copyTo(q3);
+
+    q1.copyTo(tmp);                    // swap quadrant (Top-Right with Bottom-Left)
+    q2.copyTo(q1);
+    tmp.copyTo(q2);
+
+
+
+
+	split(complexI, planes);                   // planes[0] = Re(DFT(I), planes[1] = Im(DFT(I))
+
+    Mat circleMask(srcSize,CV_32FC1);
+    ellipse (circleMask,Point(n/2,m/2), Size(n/4,n/4),0,0,360, Scalar( 1, 1, 1 ),-1);
+    //circle (circleMask,Point((planes[0].cols & -2)/2, (planes[0].rows & -2)/2),50, Scalar( 1, 1, 1 ),-1);
+
+//    int cx = circleMask.cols/2;
+//    int cy = circleMask.rows/2;
+//
+//    Mat q0(circleMask, Rect(0, 0, cx, cy));   // Top-Left - Create a ROI per quadrant
+//    Mat q1(circleMask, Rect(cx, 0, cx, cy));  // Top-Right
+//    Mat q2(circleMask, Rect(0, cy, cx, cy));  // Bottom-Left
+//    Mat q3(circleMask, Rect(cx, cy, cx, cy)); // Bottom-Right
+//
+//    Mat tmp;                           // swap quadrants (Top-Left with Bottom-Right)
+//    q0.copyTo(tmp);
+//    q3.copyTo(q0);
+//    tmp.copyTo(q3);
+//
+//    q1.copyTo(tmp);                    // swap quadrant (Top-Right with Bottom-Left)
+//    q2.copyTo(q1);
+//    tmp.copyTo(q2);
+//    Mat magI;
+//    magnitude(planes[0], planes[1], magI);// planes[0] = magnitude
+//
+//
+//    magI += Scalar::all(1);                    // switch to logarithmic scale
+//    log(magI, magI);
+//
+//    // crop the spectrum, if it has an odd number of rows or columns
+//    magI = magI(Rect(0, 0, magI.cols & -2, magI.rows & -2));
+//    normalize(magI, magI, 0, 1, CV_MINMAX);
+//
+//    namedWindow( "b", CV_WINDOW_AUTOSIZE );
+//    imshow("b", magI);
+//    waitKey(0);
+
+
+
+
+
+
+
+
+    for (int j=0; j<m; j++) {
+    	for (int i=0; i<n; i++) {
+//    		float u = (float)i/(n/2.)*PI;
+//    		float v = (float)j/(m/2.)*PI;
+//    		if (u>=PI) u=2.*PI-u;
+//    		if (v>=PI) v=2.*PI-v;
+    		float u = (float)(i-n/2);
+    		float v = (float)(j-m/2);
+    		//u2v2.at<float>(j,i) = 0.5*(u*u/n/n*4+v*v/m/m*4);
+    		float d = (u*u+v*v);
+    		if (sqrt(d)<100) u2v2.at<float>(j,i) = 1;
+    		else u2v2.at<float>(j,i) = 0;
+    	}
+    }
+
+
+//	planes[0]=planes[0].mul(circleMask);
+//	planes[1]=planes[1].mul(circleMask);
+	planes[0]=planes[0].mul(u2v2);
+	planes[1]=planes[1].mul(u2v2);
+	merge(planes, 2, complexI);
+
+
+    Mat p0(complexI, Rect(0, 0, cx, cy));   // Top-Left - Create a ROI per quadrant
+    Mat p1(complexI, Rect(cx, 0, cx, cy));  // Top-Right
+    Mat p2(complexI, Rect(0, cy, cx, cy));  // Bottom-Left
+    Mat p3(complexI, Rect(cx, cy, cx, cy)); // Bottom-Right
+
+//   Mat tmp;                           // swap quadrants (Top-Left with Bottom-Right)
+    p0.copyTo(tmp);
+    p3.copyTo(p0);
+    tmp.copyTo(p3);
+
+    p1.copyTo(tmp);                    // swap quadrant (Top-Right with Bottom-Left)
+    p2.copyTo(p1);
+    tmp.copyTo(p2);
+
+
+
+	dft(complexI, complexI, DFT_INVERSE);
+	split(complexI, planes);
+    magnitude(planes[0], planes[1], planes[0]);// planes[0] = magnitude
+    Mat magI = planes[0];
+
+    magI += Scalar::all(1);                    // switch to logarithmic scale
+    log(magI, magI);
+
+    // crop the spectrum, if it has an odd number of rows or columns
+    magI = magI(Rect(0, 0, magI.cols & -2, magI.rows & -2));
+
+
+
+
+    // rearrange the quadrants of Fourier image  so that the origin is at the image center
+
+    normalize(magI, magI, 0, 1, CV_MINMAX); // Transform the matrix with float values into a
+                                            // viewable image form (float between values 0 and 1).
+    namedWindow( "Input Image", CV_WINDOW_AUTOSIZE );
+    imshow("Input Image"       , src   );    // Show the result
+    namedWindow( "spectrum magnitude", CV_WINDOW_AUTOSIZE );
+    imshow("spectrum magnitude", magI);
+    namedWindow( "a", CV_WINDOW_AUTOSIZE );
+    imshow("a", circleMask);
+    namedWindow( "b", CV_WINDOW_AUTOSIZE );
+    imshow("b", u2v2);
+    waitKey(0);
+
+
+}
 
 }
 

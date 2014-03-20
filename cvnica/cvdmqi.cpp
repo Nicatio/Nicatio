@@ -131,7 +131,7 @@ void SelectiveClosing(
 	int dilation_type = MORPH_RECT;
 	Mat elementL = getStructuringElement( dilation_type, Size( 9,9 ), Point( 4,4 ) );
 	//Mat elementM = getStructuringElement( dilation_type, Size( 7,7 ), Point( 3,3 ) );
-	Mat elementS = getStructuringElement( dilation_type, Size( 5,5 ), Point( 2,2 ) );
+	Mat elementS = getStructuringElement( dilation_type, Size( 5,5), Point( 2,2 ) );
 	//Mat elementSS = getStructuringElement( dilation_type, Size( 3,3 ), Point( 1,1 ) );
 
 	dilate( src, l, elementL);

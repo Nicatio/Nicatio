@@ -19,7 +19,7 @@ using namespace std;
 //#define PGM
 
 #define DATA_TYPE_SELECT
-#define DATA_TYPE 0
+#define DATA_TYPE 2
 // 0: bmp
 // 1: png
 // 2: pgm
@@ -38,7 +38,7 @@ using namespace std;
 //#define FA
 
 
-//#define FR_for_integrated
+#define FR_for_integrated
 //#define FR_for_separated
 //#define FR_REGION
 //#define Fileout
@@ -53,6 +53,8 @@ using namespace std;
 //#define DMQI
 
 
+#define MDMQI_stretch
+
 //#define SMQI
 
 //#define DMQIADVANCED
@@ -62,7 +64,7 @@ using namespace std;
 
 //#define FERET_face_database_120x120_normalization
 
-//#define illuminationNormalization
+#define illuminationNormalization
 //#define textDetection
 //#define faceDetection
 //#define faceDetection3
@@ -70,7 +72,7 @@ using namespace std;
 //#define faceDetection2
 //#define PCA_
 
-#define YUVUHD
+//#define YUVUHD
 
 
 
@@ -558,487 +560,6 @@ int main(int argc, char* argv[] ){
 //	}
 
 
-	// 131219
-//	int kd=5;
-//	for (unsigned int i = 0;i < files.size();i++) {
-//
-//		int col = 2;
-//		int row = 2;
-//
-//		Mat _image1 = imread( dir+"/"+files[i], -1 );
-//		Mat __image1; cvtColor(_image1,__image1,CV_RGB2YCrCb);
-//		Size size = _image1.size();
-//		Size size2 (_image1.cols*2,_image1.rows*2);
-//
-//
-//		Mat _gray (size,CV_8UC1),_grayRGB;
-//		Mat _bilateral (size,CV_8UC1);
-//
-//		//Mat gradx(size,CV_8UC1);
-//		//Mat grady(size,CV_8UC1);
-//		Mat sobel(size,CV_8UC1);
-//
-//		Mat sobelColor_[3];
-//		Mat sobelColor;
-//		Mat sobelAND = Mat::zeros(size,CV_8UC1)+255;
-//		Mat sobelOR = Mat::zeros(size,CV_8UC1);
-//		Mat merged(_image1.rows*row, _image1.cols*col, CV_8UC3);
-//		Mat _image1_split[3];
-//		Mat _bilateral3 (size,CV_8UC3);
-//		Mat __image1_split[3];
-//		Mat __bilateral3 (size,CV_8UC3);
-//		//_bilateral3 = _image1;
-//		bilateralFilter (_image1, _bilateral3 , kd, kd*2, kd/2 );
-//		medianBlur(_bilateral3,_bilateral3,3);
-//		split (_bilateral3,_image1_split);
-//
-//
-//		bilateralFilter (__image1, __bilateral3 , kd, kd*2, kd/2 );
-//		medianBlur(__bilateral3,__bilateral3,3);
-//		split (__bilateral3,__image1_split);
-//
-//		cvtColor(_image1,_gray,CV_RGB2GRAY);
-//		cvtColor(_gray,_grayRGB,CV_GRAY2RGB);
-//
-//		Mat sobelxsqsum = Mat::zeros(size,CV_32FC1);
-//		Mat sobelysqsum = Mat::zeros(size,CV_32FC1);
-//		Mat gradx(size,CV_32FC1);
-//		Mat grady(size,CV_32FC1);
-//		int dilation_type = MORPH_ELLIPSE;
-//		//int dilation_type = MORPH_RECT;
-//			Mat elementL = getStructuringElement( dilation_type, Size( 25,25 ), Point( 12,12 ) );
-//
-//			float stdsum=.0;
-//		for (int k=0; k<3; k++) {
-//
-//			Mat varmapa(size,CV_8UC1);
-//					Mat varmapa_(size,CV_32FC1);
-//					Mat varmapa__(size,CV_32FC1);
-//
-//			cvNica::VarianceFilter(_image1_split[k],varmapa_,7);
-//
-//			Mat canny_,canny__;
-//
-//			Canny( _image1_split[k], canny_, 30, 50, 3, 1 );
-//			canny_.convertTo(canny__,CV_32FC1);
-//
-//			//erode(varmapa_,varmapa_,elementL);
-//
-//			Mat sp32; _image1_split[k].convertTo(sp32,CV_32FC1);
-//			float spsum = sum(sp32)[0]/size.width/size.height;
-//			float spsqsum = sum(sp32.mul(sp32))[0];
-//			float std = sqrt(spsqsum/size.width/size.height - spsum*spsum);
-//			cout<<": "<<spsum<<": "<<spsqsum<<": "<<std<<endl;
-////			namedWindow( "d", CV_WINDOW_AUTOSIZE );
-////						imshow( "d", varmapa__/255);
-////						waitKey(0);
-//
-//			//sqrt( varmapa__, varmapa_);
-//
-//			//threshold(varmapa_,varmapa,5,255,THRESH_BINARY_INV);
-//			//max(varmapa_,varmapa,varmapa_);
-//
-//			std = (std<30)? 30:std;
-//			//cv::pow(varmapa_,1.1,varmapa_);
-//			stdsum += std;
-//
-//
-//			threshold(varmapa_,varmapa,std/6+2,255,THRESH_BINARY_INV);
-//			//threshold(varmapa_,varmapa,sqrt(std)+2,255,THRESH_BINARY_INV);
-//			//threshold(varmapa_,varmapa,8,255,THRESH_BINARY_INV);
-//			max(varmapa_,varmapa,varmapa);
-//
-//
-////			varmapa.convertTo(varmapa_,CV_8UC1);
-////			namedWindow( "c", CV_WINDOW_AUTOSIZE );
-////			imshow( "c", varmapa_);
-////
-////			waitKey(0);
-//
-//			Mat sobelx(size,CV_32FC1);
-//			Mat sobely(size,CV_32FC1);
-//			Mat sobelxsq(size,CV_32FC1);
-//			Mat sobelysq(size,CV_32FC1);
-//			Sobel(_image1_split[k],sobelx,CV_32F,1,0,1,1, 0, BORDER_REPLICATE );
-//
-//
-////			namedWindow( "c", CV_WINDOW_AUTOSIZE );
-////			imshow( "c", sobelx/255);
-////			namedWindow( "d", CV_WINDOW_AUTOSIZE );
-////			imshow( "d", varmapa/255);
-////			waitKey(0);
-//
-//
-////			Mat __Gray,__Gray8;
-////			cvNica::DifferenceOfVariance(_image1_split[k],__Gray);
-////			//__Gray8.convertTo(__Gray,CV_8UC1);
-////			threshold(__Gray,__Gray,0,255,THRESH_BINARY);
-////			//Mat elementL = getStructuringElement( dilation_type, Size( 3,3 ), Point( 1,1 ) );
-////			//dilate(__Gray,__Gray,elementL);
-////			//erode(__Gray,__Gray,elementL);
-////			//multiply(sobel8U2,(255-__Gray)/255,sobel8U);
-////			__Gray=(255-__Gray)/255;
-////
-////
-////
-////			__Gray.convertTo(__Gray8,CV_32FC1);
-////			namedWindow( "ze4", CV_WINDOW_AUTOSIZE );
-////			imshow( "ze4", __Gray8);
-////			waitKey(0);
-//			sobelx/=varmapa/150;
-//			sobelx=sobelx.mul(canny__/255);
-//			//sobelx=sobelx.mul(__Gray8);
-//			multiply(sobelx,sobelx,sobelxsq);
-//
-//			sobelxsqsum += sobelxsq*std;
-//			//convertScaleAbs( sobelx, gradx );
-//			Sobel(_image1_split[k],sobely,CV_32F,0,1,1,1, 0, BORDER_REPLICATE );
-//			sobely/=varmapa/150;
-//			sobely=sobely.mul(canny__/255);
-//			//sobely=sobely.mul(__Gray8);
-//			multiply(sobely,sobely,sobelysq);
-//
-//			sobelysqsum += sobelysq*std;
-//
-//
-//
-//			convertScaleAbs( sobelx, gradx );
-//			convertScaleAbs( sobely, grady );
-//			addWeighted( gradx, 0.5, grady, 0.5, 0, sobelColor_[k] );
-//			Mat sobel8UU;
-//			sobelColor_[k].convertTo(sobel8UU,CV_8UC1);
-//			bitwise_and(sobel8UU,sobelAND,sobelAND);
-//			bitwise_or(sobel8UU,sobelOR,sobelOR);
-//			//convertScaleAbs( sobely, grady );
-//
-//		}
-////		for (int k=0; k<3; k++) {
-////
-////			Mat varmapa(size,CV_8UC1);
-////					Mat varmapa_(size,CV_32FC1);
-////					Mat varmapa__(size,CV_32FC1);
-////
-////			cvNica::VarianceFilter(__image1_split[k],varmapa_,5);
-////
-////
-////
-////
-////			//erode(varmapa_,varmapa_,elementL);
-////
-////			Mat sp32; __image1_split[k].convertTo(sp32,CV_32FC1);
-////			float spsum = sum(sp32)[0]/size.width/size.height;
-////			float spsqsum = sum(sp32.mul(sp32))[0];
-////			float std = sqrt(spsqsum/size.width/size.height - spsum*spsum);
-////			cout<<": "<<spsum<<": "<<spsqsum<<": "<<std<<endl;
-//////			namedWindow( "d", CV_WINDOW_AUTOSIZE );
-//////						imshow( "d", varmapa__/255);
-//////						waitKey(0);
-////
-////			//sqrt( varmapa__, varmapa_);
-////
-////			//threshold(varmapa_,varmapa,5,255,THRESH_BINARY_INV);
-////			//max(varmapa_,varmapa,varmapa_);
-////
-////			std = (std<30)? 30:std;
-////			//cv::pow(varmapa_,1.1,varmapa_);
-////			stdsum += std;
-////
-////
-////			threshold(varmapa_,varmapa,std/6+2,255,THRESH_BINARY_INV);
-////			//threshold(varmapa_,varmapa,sqrt(std)+2,255,THRESH_BINARY_INV);
-////			//threshold(varmapa_,varmapa,10,255,THRESH_BINARY_INV);
-////			max(varmapa_,varmapa,varmapa);
-////
-////
-//////			varmapa.convertTo(varmapa_,CV_8UC1);
-//////			namedWindow( "c", CV_WINDOW_AUTOSIZE );
-//////			imshow( "c", varmapa_);
-//////
-//////			waitKey(0);
-////
-////			Mat sobelx(size,CV_32FC1);
-////			Mat sobely(size,CV_32FC1);
-////			Mat sobelxsq(size,CV_32FC1);
-////			Mat sobelysq(size,CV_32FC1);
-////			Sobel(__image1_split[k],sobelx,CV_32F,1,0,1,1, 0, BORDER_REPLICATE );
-////
-////
-//////			namedWindow( "c", CV_WINDOW_AUTOSIZE );
-//////			imshow( "c", sobelx/255);
-//////			namedWindow( "d", CV_WINDOW_AUTOSIZE );
-//////			imshow( "d", varmapa/255);
-//////			waitKey(0);
-////
-////			sobelx/=varmapa/85;
-////			multiply(sobelx,sobelx,sobelxsq);
-////
-////			sobelxsqsum += sobelxsq*std;
-////			//convertScaleAbs( sobelx, gradx );
-////			Sobel(__image1_split[k],sobely,CV_32F,0,1,1,1, 0, BORDER_REPLICATE );
-////			sobely/=varmapa/85;
-////			multiply(sobely,sobely,sobelysq);
-////
-////			sobelysqsum += sobelysq*std;
-////		}
-//		sobelxsqsum/=stdsum;
-//		sobelysqsum/=stdsum;
-//		sqrt (sobelxsqsum,gradx);
-//		sqrt (sobelysqsum,grady);
-//
-//		Mat canny2;Mat gradx2;Mat grady2;
-//		gradx.convertTo(gradx2,CV_16S);
-//		grady.convertTo(grady2,CV_16S);
-//		Canny( _gray, canny2, 60, 120, 3, 1 );
-//		addWeighted( gradx, 0.5, grady, 0.5, 0, sobel );
-//
-//
-//		//
-////		namedWindow( "ze4", CV_WINDOW_AUTOSIZE );
-////		imshow( "ze4", 255-__Gray);
-////		waitKey(0);
-//
-//		Mat sobelbinary=sobel>0;
-//		cvNica::MeanFilter(sobelbinary,sobelbinary,5);
-//				namedWindow( "ze4", CV_WINDOW_AUTOSIZE );
-//				imshow( "ze4", sobelbinary);
-//				waitKey(0);
-////		void MeanFilter(
-////				InputArray 						_src,
-////				OutputArray						_dst,
-////				int								size)
-//
-//		merge(sobelColor_,3,sobelColor);
-////		Mat _sobel;
-////		cvNica::MeanFilter(sobel,_sobel,7);
-////
-////		threshold(_sobel,_sobel,80,255,THRESH_BINARY_INV);
-////		namedWindow( "e", CV_WINDOW_AUTOSIZE );
-////				imshow( "e", _sobel/255);
-////				waitKey(0);
-////		sobel=sobel.mul(_sobel)/255;
-//		Mat sobel8U2;Mat sobel8U;
-//
-//
-//		/*
-//		Mat _sobelx, _sobely;
-//		Mat sobell,sobell32;
-//		Sobel(_gray,_sobelx,CV_32F,1,0,5,1, 0, BORDER_REPLICATE );
-//		Sobel(_gray,_sobely,CV_32F,0,1,5,1, 0, BORDER_REPLICATE );
-//		convertScaleAbs( _sobelx, _sobelx );
-//		convertScaleAbs( _sobely, _sobely );
-//		addWeighted( _sobelx, 0.5, _sobely, 0.5, 0, sobell );
-//					double mmin, mmax;
-////
-//
-////
-//		//GaussianBlur(sobel,sobelOR,Size(3,3),1);
-//
-//					//sobel.copyTo(sobell);
-//					minMaxIdx(sobell,&mmin,&mmax);
-//					cout<<": "<<mmin<<" "<<mmax<<endl;
-//					//sobell/=mmax;
-//					//sobell=255-sobell;
-//		//dilate(1-sobell,sobell,elementL);
-//		erode(sobell,sobell,elementL);
-//		dilate(sobell,sobell,elementL);
-////		namedWindow( "e", CV_WINDOW_AUTOSIZE );
-////		imshow( "e", sobell);
-////		waitKey(0);
-//		sobell.convertTo(sobell32,CV_32FC1);
-////		erode(sobelOR,sobelOR,elementL);
-////		erode(sobelOR,sobelOR,elementL);
-////
-////		minMaxIdx(sobelOR,&mmin,&mmax);
-////							cout<<": "<<mmin<<" "<<mmax<<endl;
-////
-////				namedWindow( "e", CV_WINDOW_AUTOSIZE );
-////				imshow( "e", (255-sobell32*2)/256);
-////				waitKey(0);
-//		multiply(sobel, (255-sobell32*2.5)/256, sobel);
-//
-//*/
-//
-//		sobel.convertTo(sobel8U,CV_8UC1);
-//
-////
-////		Mat __Gray,__Gray8;
-////		cvNica::DifferenceOfVariance(_gray,__Gray8);
-////		__Gray8.convertTo(__Gray,CV_8UC1);
-////		threshold(__Gray,__Gray,0,255,THRESH_BINARY);
-////		//Mat elementL = getStructuringElement( dilation_type, Size( 3,3 ), Point( 1,1 ) );
-////		dilate(__Gray,__Gray,elementL);
-////		erode(__Gray,__Gray,elementL);
-////
-////		multiply(sobel8U2,(255-__Gray)/255,sobel8U);
-//
-//
-//
-//		//sobelOR/=25;
-//		Mat sobel222 = sobel/150;
-//		//namedWindow( "a", CV_WINDOW_AUTOSIZE );
-//		//				imshow( "a", sobel222);
-//		CvMat pSrc = sobel222;
-//		CvMat *pDst = cvCreateMat(size.height, size.width, CV_32FC1);;
-//
-//		cvNica::MorphologicalThinning(&pSrc,pDst);
-//		Mat dm = cv::Mat(pDst, true);
-//
-//		Mat sobelx(size,CV_8UC1);
-//		Mat sobely(size,CV_8UC1);
-//
-//		Mat varmapa(size,CV_8UC1);
-//		Mat varmapa_(size,CV_32FC1);
-//		cvNica::VarianceFilter(_gray,varmapa_,5);
-//
-//		varmapa_.convertTo(varmapa,CV_8UC1);
-//		//erode(varmapa,varmapa,elementL);
-//
-//
-//				//sobel
-//		Mat canny3(size,CV_8UC1);
-//				Sobel(_gray,sobelx,CV_16SC1,1,0,3,1, 0, BORDER_DEFAULT );
-//				Sobel(_gray,sobely,CV_16SC1,0,1,3,1, 0, BORDER_DEFAULT );
-//				cvNica::Canny2( _gray, sobelx,sobely, canny3, 60, 120, 3, 1 );
-//				//cvNica::CannyEdge( _gray.data, size.width, size.height, 20,40, canny3.data );
-//				//Canny( _gray, canny3, 20,40, 3,1 );
-//				convertScaleAbs( sobelx, gradx );
-//
-//				convertScaleAbs( sobely, grady );
-//				addWeighted( gradx, 0.5, grady, 0.5, 0, sobel );
-//
-//
-//
-//				//Canny( _gray, canny3, 60, 120, 3, false );
-//
-//				//dilate(canny3,canny3,elementL);
-//				//erode(canny3,canny3,elementL);
-//
-//				//erode(sobel8U,sobel8U,elementL);
-//
-//
-//
-////				namedWindow( "a", CV_WINDOW_AUTOSIZE );
-////								imshow( "a", sobelOR);
-////				namedWindow( "b", CV_WINDOW_AUTOSIZE );
-////				imshow( "b", sobelAND);
-//			    vector< vector<Point> > contours;
-//			    //findContours(sobel8U, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
-//
-//			    // you could also reuse img1 here
-//			   // Mat mask = Mat::zeros(size, CV_8UC1);
-//
-//			    // CV_FILLED fills the connected components found
-//			    //drawContours(mask, contours, -1, Scalar(255), CV_FILLED);
-////				namedWindow( "b", CV_WINDOW_AUTOSIZE );
-////				imshow( "b", mask);
-////		namedWindow( "c", CV_WINDOW_AUTOSIZE );
-////		imshow( "c", canny2);
-////		namedWindow( "d", CV_WINDOW_AUTOSIZE );
-////		imshow( "d", sobel);
-////		namedWindow( "e", CV_WINDOW_AUTOSIZE );
-////		imshow( "e", sobelOR);
-////		waitKey(0);
-//				Mat mergePos [col*row];
-//				for (int k=0; k<row; k++) {
-//					for (int j=0; j<col; j++) {
-//						mergePos[j+k*col] = Mat(merged, Rect(_image1.cols*(j%col), _image1.rows*((int)(j/col)+k), _image1.cols, _image1.rows));
-//					}
-//				}
-//				Mat sobel8URGB;
-//				Mat sobelRGB;
-//				Mat canny2RGB;
-//				Mat __GrayRGB;
-//				cvtColor(sobel8U,sobel8URGB,CV_GRAY2RGB);
-//				cvtColor(sobel,sobelRGB,CV_GRAY2RGB);
-//				cvtColor(canny2,canny2RGB,CV_GRAY2RGB);
-//				//cvtColor(255-__Gray,__GrayRGB,CV_GRAY2RGB);
-//
-//				_image1.copyTo(mergePos[0]);
-//				canny2RGB.copyTo(mergePos[1]);
-//				//__GrayRGB.copyTo(mergePos[1]);
-//				sobelRGB.copyTo(mergePos[2]);
-//				sobel8URGB.copyTo(mergePos[3]);
-//				imwrite(dir+"/set034/"+files[i]+".png",merged);
-//				cout<<files[i]<<endl;
-//				//_homoColor2.copyTo(mergePos[3]);
-//				//_homoThresholdColor.copyTo(mergePos[2]);
-//
-///*
-//
-//
-//
-//		Mat element = getStructuringElement(cv::MORPH_CROSS, cv::Size(3, 3));
-//
-//		Mat mergePos [col*row];
-//		for (int k=0; k<row; k++) {
-//			for (int j=0; j<col; j++) {
-//				mergePos[j+k*col] = Mat(merged, Rect(_image1.cols*(j%col), _image1.rows*((int)(j/col)+k), _image1.cols, _image1.rows));
-//			}
-//		}
-//
-//		Mat varmap4Merge = Mat::zeros(size,CV_8UC1);
-//		Mat varmap4Merge2 = Mat::zeros(size,CV_8UC1);
-//		for (int j=0; j<=3; j++) {
-//			Mat varmap_[4],varmap[4],varmapColor;
-//
-//			for (int k=0; k<3; k++) { // apply to each color channel
-//				Mat temp;
-//
-//				//if (j<2)
-//					cvNica::CornerDetector(_image1_split[k],varmap_[k],j+45);
-//
-//				threshold(varmap_[k],varmap[k],15,255,THRESH_BINARY);
-//
-//			}
-//
-//
-//			max(varmap[0],varmap[1],varmap[3]);
-//			max(varmap[3],varmap[2],varmap[3]);
-//
-//
-//			Mat varmapColor_[3] = {Mat::zeros(size,CV_8UC1),varmap[3],varmap[3]};
-//			merge(varmapColor_,3,varmapColor);
-//			varmapColor = varmapColor*0.9 + _grayRGB*0.1;
-//
-//			varmap4Merge += varmap[3];
-//			//varmap4Merge2 += varmap__[3];
-//			varmapColor.copyTo(mergePos[4+j]);
-//
-//		}
-//
-//
-//
-//
-//		Mat _homo,_homoThreshold,_homoOverlay,_homoColor,_homoColor2,_homoOverlay2,_homoOverlay3,_homoInv,_homoColorOrig,_homoThresholdColor;
-//
-//
-//		_homoInv = 255-varmap4Merge;
-//		bitwise_and(_homoInv,_gray,_homoOverlay2);
-//		bitwise_or(varmap4Merge,_gray,_homoOverlay);
-//		bitwise_or(varmap4Merge2,_gray,_homoOverlay3);
-//
-//		Mat _homoColor_[3] = {_homoOverlay2,_homoOverlay,_homoOverlay};
-//		Mat _homoColor_2[3] = {_homoOverlay2,_homoOverlay3,_homoOverlay};
-//		merge(_homoColor_,3,_homoColor);
-//		merge(_homoColor_2,3,_homoColor2);
-//
-//		cvtColor (_homo,_homoColorOrig,CV_GRAY2RGB);
-//		cvtColor (varmap4Merge,_homoThresholdColor,CV_GRAY2RGB);
-//
-//
-//
-//
-//		_image1.copyTo(mergePos[0]);
-//		_homoColor.copyTo(mergePos[1]);
-//		//_homoColor2.copyTo(mergePos[3]);
-//		_homoThresholdColor.copyTo(mergePos[2]);
-//
-//
-//		imwrite(dir+"/set029/"+files[i]+".png",merged);
-//		cout<<files[i]<<endl;
-//		*/
-//	}
-
 
 
 
@@ -1388,184 +909,722 @@ int main(int argc, char* argv[] ){
 
 
 
-
-	int kd=5;
-	for (unsigned int i = 0;i < files.size();i++) {
-
-		int col = 2;
-		int row = 1;
-
-		Mat _image1 = imread( dir+"/"+files[i], -1 );
-		Mat __image1; cvtColor(_image1,__image1,CV_RGB2YCrCb);
-		Size size = _image1.size();
-		Size size2 (_image1.cols*4,_image1.rows*4);
-
-
-		Mat _gray (size,CV_8UC1),_grayRGB;
-		Mat _gray_enlarged (size2,CV_8UC1);
-		Mat _bilateral (size,CV_8UC1);
-
-		Mat sobel(size,CV_8UC1);
-		Mat gradx(size,CV_32FC1);
-		Mat grady(size,CV_32FC1);
-		Mat sobelx(size,CV_8UC1);
-		Mat sobely(size,CV_8UC1);
-
-		Mat sobel_enlarged(size2,CV_8UC1);
-		Mat gradx_enlarged(size2,CV_32FC1);
-		Mat grady_enlarged(size2,CV_32FC1);
-		Mat sobelx_enlarged(size2,CV_8UC1);
-		Mat sobely_enlarged(size2,CV_8UC1);
-		Mat sobel_redim (size,CV_8UC1);
-
-		Mat merged(_image1.rows*row, _image1.cols*col, CV_8UC3);
-		Mat _image1_split[3];
-		Mat _image1_split_resized[3];
-		Mat _image1_split2[3];
-		Mat _image1_split_resized2[3];
-		Mat _bilateral3 (size,CV_8UC3);
-		Mat _bilateral3_resized (size2,CV_8UC3);
-
-		Mat _resized;
-
-
-		Mat sobel1MAX = Mat::zeros(size,CV_8UC1);
-		Mat sobel2MAX = Mat::zeros(size,CV_8UC1);
-		Mat sobel3MAX = Mat::zeros(size,CV_8UC1);
-		Mat sobel4MAX = Mat::zeros(size,CV_8UC1);
-
-		Mat sobel1RGB;
-		Mat sobel2RGB;
-		Mat sobel3RGB;
-		Mat sobel4RGB;
-
-
-
-		bilateralFilter (_image1, _bilateral3 , kd, kd*2, kd/2 );
-		medianBlur(_bilateral3,_bilateral3,3);
-		split (_image1,_image1_split);
-
-		resize (_bilateral3,_resized, size2, 0, 0, INTER_CUBIC);
-		bilateralFilter (_resized, _bilateral3_resized , kd, kd*2, kd/2 );
-		medianBlur(_bilateral3_resized,_bilateral3_resized,3);
-		split (_resized,_image1_split_resized);
-
-
-		//cvtColor(_gray,_grayRGB,CV_GRAY2RGB);
-
-
-		for (int k=0; k<3; k++) {
-//			Sobel(_image1_split[k],sobelx,CV_16SC1,1,0,3,1, 0, BORDER_DEFAULT );
-//			Sobel(_image1_split[k],sobely,CV_16SC1,0,1,3,1, 0, BORDER_DEFAULT );
-//			convertScaleAbs( sobelx, gradx );
-//			convertScaleAbs( sobely, grady );
-//			addWeighted( gradx, 0.5, grady, 0.5, 0, sobel );
-//			max(sobel,sobel1MAX,sobel1MAX);
+//131230
+//	int kd=5;
+//	for (unsigned int i = 0;i < files.size();i++) {
 //
-//			Sobel(_image1_split_resized[k],sobelx_enlarged,CV_16SC1,1,0,3,1, 0, BORDER_DEFAULT );
-//			Sobel(_image1_split_resized[k],sobely_enlarged,CV_16SC1,0,1,3,1, 0, BORDER_DEFAULT );
+//		int col = 2;
+//		int row = 1;
+//
+//		Mat _image1 = imread( dir+"/"+files[i], -1 );
+//		Mat __image1; cvtColor(_image1,__image1,CV_RGB2YCrCb);
+//		Size size = _image1.size();
+//		Size size2 (_image1.cols*4,_image1.rows*4);
+//
+//
+//		Mat _gray (size,CV_8UC1),_grayRGB;
+//		Mat _gray_enlarged (size2,CV_8UC1);
+//		Mat _bilateral (size,CV_8UC1);
+//
+//		Mat sobel(size,CV_8UC1);
+//		Mat gradx(size,CV_32FC1);
+//		Mat grady(size,CV_32FC1);
+//		Mat sobelx(size,CV_8UC1);
+//		Mat sobely(size,CV_8UC1);
+//
+//		Mat sobel_enlarged(size2,CV_8UC1);
+//		Mat gradx_enlarged(size2,CV_32FC1);
+//		Mat grady_enlarged(size2,CV_32FC1);
+//		Mat sobelx_enlarged(size2,CV_8UC1);
+//		Mat sobely_enlarged(size2,CV_8UC1);
+//		Mat sobel_redim (size,CV_8UC1);
+//
+//		Mat merged(_image1.rows*row, _image1.cols*col, CV_8UC3);
+//		Mat _image1_split[3];
+//		Mat _image1_split_resized[3];
+//		Mat _image1_split2[3];
+//		Mat _image1_split_resized2[3];
+//		Mat _bilateral3 (size,CV_8UC3);
+//		Mat _bilateral3_resized (size2,CV_8UC3);
+//
+//		Mat _resized;
+//
+//
+//		Mat sobel1MAX = Mat::zeros(size,CV_8UC1);
+//		Mat sobel2MAX = Mat::zeros(size,CV_8UC1);
+//		Mat sobel3MAX = Mat::zeros(size,CV_8UC1);
+//		Mat sobel4MAX = Mat::zeros(size,CV_8UC1);
+//
+//		Mat sobel1RGB;
+//		Mat sobel2RGB;
+//		Mat sobel3RGB;
+//		Mat sobel4RGB;
+//
+//
+//
+//		bilateralFilter (_image1, _bilateral3 , kd, kd*2, kd/2 );
+//		medianBlur(_bilateral3,_bilateral3,3);
+//		split (_image1,_image1_split);
+//
+//		resize (_bilateral3,_resized, size2, 0, 0, INTER_CUBIC);
+//		bilateralFilter (_resized, _bilateral3_resized , kd, kd*2, kd/2 );
+//		medianBlur(_bilateral3_resized,_bilateral3_resized,3);
+//		split (_resized,_image1_split_resized);
+//
+//
+//		//cvtColor(_gray,_grayRGB,CV_GRAY2RGB);
+//
+//
+//		for (int k=0; k<3; k++) {
+////			Sobel(_image1_split[k],sobelx,CV_16SC1,1,0,3,1, 0, BORDER_DEFAULT );
+////			Sobel(_image1_split[k],sobely,CV_16SC1,0,1,3,1, 0, BORDER_DEFAULT );
+////			convertScaleAbs( sobelx, gradx );
+////			convertScaleAbs( sobely, grady );
+////			addWeighted( gradx, 0.5, grady, 0.5, 0, sobel );
+////			max(sobel,sobel1MAX,sobel1MAX);
+////
+////			Sobel(_image1_split_resized[k],sobelx_enlarged,CV_16SC1,1,0,3,1, 0, BORDER_DEFAULT );
+////			Sobel(_image1_split_resized[k],sobely_enlarged,CV_16SC1,0,1,3,1, 0, BORDER_DEFAULT );
+////			convertScaleAbs( sobelx_enlarged, gradx_enlarged );
+////			convertScaleAbs( sobely_enlarged, grady_enlarged );
+////			addWeighted( gradx_enlarged, 0.5, grady_enlarged, 0.5, 0, sobel_enlarged );
+////			resize (sobel_enlarged,sobel_redim, size, 0, 0, INTER_CUBIC);
+////			max(sobel_redim,sobel3MAX,sobel3MAX);
+//		}
+//
+//
+//		split (_bilateral3,_image1_split2);
+//		split (_bilateral3_resized,_image1_split_resized2);
+//
+//
+//		for (int k=0; k<3; k++) {
+////			Sobel(_image1_split2[k],sobelx,CV_16SC1,1,0,3,1, 0, BORDER_DEFAULT );
+////			Sobel(_image1_split2[k],sobely,CV_16SC1,0,1,3,1, 0, BORDER_DEFAULT );
+////			convertScaleAbs( sobelx, gradx );
+////			convertScaleAbs( sobely, grady );
+////			addWeighted( gradx, 0.5, grady, 0.5, 0, sobel );
+////			max(sobel,sobel2MAX,sobel2MAX);
+//
+//			Sobel(_image1_split_resized2[k],sobelx_enlarged,CV_16SC1,1,0,3,1, 0, BORDER_DEFAULT );
+//			Sobel(_image1_split_resized2[k],sobely_enlarged,CV_16SC1,0,1,3,1, 0, BORDER_DEFAULT );
 //			convertScaleAbs( sobelx_enlarged, gradx_enlarged );
 //			convertScaleAbs( sobely_enlarged, grady_enlarged );
 //			addWeighted( gradx_enlarged, 0.5, grady_enlarged, 0.5, 0, sobel_enlarged );
 //			resize (sobel_enlarged,sobel_redim, size, 0, 0, INTER_CUBIC);
-//			max(sobel_redim,sobel3MAX,sobel3MAX);
-		}
+//			max(sobel_redim,sobel4MAX,sobel4MAX);
+//		}
+//
+//
+//				cvtColor(_image1,_gray,CV_RGB2GRAY);
+//				Sobel(_gray,sobelx,CV_16SC1,1,0,3,1, 0, BORDER_DEFAULT );
+//				Sobel(_gray,sobely,CV_16SC1,0,1,3,1, 0, BORDER_DEFAULT );
+//				convertScaleAbs( sobelx, gradx );
+//				convertScaleAbs( sobely, grady );
+//				addWeighted( gradx, 0.5, grady, 0.5, 0, sobel );
+//				cvtColor(sobel,sobel1RGB,CV_GRAY2RGB);
+//		//
+//		//		cvtColor(_bilateral3,_gray,CV_RGB2GRAY);
+//		//		Sobel(_gray,sobelx,CV_16SC1,1,0,3,1, 0, BORDER_DEFAULT );
+//		//		Sobel(_gray,sobely,CV_16SC1,0,1,3,1, 0, BORDER_DEFAULT );
+//		//		convertScaleAbs( sobelx, gradx );
+//		//		convertScaleAbs( sobely, grady );
+//		//		addWeighted( gradx, 0.5, grady, 0.5, 0, sobel );
+//		//		cvtColor(sobel,sobel2RGB,CV_GRAY2RGB);
+//		//
+//		//
+//		//		cvtColor(_resized,_gray_enlarged,CV_RGB2GRAY);
+//		//		Sobel(_gray_enlarged,sobelx_enlarged,CV_16SC1,1,0,3,1, 0, BORDER_DEFAULT );
+//		//		Sobel(_gray_enlarged,sobely_enlarged,CV_16SC1,0,1,3,1, 0, BORDER_DEFAULT );
+//		//		convertScaleAbs( sobelx_enlarged, gradx_enlarged );
+//		//		convertScaleAbs( sobely_enlarged, grady_enlarged );
+//		//		addWeighted( gradx_enlarged, 0.5, grady_enlarged, 0.5, 0, sobel_enlarged );
+//		//		resize (sobel_enlarged,sobel_redim, size, 0, 0, INTER_CUBIC);
+//		//		cvtColor(sobel_redim,sobel3RGB,CV_GRAY2RGB);
+//		//
+//		//		cvtColor(_bilateral3_resized,_gray_enlarged,CV_RGB2GRAY);
+//		//		Sobel(_gray_enlarged,sobelx_enlarged,CV_16SC1,1,0,3,1, 0, BORDER_DEFAULT );
+//		//		Sobel(_gray_enlarged,sobely_enlarged,CV_16SC1,0,1,3,1, 0, BORDER_DEFAULT );
+//		//		convertScaleAbs( sobelx_enlarged, gradx_enlarged );
+//		//		convertScaleAbs( sobely_enlarged, grady_enlarged );
+//		//		addWeighted( gradx_enlarged, 0.5, grady_enlarged, 0.5, 0, sobel_enlarged );
+//		//		resize (sobel_enlarged,sobel_redim, size, 0, 0, INTER_CUBIC);
+//		//		cvtColor(sobel_redim,sobel4RGB,CV_GRAY2RGB);
+//
+//				//cvtColor(sobel1MAX,sobel1RGB,CV_GRAY2RGB);
+//				//cvtColor(sobel2MAX,sobel2RGB,CV_GRAY2RGB);
+//				//cvtColor(sobel3MAX,sobel3RGB,CV_GRAY2RGB);
+//				cvtColor(sobel4MAX,sobel4RGB,CV_GRAY2RGB);
+//
+//
+//
+//				//sobel3RGB*=2.3;
+//				sobel4RGB*=1.5;
+//
+//				//equalizeHist(sobel_redim,sobel_redim);
+//
+//		//		namedWindow( "e", CV_WINDOW_AUTOSIZE );
+//		//		imshow( "e", sobel);
+//		//		namedWindow( "e2", CV_WINDOW_AUTOSIZE );
+//		//		imshow( "e2", sobel_redim*2);
+//		//		waitKey(0);
+//						Mat mergePos [col*row];
+//						for (int k=0; k<row; k++) {
+//							for (int j=0; j<col; j++) {
+//								mergePos[j+k*col] = Mat(merged, Rect(_image1.cols*(j%col), _image1.rows*((int)(j/col)+k), _image1.cols, _image1.rows));
+//							}
+//						}
+////						_image1.copyTo(mergePos[0]);
+////						_bilateral3.copyTo(mergePos[1]);
+////						sobel1RGB.copyTo(mergePos[2]);
+////						sobel2RGB.copyTo(mergePos[3]);
+////						sobel3RGB.copyTo(mergePos[4]);
+////						sobel4RGB.copyTo(mergePos[5]);
+//
+//						sobel1RGB.copyTo(mergePos[0]);
+//						sobel4RGB.copyTo(mergePos[1]);
+//						imwrite(dir+"/set035_2/"+files[i]+".png",merged);
+//
+//				cout<<files[i]<<endl;
+//
+//	}
 
 
-		split (_bilateral3,_image1_split2);
-		split (_bilateral3_resized,_image1_split_resized2);
 
 
-		for (int k=0; k<3; k++) {
-//			Sobel(_image1_split2[k],sobelx,CV_16SC1,1,0,3,1, 0, BORDER_DEFAULT );
-//			Sobel(_image1_split2[k],sobely,CV_16SC1,0,1,3,1, 0, BORDER_DEFAULT );
+// 140226
+
+//	int kd=5;
+//	for (unsigned int i = 0;i < files.size();i++) {
+//
+//		int col = 2;
+//		int row = 1;
+//
+//		Mat _image1 = imread( dir+"/"+files[i], -1 );
+//		Mat __image1; cvtColor(_image1,__image1,CV_RGB2YCrCb);
+//		Size size = _image1.size();
+//		Size size2 (_image1.cols*4,_image1.rows*4);
+//
+//
+//		Mat _gray (size,CV_8UC1),_grayRGB;
+//		Mat _gray_enlarged (size2,CV_8UC1);
+//		Mat _bilateral (size,CV_8UC1);
+//
+//		Mat sobel(size,CV_8UC1);
+//		Mat gradx(size,CV_32FC1);
+//		Mat grady(size,CV_32FC1);
+//		Mat sobelx(size,CV_8UC1);
+//		Mat sobely(size,CV_8UC1);
+//
+//		Mat sobel_enlarged(size2,CV_8UC1);
+//		Mat gradx_enlarged(size2,CV_32FC1);
+//		Mat grady_enlarged(size2,CV_32FC1);
+//		Mat sobelx_enlarged(size2,CV_8UC1);
+//		Mat sobely_enlarged(size2,CV_8UC1);
+//		Mat sobel_redim (size,CV_8UC1);
+//
+//		Mat merged(_image1.rows*row, _image1.cols*col, CV_8UC3);
+//		Mat _image1_split[3];
+//		Mat _image1_split_resized[3];
+//		Mat _image1_split2[3];
+//		Mat _image1_split_resized2[3];
+//		Mat _bilateral3 (size,CV_8UC3);
+//		Mat _bilateral3_resized (size2,CV_8UC3);
+//
+//		Mat _resized;
+//
+//
+//		Mat sobel1MAX = Mat::zeros(size,CV_8UC1);
+//		Mat sobel2MAX = Mat::zeros(size,CV_8UC1);
+//		Mat sobel3MAX = Mat::zeros(size,CV_8UC1);
+//		Mat sobel4MAX = Mat::zeros(size,CV_8UC1);
+//
+//		Mat sobel1RGB;
+//		Mat sobel2RGB;
+//		Mat sobel3RGB;
+//		Mat sobel4RGB;
+//
+//
+//
+//		bilateralFilter (_image1, _bilateral3 , kd, kd*2, kd/2 );
+//		medianBlur(_bilateral3,_bilateral3,3);
+//		split (_image1,_image1_split);
+//
+//		Mat _bilateral3_gray,cornerharrisdst[3],cornerharrisdst_norm[3],cornerharrisdst_norm_scaled[3], cornerharrisdst_norm_scaled2[3],cornerharrisdst_norm_scaled2_merge;
+//
+//		cvtColor(_bilateral3,_bilateral3_gray,CV_RGB2GRAY);
+//		int thresh = 80;
+//		int blockSize = 3;
+//		int apertureSize = 3;
+//		double k = 0.04;
+//		double min_,max_;
+//
+//		Mat cannny[3],soobel[3],cannny_merge,soobel_merge;
+//
+//		for (int q=0;q<3;q++){
+//			cornerHarris(_image1_split[q], cornerharrisdst[q], blockSize, apertureSize, k, BORDER_DEFAULT );
+//
+//			minMaxIdx(cornerharrisdst[q],&min_,&max_,0);
+//			cout<<"max: "<<max_<<endl;
+//			cout<<"min: "<<min_<<endl;
+//
+//			cornerharrisdst_norm[q] = cornerharrisdst[q]/max_*255.;
+//
+//
+//
+//
+//			/// Normalizing
+//			normalize( cornerharrisdst[q], cornerharrisdst_norm[q], 0, 255, NORM_MINMAX, CV_32FC1, Mat() );
+//			convertScaleAbs( cornerharrisdst_norm[q], cornerharrisdst_norm_scaled[q] );
+//			normalize( cornerharrisdst_norm_scaled[q], cornerharrisdst_norm_scaled2[q], 0, 255, NORM_MINMAX, CV_8UC1, Mat() );
+//	//		minMaxIdx(cornerharrisdst_norm,&min_,&max_,0);
+//	//		cout<<"max: "<<max_<<endl;
+//	//		cout<<"min: "<<min_<<endl;
+//	//		cornerharrisdst_norm.convertTo(cornerharrisdst_norm_scaled,CV_8UC1);
+//
+//
+//
+//
+//
+//			Canny( _image1_split[q], cannny[q], 30, 50, 3, 1 );
+//
+//
+//			Mat sobelx(size,CV_32FC1);
+//			Mat sobely(size,CV_32FC1);
+//			Mat sobelxsq(size,CV_32FC1);
+//			Mat sobelysq(size,CV_32FC1);
+//			Sobel(_image1_split[q],sobelx,CV_32FC1,1,0,3,1, 0, BORDER_DEFAULT );
+//			Sobel(_image1_split[q],sobely,CV_32FC1,0,1,3,1, 0, BORDER_DEFAULT );
 //			convertScaleAbs( sobelx, gradx );
 //			convertScaleAbs( sobely, grady );
-//			addWeighted( gradx, 0.5, grady, 0.5, 0, sobel );
-//			max(sobel,sobel2MAX,sobel2MAX);
+//			addWeighted( gradx, 0.5, grady, 0.5, 0, soobel[q] );
+//
+//
+//		}
+//
+//		merge (cornerharrisdst_norm_scaled2,3,cornerharrisdst_norm_scaled2_merge);
+//		merge (soobel,3,soobel_merge);
+//		merge (cannny,3,cannny_merge);
+//		//threshold(cornerharrisdst_norm_scaled,cornerharrisdst_norm_scaled_cvt,20,255,THRESH_BINARY);
+//
+//
+//
+//
+//
+//
+//
+//		//			namedWindow( "c", CV_WINDOW_AUTOSIZE );
+//		//			imshow( "c", sobelx/255);
+//		//			namedWindow( "d", CV_WINDOW_AUTOSIZE );
+//		//			imshow( "d", varmapa/255);
+//		//			waitKey(0);
+//
+//
+//
+//
+//
+//		namedWindow( "c", CV_WINDOW_AUTOSIZE );
+//		imshow( "c", soobel_merge);
+//		namedWindow( "d", CV_WINDOW_AUTOSIZE );
+//		imshow( "d", cannny_merge);
+//		namedWindow( "e", CV_WINDOW_AUTOSIZE );
+//		imshow( "e", cornerharrisdst_norm_scaled2_merge);
+//		waitKey(0);
+//
+//
+//
+//		resize (_bilateral3,_resized, size2, 0, 0, INTER_CUBIC);
+//		bilateralFilter (_resized, _bilateral3_resized , kd, kd*2, kd/2 );
+//		medianBlur(_bilateral3_resized,_bilateral3_resized,3);
+//		split (_resized,_image1_split_resized);
+//
+//
+//		split (_bilateral3,_image1_split2);
+//		split (_bilateral3_resized,_image1_split_resized2);
+//
+//
+//		for (int k=0; k<3; k++) {
+//			Sobel(_image1_split_resized2[k],sobelx_enlarged,CV_16SC1,1,0,3,1, 0, BORDER_DEFAULT );
+//			Sobel(_image1_split_resized2[k],sobely_enlarged,CV_16SC1,0,1,3,1, 0, BORDER_DEFAULT );
+//			convertScaleAbs( sobelx_enlarged, gradx_enlarged );
+//			convertScaleAbs( sobely_enlarged, grady_enlarged );
+//			addWeighted( gradx_enlarged, 0.5, grady_enlarged, 0.5, 0, sobel_enlarged );
+//			resize (sobel_enlarged,sobel_redim, size, 0, 0, INTER_CUBIC);
+//			max(sobel_redim,sobel4MAX,sobel4MAX);
+//		}
+//
+//
+//				cvtColor(_image1,_gray,CV_RGB2GRAY);
+//				Sobel(_gray,sobelx,CV_16SC1,1,0,3,1, 0, BORDER_DEFAULT );
+//				Sobel(_gray,sobely,CV_16SC1,0,1,3,1, 0, BORDER_DEFAULT );
+//				convertScaleAbs( sobelx, gradx );
+//				convertScaleAbs( sobely, grady );
+//				addWeighted( gradx, 0.5, grady, 0.5, 0, sobel );
+//				cvtColor(sobel,sobel1RGB,CV_GRAY2RGB);
+//
+//				cvtColor(sobel4MAX,sobel4RGB,CV_GRAY2RGB);
+//				sobel4RGB*=1.5;
+//
+//						Mat mergePos [col*row];
+//						for (int k=0; k<row; k++) {
+//							for (int j=0; j<col; j++) {
+//								mergePos[j+k*col] = Mat(merged, Rect(_image1.cols*(j%col), _image1.rows*((int)(j/col)+k), _image1.cols, _image1.rows));
+//							}
+//						}
+//
+//						sobel1RGB.copyTo(mergePos[0]);
+//						sobel4RGB.copyTo(mergePos[1]);
+//						imwrite(dir+"/set035_2/"+files[i]+".png",merged);
+//
+//				cout<<files[i]<<endl;
+//
+//	}
 
-			Sobel(_image1_split_resized2[k],sobelx_enlarged,CV_16SC1,1,0,3,1, 0, BORDER_DEFAULT );
-			Sobel(_image1_split_resized2[k],sobely_enlarged,CV_16SC1,0,1,3,1, 0, BORDER_DEFAULT );
-			convertScaleAbs( sobelx_enlarged, gradx_enlarged );
-			convertScaleAbs( sobely_enlarged, grady_enlarged );
-			addWeighted( gradx_enlarged, 0.5, grady_enlarged, 0.5, 0, sobel_enlarged );
-			resize (sobel_enlarged,sobel_redim, size, 0, 0, INTER_CUBIC);
-			max(sobel_redim,sobel4MAX,sobel4MAX);
-		}
-
-
-				cvtColor(_image1,_gray,CV_RGB2GRAY);
-				Sobel(_gray,sobelx,CV_16SC1,1,0,3,1, 0, BORDER_DEFAULT );
-				Sobel(_gray,sobely,CV_16SC1,0,1,3,1, 0, BORDER_DEFAULT );
-				convertScaleAbs( sobelx, gradx );
-				convertScaleAbs( sobely, grady );
-				addWeighted( gradx, 0.5, grady, 0.5, 0, sobel );
-				cvtColor(sobel,sobel1RGB,CV_GRAY2RGB);
-		//
-		//		cvtColor(_bilateral3,_gray,CV_RGB2GRAY);
-		//		Sobel(_gray,sobelx,CV_16SC1,1,0,3,1, 0, BORDER_DEFAULT );
-		//		Sobel(_gray,sobely,CV_16SC1,0,1,3,1, 0, BORDER_DEFAULT );
-		//		convertScaleAbs( sobelx, gradx );
-		//		convertScaleAbs( sobely, grady );
-		//		addWeighted( gradx, 0.5, grady, 0.5, 0, sobel );
-		//		cvtColor(sobel,sobel2RGB,CV_GRAY2RGB);
-		//
-		//
-		//		cvtColor(_resized,_gray_enlarged,CV_RGB2GRAY);
-		//		Sobel(_gray_enlarged,sobelx_enlarged,CV_16SC1,1,0,3,1, 0, BORDER_DEFAULT );
-		//		Sobel(_gray_enlarged,sobely_enlarged,CV_16SC1,0,1,3,1, 0, BORDER_DEFAULT );
-		//		convertScaleAbs( sobelx_enlarged, gradx_enlarged );
-		//		convertScaleAbs( sobely_enlarged, grady_enlarged );
-		//		addWeighted( gradx_enlarged, 0.5, grady_enlarged, 0.5, 0, sobel_enlarged );
-		//		resize (sobel_enlarged,sobel_redim, size, 0, 0, INTER_CUBIC);
-		//		cvtColor(sobel_redim,sobel3RGB,CV_GRAY2RGB);
-		//
-		//		cvtColor(_bilateral3_resized,_gray_enlarged,CV_RGB2GRAY);
-		//		Sobel(_gray_enlarged,sobelx_enlarged,CV_16SC1,1,0,3,1, 0, BORDER_DEFAULT );
-		//		Sobel(_gray_enlarged,sobely_enlarged,CV_16SC1,0,1,3,1, 0, BORDER_DEFAULT );
-		//		convertScaleAbs( sobelx_enlarged, gradx_enlarged );
-		//		convertScaleAbs( sobely_enlarged, grady_enlarged );
-		//		addWeighted( gradx_enlarged, 0.5, grady_enlarged, 0.5, 0, sobel_enlarged );
-		//		resize (sobel_enlarged,sobel_redim, size, 0, 0, INTER_CUBIC);
-		//		cvtColor(sobel_redim,sobel4RGB,CV_GRAY2RGB);
-
-				//cvtColor(sobel1MAX,sobel1RGB,CV_GRAY2RGB);
-				//cvtColor(sobel2MAX,sobel2RGB,CV_GRAY2RGB);
-				//cvtColor(sobel3MAX,sobel3RGB,CV_GRAY2RGB);
-				cvtColor(sobel4MAX,sobel4RGB,CV_GRAY2RGB);
 
 
 
-				//sobel3RGB*=2.3;
-				sobel4RGB*=1.5;
 
-				//equalizeHist(sobel_redim,sobel_redim);
 
-		//		namedWindow( "e", CV_WINDOW_AUTOSIZE );
-		//		imshow( "e", sobel);
-		//		namedWindow( "e2", CV_WINDOW_AUTOSIZE );
-		//		imshow( "e2", sobel_redim*2);
-		//		waitKey(0);
-						Mat mergePos [col*row];
-						for (int k=0; k<row; k++) {
-							for (int j=0; j<col; j++) {
-								mergePos[j+k*col] = Mat(merged, Rect(_image1.cols*(j%col), _image1.rows*((int)(j/col)+k), _image1.cols, _image1.rows));
-							}
-						}
-//						_image1.copyTo(mergePos[0]);
-//						_bilateral3.copyTo(mergePos[1]);
-//						sobel1RGB.copyTo(mergePos[2]);
-//						sobel2RGB.copyTo(mergePos[3]);
-//						sobel3RGB.copyTo(mergePos[4]);
-//						sobel4RGB.copyTo(mergePos[5]);
+//		int kd=5;
+//		for (unsigned int i = 0;i < files.size();i++) {
+//
+//			int col = 2;
+//			int row = 3;
+//
+//			Mat _image1 = imread( dir+"/"+files[i], -1 );
+//			Mat __image1; cvtColor(_image1,__image1,CV_RGB2YCrCb);
+//			Size size = _image1.size();
+//			Size size2 (_image1.cols*2,_image1.rows*2);
+//
+//
+//			Mat _gray (size,CV_8UC1),_grayRGB;
+//			Mat _bilateral (size,CV_8UC1);
+//
+//			//Mat gradx(size,CV_8UC1);
+//			//Mat grady(size,CV_8UC1);
+//			Mat sobel(size,CV_8UC1);
+//
+//			Mat sobelColor_[3];
+//			Mat sobelColor;
+//			Mat sobelAND = Mat::zeros(size,CV_8UC1)+255;
+//			Mat sobelOR = Mat::zeros(size,CV_8UC1);
+//			Mat merged(_image1.rows*row, _image1.cols*col, CV_8UC3);
+//			Mat _image1_split[3];
+//			Mat _bilateral3 (size,CV_8UC3);
+//			Mat __image1_split[3];
+//			Mat __bilateral3 (size,CV_8UC3);
+//			//_bilateral3 = _image1;
+//			bilateralFilter (_image1, _bilateral3 , kd, kd*2, kd/2 );
+//			medianBlur(_bilateral3,_bilateral3,3);
+//			split (_bilateral3,_image1_split);
+//
+//
+//			bilateralFilter (__image1, __bilateral3 , kd, kd*2, kd/2 );
+//			medianBlur(__bilateral3,__bilateral3,3);
+//			split (__bilateral3,__image1_split);
+//
+//			cvtColor(_image1,_gray,CV_RGB2GRAY);
+//			cvtColor(_gray,_grayRGB,CV_GRAY2RGB);
+//
+//
+//			waitKey(0);
+//
+//			Mat sobelxsqsum = Mat::zeros(size,CV_32FC1);
+//			Mat sobelysqsum = Mat::zeros(size,CV_32FC1);
+//			Mat gradx(size,CV_32FC1);
+//			Mat grady(size,CV_32FC1);
+//			int dilation_type = MORPH_CROSS;
+//			Mat elementL = getStructuringElement( dilation_type, Size( 3,3 ), Point( 1,1 ) );
+//
+//			float stdsum=.0;
+//			Mat hetero1 = Mat::zeros(size,CV_8UC1),
+//				hetero2 = Mat::zeros(size,CV_8UC1),
+//				hetero3 = Mat::zeros(size,CV_8UC1);
+//
+//			for (int k=0; k<3; k++) {
+//				Mat hetero1t,
+//					hetero2t,
+//					hetero3t;
+//
+//				cvNica::HeteroDetector(_image1_split[k],hetero1t,53);
+//				//cvNica::HeteroDetector(__image1_split[k],hetero2t,54);
+//				cvNica::HeteroDetector(_image1_split[k],hetero3t,55);
+//
+//				max(hetero1,hetero1t,hetero1);
+//				//max(hetero2,hetero2t,hetero2);
+//				max(hetero3,hetero3t,hetero3);
+//			}
+//
+//	//		namedWindow( "ze1", CV_WINDOW_AUTOSIZE );
+//	//		imshow( "ze1", hetero1);
+//	//		namedWindow( "ze2", CV_WINDOW_AUTOSIZE );
+//	//		imshow( "ze2", hetero2);
+//	//		namedWindow( "ze3", CV_WINDOW_AUTOSIZE );
+//	//		imshow( "ze3", hetero3);
+//			//namedWindow( "ze4", CV_WINDOW_AUTOSIZE );
+//			//imshow( "ze4", (hetero1+hetero3));
+//
+//			//waitKey(0);
+//
+//
+//
+//			Mat mergePos [col*row];
+//			for (int k=0; k<row; k++) {
+//				for (int j=0; j<col; j++) {
+//					mergePos[j+k*col] = Mat(merged, Rect(_image1.cols*(j%col), _image1.rows*((int)(j/col)+k), _image1.cols, _image1.rows));
+//				}
+//			}
+//
+//			Mat hetero1RGB;
+//			Mat hetero3RGB;
+//			Mat hetero13RGB;
+//			Mat hetero13RGB2;
+//			cvtColor(hetero1,hetero1RGB,CV_GRAY2RGB);
+//			cvtColor(hetero3,hetero3RGB,CV_GRAY2RGB);
+//			cvtColor(hetero1+hetero3,hetero13RGB,CV_GRAY2RGB);
+//			cvtColor((hetero1+hetero3)*255,hetero13RGB2,CV_GRAY2RGB);
+//			_image1.copyTo(mergePos[0]);
+//			hetero1RGB.copyTo(mergePos[2]);
+//			hetero3RGB.copyTo(mergePos[3]);
+//			hetero13RGB.copyTo(mergePos[4]);
+//			hetero13RGB2.copyTo(mergePos[5]);
+//
+//			//imwrite(dir+"/set032/"+files[i]+".png",merged);
+//			cout<<files[i]<<endl;
+//
+//
+//	//		for (int k=0; k<3; k++) {
+//	//
+//	//			Mat varmapa(size,CV_8UC1);
+//	//					Mat varmapa_(size,CV_32FC1);
+//	//					Mat varmapa__(size,CV_32FC1);
+//	//
+//	//			cvNica::VarianceFilter(__image1_split[k],varmapa_,5);
+//	//
+//	//
+//	//
+//	//
+//	//			//erode(varmapa_,varmapa_,elementL);
+//	//
+//	//			Mat sp32; __image1_split[k].convertTo(sp32,CV_32FC1);
+//	//			float spsum = sum(sp32)[0]/size.width/size.height;
+//	//			float spsqsum = sum(sp32.mul(sp32))[0];
+//	//			float std = sqrt(spsqsum/size.width/size.height - spsum*spsum);
+//	//			cout<<": "<<spsum<<": "<<spsqsum<<": "<<std<<endl;
+//	////			namedWindow( "d", CV_WINDOW_AUTOSIZE );
+//	////						imshow( "d", varmapa__/255);
+//	////						waitKey(0);
+//	//
+//	//			//sqrt( varmapa__, varmapa_);
+//	//
+//	//			//threshold(varmapa_,varmapa,5,255,THRESH_BINARY_INV);
+//	//			//max(varmapa_,varmapa,varmapa_);
+//	//
+//	//			std = (std<30)? 30:std;
+//	//			//cv::pow(varmapa_,1.1,varmapa_);
+//	//			stdsum += std;
+//	//
+//	//
+//	//			threshold(varmapa_,varmapa,std/6+2,255,THRESH_BINARY_INV);
+//	//			//threshold(varmapa_,varmapa,sqrt(std)+2,255,THRESH_BINARY_INV);
+//	//			//threshold(varmapa_,varmapa,10,255,THRESH_BINARY_INV);
+//	//			max(varmapa_,varmapa,varmapa);
+//	//
+//	//
+//	////			varmapa.convertTo(varmapa_,CV_8UC1);
+//	////			namedWindow( "c", CV_WINDOW_AUTOSIZE );
+//	////			imshow( "c", varmapa_);
+//	////
+//	////			waitKey(0);
+//	//
+//	//			Mat sobelx(size,CV_32FC1);
+//	//			Mat sobely(size,CV_32FC1);
+//	//			Mat sobelxsq(size,CV_32FC1);
+//	//			Mat sobelysq(size,CV_32FC1);
+//	//			Sobel(__image1_split[k],sobelx,CV_32F,1,0,1,1, 0, BORDER_REPLICATE );
+//	//
+//	//
+//	////			namedWindow( "c", CV_WINDOW_AUTOSIZE );
+//	////			imshow( "c", sobelx/255);
+//	////			namedWindow( "d", CV_WINDOW_AUTOSIZE );
+//	////			imshow( "d", varmapa/255);
+//	////			waitKey(0);
+//	//
+//	//			sobelx/=varmapa/85;
+//	//			multiply(sobelx,sobelx,sobelxsq);
+//	//
+//	//			sobelxsqsum += sobelxsq*std;
+//	//			//convertScaleAbs( sobelx, gradx );
+//	//			Sobel(__image1_split[k],sobely,CV_32F,0,1,1,1, 0, BORDER_REPLICATE );
+//	//			sobely/=varmapa/85;
+//	//			multiply(sobely,sobely,sobelysq);
+//	//
+//	//			sobelysqsum += sobelysq*std;
+//	//		}
+//	//		sobelxsqsum/=stdsum;
+//	//		sobelysqsum/=stdsum;
+//	//		sqrt (sobelxsqsum,gradx);
+//	//		sqrt (sobelysqsum,grady);
+//	//
+//	//		Mat canny2;Mat gradx2;Mat grady2;
+//	//		gradx.convertTo(gradx2,CV_16S);
+//	//		grady.convertTo(grady2,CV_16S);
+//	//		Canny( _gray, canny2, 60, 120, 3, 1 );
+//	//		addWeighted( gradx, 0.5, grady, 0.5, 0, sobel );
+//	//		merge(sobelColor_,3,sobelColor);
+//	////		Mat _sobel;
+//	////		cvNica::MeanFilter(sobel,_sobel,7);
+//	////
+//	////		threshold(_sobel,_sobel,80,255,THRESH_BINARY_INV);
+//	////		namedWindow( "e", CV_WINDOW_AUTOSIZE );
+//	////				imshow( "e", _sobel/255);
+//	////				waitKey(0);
+//	////		sobel=sobel.mul(_sobel)/255;
+//	//		Mat sobel8U;
+//	//		sobel.convertTo(sobel8U,CV_8UC1);
+//	//		medianBlur(sobel8U,sobelOR,13);
+//	//		//sobelOR/=25;
+//	//		Mat sobel222 = sobel/150;
+//	//		//namedWindow( "a", CV_WINDOW_AUTOSIZE );
+//	//		//				imshow( "a", sobel222);
+//	//		CvMat pSrc = sobel222;
+//	//		CvMat *pDst = cvCreateMat(size.height, size.width, CV_32FC1);;
+//	//
+//	//		cvNica::MorphologicalThinning(&pSrc,pDst);
+//	//		Mat dm = cv::Mat(pDst, true);
+//	//
+//	//		Mat sobelx(size,CV_8UC1);
+//	//		Mat sobely(size,CV_8UC1);
+//	//
+//	//		Mat varmapa(size,CV_8UC1);
+//	//		Mat varmapa_(size,CV_32FC1);
+//	//		cvNica::VarianceFilter(_gray,varmapa_,5);
+//	//
+//	//		varmapa_.convertTo(varmapa,CV_8UC1);
+//	//		//erode(varmapa,varmapa,elementL);
+//	//
+//	//
+//	//				//sobel
+//	//		Mat canny3(size,CV_8UC1);
+//	//				Sobel(_gray,sobelx,CV_16SC1,1,0,3,1, 0, BORDER_DEFAULT );
+//	//				Sobel(_gray,sobely,CV_16SC1,0,1,3,1, 0, BORDER_DEFAULT );
+//	//				cvNica::Canny2( _gray, sobelx,sobely, canny3, 60, 120, 3, 1 );
+//	//				//cvNica::CannyEdge( _gray.data, size.width, size.height, 20,40, canny3.data );
+//	//				//Canny( _gray, canny3, 20,40, 3,1 );
+//	//				convertScaleAbs( sobelx, gradx );
+//	//
+//	//				convertScaleAbs( sobely, grady );
+//	//				addWeighted( gradx, 0.5, grady, 0.5, 0, sobel );
+//	//
+//	//
+//	//
+//	//				//Canny( _gray, canny3, 60, 120, 3, false );
+//	//
+//	//				//dilate(canny3,canny3,elementL);
+//	//				//erode(canny3,canny3,elementL);
+//	//
+//	//				//erode(sobel8U,sobel8U,elementL);
+//	//
+//	//
+//	//
+//	////				namedWindow( "a", CV_WINDOW_AUTOSIZE );
+//	////								imshow( "a", sobelOR);
+//	////				namedWindow( "b", CV_WINDOW_AUTOSIZE );
+//	////				imshow( "b", sobelAND);
+//	//			    vector< vector<Point> > contours;
+//	//			    findContours(sobel8U, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
+//	//
+//	//			    // you could also reuse img1 here
+//	//			    Mat mask = Mat::zeros(size, CV_8UC1);
+//	//
+//	//			    // CV_FILLED fills the connected components found
+//	//			    drawContours(mask, contours, -1, Scalar(255), CV_FILLED);
+//	//				namedWindow( "b", CV_WINDOW_AUTOSIZE );
+//	//				imshow( "b", mask);
+//	//		namedWindow( "c", CV_WINDOW_AUTOSIZE );
+//	//		imshow( "c", canny2);
+//	//		namedWindow( "d", CV_WINDOW_AUTOSIZE );
+//	//		imshow( "d", sobel);
+//	//		namedWindow( "e", CV_WINDOW_AUTOSIZE );
+//	//		imshow( "e", sobel8U);
+//	//		waitKey(0);
+//
+//	/*
+//
+//
+//
+//			Mat element = getStructuringElement(cv::MORPH_CROSS, cv::Size(3, 3));
+//
+//			Mat mergePos [col*row];
+//			for (int k=0; k<row; k++) {
+//				for (int j=0; j<col; j++) {
+//					mergePos[j+k*col] = Mat(merged, Rect(_image1.cols*(j%col), _image1.rows*((int)(j/col)+k), _image1.cols, _image1.rows));
+//				}
+//			}
+//
+//			Mat varmap4Merge = Mat::zeros(size,CV_8UC1);
+//			Mat varmap4Merge2 = Mat::zeros(size,CV_8UC1);
+//			for (int j=0; j<=3; j++) {
+//				Mat varmap_[4],varmap[4],varmapColor;
+//
+//				for (int k=0; k<3; k++) { // apply to each color channel
+//					Mat temp;
+//
+//					//if (j<2)
+//						cvNica::CornerDetector(_image1_split[k],varmap_[k],j+45);
+//
+//					threshold(varmap_[k],varmap[k],15,255,THRESH_BINARY);
+//
+//				}
+//
+//
+//				max(varmap[0],varmap[1],varmap[3]);
+//				max(varmap[3],varmap[2],varmap[3]);
+//
+//
+//				Mat varmapColor_[3] = {Mat::zeros(size,CV_8UC1),varmap[3],varmap[3]};
+//				merge(varmapColor_,3,varmapColor);
+//				varmapColor = varmapColor*0.9 + _grayRGB*0.1;
+//
+//				varmap4Merge += varmap[3];
+//				//varmap4Merge2 += varmap__[3];
+//				varmapColor.copyTo(mergePos[4+j]);
+//
+//			}
+//
+//
+//
+//
+//			Mat _homo,_homoThreshold,_homoOverlay,_homoColor,_homoColor2,_homoOverlay2,_homoOverlay3,_homoInv,_homoColorOrig,_homoThresholdColor;
+//
+//
+//			_homoInv = 255-varmap4Merge;
+//			bitwise_and(_homoInv,_gray,_homoOverlay2);
+//			bitwise_or(varmap4Merge,_gray,_homoOverlay);
+//			bitwise_or(varmap4Merge2,_gray,_homoOverlay3);
+//
+//			Mat _homoColor_[3] = {_homoOverlay2,_homoOverlay,_homoOverlay};
+//			Mat _homoColor_2[3] = {_homoOverlay2,_homoOverlay3,_homoOverlay};
+//			merge(_homoColor_,3,_homoColor);
+//			merge(_homoColor_2,3,_homoColor2);
+//
+//			cvtColor (_homo,_homoColorOrig,CV_GRAY2RGB);
+//			cvtColor (varmap4Merge,_homoThresholdColor,CV_GRAY2RGB);
+//
+//
+//
+//
+//			_image1.copyTo(mergePos[0]);
+//			_homoColor.copyTo(mergePos[1]);
+//			//_homoColor2.copyTo(mergePos[3]);
+//			_homoThresholdColor.copyTo(mergePos[2]);
+//
+//
+//			imwrite(dir+"/set029/"+files[i]+".png",merged);
+//			cout<<files[i]<<endl;
+//			*/
+//		}
 
-						sobel1RGB.copyTo(mergePos[0]);
-						sobel4RGB.copyTo(mergePos[1]);
-						imwrite(dir+"/set035_2/"+files[i]+".png",merged);
 
-				cout<<files[i]<<endl;
-
-	}
 
 
 
@@ -1836,7 +1895,1767 @@ int main(int argc, char* argv[] ){
 //	}
 
 
+
+// 140304
+//	int kd=5;
+//	for (unsigned int i = 0;i < files.size();i++) {
+//
+//		int col = 3;
+//		int row = 2;
+//
+//		Mat _image1 = imread( dir+"/"+files[i], -1 );
+//		Mat __image1; cvtColor(_image1,__image1,CV_RGB2YCrCb);
+//		Size size = _image1.size();
+//		Size size2 (_image1.cols*2,_image1.rows*2);
+//
+//
+//		Mat _gray (size,CV_8UC1),_grayRGB;
+//		Mat _bilateral (size,CV_8UC1);
+//
+//		//Mat gradx(size,CV_8UC1);
+//		//Mat grady(size,CV_8UC1);
+//		Mat sobel(size,CV_8UC1);
+//
+//		Mat sobelColor_[3];
+//		Mat sobelColor;
+//		Mat sobelAND = Mat::zeros(size,CV_8UC1)+255;
+//		Mat sobelOR = Mat::zeros(size,CV_8UC1);
+//		Mat merged(_image1.rows*row, _image1.cols*col, CV_8UC3);
+//		Mat _image1_split[3];
+//		Mat _bilateral3 (size,CV_8UC3);
+//		Mat __image1_split[3];
+//		Mat __bilateral3 (size,CV_8UC3);
+//		//_bilateral3 = _image1;
+//		bilateralFilter (_image1, _bilateral3 , kd, kd*2, kd/2 );
+//		medianBlur(_bilateral3,_bilateral3,3);
+//		//medianBlur(_image1,_bilateral3,3);
+//		int dilation_type = MORPH_RECT;
+//		Mat elementL = getStructuringElement( dilation_type, Size( 3,3 ), Point( 1,1 ) );
+//		//			//dilate(__Gray,__Gray,elementL);
+//		//			//erode(__Gray,__Gray,elementL);
+//
+////		dilate(_image1,_bilateral3,elementL);
+////		erode(_bilateral3,_bilateral3,elementL);
+////		erode(_bilateral3,_bilateral3,elementL);
+////		dilate(_bilateral3,_bilateral3,elementL);
+//
+//		split (_bilateral3,_image1_split);
+//		bilateralFilter (__image1, __bilateral3 , kd, kd*2, kd/2 );
+//		medianBlur(__bilateral3,__bilateral3,3);
+//		//medianBlur(__image1,__bilateral3,3);
+//
+////		dilate(__image1,__bilateral3,elementL);
+////		erode(__bilateral3,__bilateral3,elementL);
+////		erode(__bilateral3,__bilateral3,elementL);
+////		dilate(__bilateral3,__bilateral3,elementL);
+//		split (__bilateral3,__image1_split);
+//
+//		//split (_image1,_image1_split);
+//		//split (__image1,__image1_split);
+//
+//
+//		cvtColor(_image1,_gray,CV_RGB2GRAY);
+//		cvtColor(_gray,_grayRGB,CV_GRAY2RGB);
+//
+//		Mat sobelxsqsum = Mat::zeros(size,CV_32FC1);
+//		Mat sobelysqsum = Mat::zeros(size,CV_32FC1);
+//		Mat gradx(size,CV_32FC1);
+//		Mat grady(size,CV_32FC1);
+//		 //dilation_type = MORPH_ELLIPSE;
+//		//int dilation_type = MORPH_RECT;
+//			//elementL = getStructuringElement( dilation_type, Size( 25,25 ), Point( 12,12 ) );
+//
+//			float stdsum=.0;
+//		for (int k=0; k<3; k++) {
+//
+//			Mat varmapa(size,CV_8UC1);
+//					Mat varmapa_(size,CV_32FC1);
+//					Mat varmapa__(size,CV_32FC1);
+//
+//			cvNica::VarianceFilter(_image1_split[k],varmapa_,7);
+//
+//			Mat canny_,canny__;
+//
+//			Canny( _image1_split[k], canny_, 30, 50, 3, 1 );
+//			canny_.convertTo(canny__,CV_32FC1);
+//
+//			//erode(varmapa_,varmapa_,elementL);
+//
+//			Mat sp32; _image1_split[k].convertTo(sp32,CV_32FC1);
+//			float spsum = sum(sp32)[0]/size.width/size.height;
+//			float spsqsum = sum(sp32.mul(sp32))[0];
+//			float std = sqrt(spsqsum/size.width/size.height - spsum*spsum);
+//			cout<<": "<<spsum<<": "<<spsqsum<<": "<<std<<endl;
+////			namedWindow( "d", CV_WINDOW_AUTOSIZE );
+////						imshow( "d", varmapa__/255);
+////						waitKey(0);
+//
+//			//sqrt( varmapa__, varmapa_);
+//
+//			//threshold(varmapa_,varmapa,5,255,THRESH_BINARY_INV);
+//			//max(varmapa_,varmapa,varmapa_);
+//
+//			std = (std<30)? 30:std;
+//			//cv::pow(varmapa_,1.1,varmapa_);
+//			stdsum += std;
+//
+//
+//			threshold(varmapa_,varmapa,std/6+2,255,THRESH_BINARY_INV);
+//			//threshold(varmapa_,varmapa,sqrt(std)+2,255,THRESH_BINARY_INV);
+//			//threshold(varmapa_,varmapa,8,255,THRESH_BINARY_INV);
+//			max(varmapa_,varmapa,varmapa);
+//
+//
+////			varmapa.convertTo(varmapa_,CV_8UC1);
+////			namedWindow( "c", CV_WINDOW_AUTOSIZE );
+////			imshow( "c", varmapa_);
+////
+////			waitKey(0);
+//
+//			Mat sobelx(size,CV_32FC1);
+//			Mat sobely(size,CV_32FC1);
+//			Mat sobelxsq(size,CV_32FC1);
+//			Mat sobelysq(size,CV_32FC1);
+//			Sobel(_image1_split[k],sobelx,CV_32F,1,0,1,1, 0, BORDER_REPLICATE );
+//
+//
+////			namedWindow( "c", CV_WINDOW_AUTOSIZE );
+////			imshow( "c", sobelx/255);
+////			namedWindow( "d", CV_WINDOW_AUTOSIZE );
+////			imshow( "d", varmapa/255);
+////			waitKey(0);
+//
+//
+////			Mat __Gray,__Gray8;
+////			cvNica::DifferenceOfVariance(_image1_split[k],__Gray);
+////			//__Gray8.convertTo(__Gray,CV_8UC1);
+////			threshold(__Gray,__Gray,0,255,THRESH_BINARY);
+////			//Mat elementL = getStructuringElement( dilation_type, Size( 3,3 ), Point( 1,1 ) );
+////			//dilate(__Gray,__Gray,elementL);
+////			//erode(__Gray,__Gray,elementL);
+////			//multiply(sobel8U2,(255-__Gray)/255,sobel8U);
+////			__Gray=(255-__Gray)/255;
+////
+////
+////
+////			__Gray.convertTo(__Gray8,CV_32FC1);
+////			namedWindow( "ze4", CV_WINDOW_AUTOSIZE );
+////			imshow( "ze4", __Gray8);
+////			waitKey(0);
+//			sobelx/=varmapa/150;
+//			sobelx=sobelx.mul(canny__/255);
+//			//sobelx=sobelx.mul(__Gray8);
+//			multiply(sobelx,sobelx,sobelxsq);
+//
+//			sobelxsqsum += sobelxsq*std;
+//			//convertScaleAbs( sobelx, gradx );
+//			Sobel(_image1_split[k],sobely,CV_32F,0,1,1,1, 0, BORDER_REPLICATE );
+//			sobely/=varmapa/150;
+//			sobely=sobely.mul(canny__/255);
+//			//sobely=sobely.mul(__Gray8);
+//			multiply(sobely,sobely,sobelysq);
+//
+//			sobelysqsum += sobelysq*std;
+//
+//
+//
+//			convertScaleAbs( sobelx, gradx );
+//			convertScaleAbs( sobely, grady );
+//			addWeighted( gradx, 0.5, grady, 0.5, 0, sobelColor_[k] );
+//			Mat sobel8UU;
+//			sobelColor_[k].convertTo(sobel8UU,CV_8UC1);
+//			bitwise_and(sobel8UU,sobelAND,sobelAND);
+//			bitwise_or(sobel8UU,sobelOR,sobelOR);
+//			//convertScaleAbs( sobely, grady );
+//
+//		}
+////		for (int k=0; k<3; k++) {
+////
+////			Mat varmapa(size,CV_8UC1);
+////					Mat varmapa_(size,CV_32FC1);
+////					Mat varmapa__(size,CV_32FC1);
+////
+////			cvNica::VarianceFilter(__image1_split[k],varmapa_,5);
+////
+////
+////
+////
+////			//erode(varmapa_,varmapa_,elementL);
+////
+////			Mat sp32; __image1_split[k].convertTo(sp32,CV_32FC1);
+////			float spsum = sum(sp32)[0]/size.width/size.height;
+////			float spsqsum = sum(sp32.mul(sp32))[0];
+////			float std = sqrt(spsqsum/size.width/size.height - spsum*spsum);
+////			cout<<": "<<spsum<<": "<<spsqsum<<": "<<std<<endl;
+//////			namedWindow( "d", CV_WINDOW_AUTOSIZE );
+//////						imshow( "d", varmapa__/255);
+//////						waitKey(0);
+////
+////			//sqrt( varmapa__, varmapa_);
+////
+////			//threshold(varmapa_,varmapa,5,255,THRESH_BINARY_INV);
+////			//max(varmapa_,varmapa,varmapa_);
+////
+////			std = (std<30)? 30:std;
+////			//cv::pow(varmapa_,1.1,varmapa_);
+////			stdsum += std;
+////
+////
+////			threshold(varmapa_,varmapa,std/6+2,255,THRESH_BINARY_INV);
+////			//threshold(varmapa_,varmapa,sqrt(std)+2,255,THRESH_BINARY_INV);
+////			//threshold(varmapa_,varmapa,10,255,THRESH_BINARY_INV);
+////			max(varmapa_,varmapa,varmapa);
+////
+////
+//////			varmapa.convertTo(varmapa_,CV_8UC1);
+//////			namedWindow( "c", CV_WINDOW_AUTOSIZE );
+//////			imshow( "c", varmapa_);
+//////
+//////			waitKey(0);
+////
+////			Mat sobelx(size,CV_32FC1);
+////			Mat sobely(size,CV_32FC1);
+////			Mat sobelxsq(size,CV_32FC1);
+////			Mat sobelysq(size,CV_32FC1);
+////			Sobel(__image1_split[k],sobelx,CV_32F,1,0,1,1, 0, BORDER_REPLICATE );
+////
+////
+//////			namedWindow( "c", CV_WINDOW_AUTOSIZE );
+//////			imshow( "c", sobelx/255);
+//////			namedWindow( "d", CV_WINDOW_AUTOSIZE );
+//////			imshow( "d", varmapa/255);
+//////			waitKey(0);
+////
+////			sobelx/=varmapa/85;
+////			multiply(sobelx,sobelx,sobelxsq);
+////
+////			sobelxsqsum += sobelxsq*std;
+////			//convertScaleAbs( sobelx, gradx );
+////			Sobel(__image1_split[k],sobely,CV_32F,0,1,1,1, 0, BORDER_REPLICATE );
+////			sobely/=varmapa/85;
+////			multiply(sobely,sobely,sobelysq);
+////
+////			sobelysqsum += sobelysq*std;
+////		}
+//		sobelxsqsum/=stdsum;
+//		sobelysqsum/=stdsum;
+//		sqrt (sobelxsqsum,gradx);
+//		sqrt (sobelysqsum,grady);
+//
+//		Mat canny2;Mat gradx2;Mat grady2;
+//		gradx.convertTo(gradx2,CV_16S);
+//		grady.convertTo(grady2,CV_16S);
+//		Canny( _gray, canny2, 60, 120, 3, 1 );
+//		addWeighted( gradx, 0.5, grady, 0.5, 0, sobel );
+//
+//		Point a1;
+//		Mat matchtresultAcc;
+//		Mat matchtresult;
+//		Mat kernel1;
+////		kernel1 = cvNica::kernels(98,a1);
+////		matchTemplate(sobel,kernel1,matchtresult,CV_TM_CCOEFF_NORMED);
+////		threshold(matchtresult,matchtresult,0.63,1,THRESH_BINARY);
+////		matchtresult.copyTo(matchtresultAcc);
+////
+////		kernel1 = cvNica::kernels(99,a1);
+////		matchTemplate(sobel,kernel1,matchtresult,CV_TM_CCOEFF_NORMED);
+////		threshold(matchtresult,matchtresult,0.63,1,THRESH_BINARY);
+////		matchtresultAcc += matchtresult;
+////
+////		kernel1 = cvNica::kernels(100,a1);
+////		matchTemplate(sobel,kernel1,matchtresult,CV_TM_CCOEFF_NORMED);
+////		threshold(matchtresult,matchtresult,0.63,1,THRESH_BINARY);
+////		matchtresultAcc += matchtresult;
+////
+////		kernel1 = cvNica::kernels(101,a1);
+////		matchTemplate(sobel,kernel1,matchtresult,CV_TM_CCOEFF_NORMED);
+////		threshold(matchtresult,matchtresult,0.63,1,THRESH_BINARY);
+////		matchtresultAcc += matchtresult;
+//
+//		int startIndex = 36;//98;//36;
+//		kernel1 = cvNica::kernels(startIndex,a1)*255;
+//		matchTemplate(sobel,kernel1,matchtresult,CV_TM_CCOEFF_NORMED);
+//		threshold(matchtresult,matchtresult,0.7,1,THRESH_BINARY);
+//		matchtresult.copyTo(matchtresultAcc);
+//
+//		kernel1 = cvNica::kernels(startIndex+1,a1)*255;
+//		matchTemplate(sobel,kernel1,matchtresult,CV_TM_CCOEFF_NORMED);
+//		threshold(matchtresult,matchtresult,0.7,1,THRESH_BINARY);
+//		matchtresultAcc += matchtresult;
+//
+//		kernel1 = cvNica::kernels(startIndex+2,a1)*255;
+//		matchTemplate(sobel,kernel1,matchtresult,CV_TM_CCOEFF_NORMED);
+//		threshold(matchtresult,matchtresult,0.7,1,THRESH_BINARY);
+//		matchtresultAcc += matchtresult;
+//
+//		kernel1 = cvNica::kernels(startIndex+3,a1)*255;
+//		matchTemplate(sobel,kernel1,matchtresult,CV_TM_CCOEFF_NORMED);
+//		threshold(matchtresult,matchtresult,0.7,1,THRESH_BINARY);
+//		matchtresultAcc += matchtresult;
+//
+//
+//
+//
+//
+//		Point a2;
+//		Mat matchtresultAcc2;
+//		Mat matchtresult2;
+//		Mat kernel2;
+//		Mat canny232F;
+//		canny2.convertTo(canny232F,CV_32FC1);
+//		kernel2 = cvNica::kernels(startIndex,a2)*255;
+//		matchTemplate(canny232F,kernel2,matchtresult2,CV_TM_CCOEFF_NORMED);
+//		threshold(matchtresult2,matchtresult2,0.7,1,THRESH_BINARY);
+//		matchtresult2.copyTo(matchtresultAcc2);
+//
+//		kernel2 = cvNica::kernels(startIndex+1,a1)*255;
+//		matchTemplate(canny232F,kernel1,matchtresult2,CV_TM_CCOEFF_NORMED);
+//		threshold(matchtresult2,matchtresult2,0.7,1,THRESH_BINARY);
+//		matchtresultAcc2 += matchtresult2;
+//
+//		kernel2 = cvNica::kernels(startIndex+2,a1)*255;
+//		matchTemplate(canny232F,kernel1,matchtresult2,CV_TM_CCOEFF_NORMED);
+//		threshold(matchtresult2,matchtresult2,0.7,1,THRESH_BINARY);
+//		matchtresultAcc2 += matchtresult2;
+//
+//		kernel2 = cvNica::kernels(startIndex+3,a1)*255;
+//		matchTemplate(canny232F,kernel1,matchtresult2,CV_TM_CCOEFF_NORMED);
+//		threshold(matchtresult2,matchtresult2,0.7,1,THRESH_BINARY);
+//		matchtresultAcc2 += matchtresult2;
+//
+//
+//
+//
+//
+//
+//
+//		//
+////		namedWindow( "ze4", CV_WINDOW_AUTOSIZE );
+////		imshow( "ze4", 255-__Gray);
+////		waitKey(0);
+//
+////		Mat sobelbinary=sobel>0;
+////		cvNica::MeanFilter(sobelbinary,sobelbinary,5);
+////				namedWindow( "ze4", CV_WINDOW_AUTOSIZE );
+////				imshow( "ze4", sobelbinary);
+////				waitKey(0);
+////		void MeanFilter(
+////				InputArray 						_src,
+////				OutputArray						_dst,
+////				int								size)
+//
+//		merge(sobelColor_,3,sobelColor);
+////		Mat _sobel;
+////		cvNica::MeanFilter(sobel,_sobel,7);
+////
+////		threshold(_sobel,_sobel,80,255,THRESH_BINARY_INV);
+////		namedWindow( "e", CV_WINDOW_AUTOSIZE );
+////				imshow( "e", _sobel/255);
+////				waitKey(0);
+////		sobel=sobel.mul(_sobel)/255;
+//		Mat sobel8U2;Mat sobel8U;
+//
+//
+//		/*
+//		Mat _sobelx, _sobely;
+//		Mat sobell,sobell32;
+//		Sobel(_gray,_sobelx,CV_32F,1,0,5,1, 0, BORDER_REPLICATE );
+//		Sobel(_gray,_sobely,CV_32F,0,1,5,1, 0, BORDER_REPLICATE );
+//		convertScaleAbs( _sobelx, _sobelx );
+//		convertScaleAbs( _sobely, _sobely );
+//		addWeighted( _sobelx, 0.5, _sobely, 0.5, 0, sobell );
+//					double mmin, mmax;
+////
+//
+////
+//		//GaussianBlur(sobel,sobelOR,Size(3,3),1);
+//
+//					//sobel.copyTo(sobell);
+//					minMaxIdx(sobell,&mmin,&mmax);
+//					cout<<": "<<mmin<<" "<<mmax<<endl;
+//					//sobell/=mmax;
+//					//sobell=255-sobell;
+//		//dilate(1-sobell,sobell,elementL);
+//		erode(sobell,sobell,elementL);
+//		dilate(sobell,sobell,elementL);
+////		namedWindow( "e", CV_WINDOW_AUTOSIZE );
+////		imshow( "e", sobell);
+////		waitKey(0);
+//		sobell.convertTo(sobell32,CV_32FC1);
+////		erode(sobelOR,sobelOR,elementL);
+////		erode(sobelOR,sobelOR,elementL);
+////
+////		minMaxIdx(sobelOR,&mmin,&mmax);
+////							cout<<": "<<mmin<<" "<<mmax<<endl;
+////
+////				namedWindow( "e", CV_WINDOW_AUTOSIZE );
+////				imshow( "e", (255-sobell32*2)/256);
+////				waitKey(0);
+//		multiply(sobel, (255-sobell32*2.5)/256, sobel);
+//
+//*/
+//
+//		sobel.convertTo(sobel8U,CV_8UC1);
+//
+////
+////		Mat __Gray,__Gray8;
+////		cvNica::DifferenceOfVariance(_gray,__Gray8);
+////		__Gray8.convertTo(__Gray,CV_8UC1);
+////		threshold(__Gray,__Gray,0,255,THRESH_BINARY);
+////		//Mat elementL = getStructuringElement( dilation_type, Size( 3,3 ), Point( 1,1 ) );
+////		dilate(__Gray,__Gray,elementL);
+////		erode(__Gray,__Gray,elementL);
+////
+////		multiply(sobel8U2,(255-__Gray)/255,sobel8U);
+//
+//
+//
+//		//sobelOR/=25;
+//		Mat sobel222 = sobel/150;
+//		//namedWindow( "a", CV_WINDOW_AUTOSIZE );
+//		//				imshow( "a", sobel222);
+//		CvMat pSrc = sobel222;
+//		CvMat *pDst = cvCreateMat(size.height, size.width, CV_32FC1);;
+//
+//		cvNica::MorphologicalThinning(&pSrc,pDst);
+//		Mat dm = cv::Mat(pDst, true);
+//
+//		Mat sobelx(size,CV_8UC1);
+//		Mat sobely(size,CV_8UC1);
+//
+//		Mat varmapa(size,CV_8UC1);
+//		Mat varmapa_(size,CV_32FC1);
+//		cvNica::VarianceFilter(_gray,varmapa_,5);
+//
+//		varmapa_.convertTo(varmapa,CV_8UC1);
+//		//erode(varmapa,varmapa,elementL);
+//
+//
+//				//sobel
+//		Mat canny3(size,CV_8UC1);
+//				Sobel(_gray,sobelx,CV_16SC1,1,0,3,1, 0, BORDER_DEFAULT );
+//				Sobel(_gray,sobely,CV_16SC1,0,1,3,1, 0, BORDER_DEFAULT );
+//				cvNica::Canny2( _gray, sobelx,sobely, canny3, 60, 120, 3, 1 );
+//				//cvNica::CannyEdge( _gray.data, size.width, size.height, 20,40, canny3.data );
+//				//Canny( _gray, canny3, 20,40, 3,1 );
+//				convertScaleAbs( sobelx, gradx );
+//
+//				convertScaleAbs( sobely, grady );
+//				addWeighted( gradx, 0.5, grady, 0.5, 0, sobel );
+//
+//
+//
+//				//Canny( _gray, canny3, 60, 120, 3, false );
+//
+//				//dilate(canny3,canny3,elementL);
+//				//erode(canny3,canny3,elementL);
+//
+//				//erode(sobel8U,sobel8U,elementL);
+//
+//
+//
+////				namedWindow( "a", CV_WINDOW_AUTOSIZE );
+////								imshow( "a", sobelOR);
+////				namedWindow( "b", CV_WINDOW_AUTOSIZE );
+////				imshow( "b", sobelAND);
+//			    vector< vector<Point> > contours;
+//			    //findContours(sobel8U, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
+//
+//			    // you could also reuse img1 here
+//			   // Mat mask = Mat::zeros(size, CV_8UC1);
+//
+//			    // CV_FILLED fills the connected components found
+//			    //drawContours(mask, contours, -1, Scalar(255), CV_FILLED);
+////				namedWindow( "b", CV_WINDOW_AUTOSIZE );
+////				imshow( "b", mask);
+////		namedWindow( "c", CV_WINDOW_AUTOSIZE );
+////		imshow( "c", canny2);
+////		namedWindow( "d", CV_WINDOW_AUTOSIZE );
+////		imshow( "d", sobel);
+//
+//
+//				Mat mergePos [col*row];
+//				for (int k=0; k<row; k++) {
+//					for (int j=0; j<col; j++) {
+//						mergePos[j+k*col] = Mat(merged, Rect(_image1.cols*(j%col), _image1.rows*((int)(j/col)+k), _image1.cols, _image1.rows));
+//					}
+//				}
+//				Mat sobel8URGB;
+//				Mat sobelRGB;
+//				Mat canny2RGB;
+//				Mat __GrayRGB;
+//				Mat matchtresultRGB;
+//				Mat matchtresult2RGB;
+//				Mat matchtresult8U;
+//				Mat matchtresult28U;
+//				cvtColor(sobel8U,sobel8URGB,CV_GRAY2RGB);
+//				cvtColor(sobel,sobelRGB,CV_GRAY2RGB);
+//				cvtColor(canny2,canny2RGB,CV_GRAY2RGB);
+//				matchtresultAcc*=255;
+//				matchtresultAcc2*=255;
+//				matchtresultAcc.convertTo(matchtresult8U,CV_8UC1);
+//				matchtresultAcc2.convertTo(matchtresult28U,CV_8UC1);
+//
+//				Mat matchtresultlarge(size,CV_8UC1);
+//				Mat matchtresult2large(size,CV_8UC1);
+//
+//				Mat matchtresulttemp = Mat(matchtresultlarge, Rect(3, 3, matchtresult.cols, matchtresult.rows));
+//				Mat matchtresult2temp = Mat(matchtresult2large, Rect(3, 3, matchtresult2.cols, matchtresult2.rows));
+//				matchtresult8U.copyTo(matchtresulttemp);
+//				matchtresult28U.copyTo(matchtresult2temp);
+//
+//
+//				cvtColor(matchtresultlarge,matchtresultRGB,CV_GRAY2RGB);
+//				cvtColor(matchtresult2large,matchtresult2RGB,CV_GRAY2RGB);
+//				//cvtColor(255-__Gray,__GrayRGB,CV_GRAY2RGB);
+////				namedWindow( "c", CV_WINDOW_AUTOSIZE );
+////				imshow( "c", matchtresultRGB);
+////				namedWindow( "d", CV_WINDOW_AUTOSIZE );
+////				imshow( "d", matchtresult2RGB);
+////				namedWindow( "e", CV_WINDOW_AUTOSIZE );
+////				imshow( "e", sobel);
+////				waitKey(0);
+//
+////				cout<<matchtresultRGB.cols<<endl;
+////				cout<<matchtresultRGB.rows<<endl; /// size not fit
+//
+//				dilate(matchtresultlarge,matchtresultlarge,elementL);
+//				dilate(matchtresult2large,matchtresult2large,elementL);
+//
+//				Mat matchtresultmerged_[3] = {_gray-matchtresultlarge,_gray-matchtresultlarge,_gray+matchtresultlarge};
+//				Mat matchtresultmerged;
+//				merge(matchtresultmerged_,3,matchtresultmerged);
+//
+//				Mat matchtresultmerged2_[3] = {_gray-matchtresult2large,_gray-matchtresult2large,_gray+matchtresult2large};
+//				Mat matchtresultmerged2;
+//				merge(matchtresultmerged2_,3,matchtresultmerged2);
+//
+//				//_image1.copyTo(mergePos[0]);
+//				canny2RGB.copyTo(mergePos[1]);
+//				matchtresultRGB.copyTo(mergePos[5]);
+//				matchtresultmerged.copyTo(mergePos[3]);
+//				//sobelRGB.copyTo(mergePos[4]);
+//				sobel8URGB.copyTo(mergePos[4]);
+//				matchtresult2RGB.copyTo(mergePos[2]);
+//				matchtresultmerged2.copyTo(mergePos[0]);
+//
+//				imwrite(dir+"/set036/"+files[i]+".png",merged);
+//				cout<<files[i]<<endl;
+//				//_homoColor2.copyTo(mergePos[3]);
+//				//_homoThresholdColor.copyTo(mergePos[2]);
+//
+///*
+//
+//
+//
+//		Mat element = getStructuringElement(cv::MORPH_CROSS, cv::Size(3, 3));
+//
+//		Mat mergePos [col*row];
+//		for (int k=0; k<row; k++) {
+//			for (int j=0; j<col; j++) {
+//				mergePos[j+k*col] = Mat(merged, Rect(_image1.cols*(j%col), _image1.rows*((int)(j/col)+k), _image1.cols, _image1.rows));
+//			}
+//		}
+//
+//		Mat varmap4Merge = Mat::zeros(size,CV_8UC1);
+//		Mat varmap4Merge2 = Mat::zeros(size,CV_8UC1);
+//		for (int j=0; j<=3; j++) {
+//			Mat varmap_[4],varmap[4],varmapColor;
+//
+//			for (int k=0; k<3; k++) { // apply to each color channel
+//				Mat temp;
+//
+//				//if (j<2)
+//					cvNica::CornerDetector(_image1_split[k],varmap_[k],j+45);
+//
+//				threshold(varmap_[k],varmap[k],15,255,THRESH_BINARY);
+//
+//			}
+//
+//
+//			max(varmap[0],varmap[1],varmap[3]);
+//			max(varmap[3],varmap[2],varmap[3]);
+//
+//
+//			Mat varmapColor_[3] = {Mat::zeros(size,CV_8UC1),varmap[3],varmap[3]};
+//			merge(varmapColor_,3,varmapColor);
+//			varmapColor = varmapColor*0.9 + _grayRGB*0.1;
+//
+//			varmap4Merge += varmap[3];
+//			//varmap4Merge2 += varmap__[3];
+//			varmapColor.copyTo(mergePos[4+j]);
+//
+//		}
+//
+//
+//
+//
+//		Mat _homo,_homoThreshold,_homoOverlay,_homoColor,_homoColor2,_homoOverlay2,_homoOverlay3,_homoInv,_homoColorOrig,_homoThresholdColor;
+//
+//
+//		_homoInv = 255-varmap4Merge;
+//		bitwise_and(_homoInv,_gray,_homoOverlay2);
+//		bitwise_or(varmap4Merge,_gray,_homoOverlay);
+//		bitwise_or(varmap4Merge2,_gray,_homoOverlay3);
+//
+//		Mat _homoColor_[3] = {_homoOverlay2,_homoOverlay,_homoOverlay};
+//		Mat _homoColor_2[3] = {_homoOverlay2,_homoOverlay3,_homoOverlay};
+//		merge(_homoColor_,3,_homoColor);
+//		merge(_homoColor_2,3,_homoColor2);
+//
+//		cvtColor (_homo,_homoColorOrig,CV_GRAY2RGB);
+//		cvtColor (varmap4Merge,_homoThresholdColor,CV_GRAY2RGB);
+//
+//
+//
+//
+//		_image1.copyTo(mergePos[0]);
+//		_homoColor.copyTo(mergePos[1]);
+//		//_homoColor2.copyTo(mergePos[3]);
+//		_homoThresholdColor.copyTo(mergePos[2]);
+//
+//
+//		imwrite(dir+"/set029/"+files[i]+".png",merged);
+//		cout<<files[i]<<endl;
+//		*/
+//	}
+
+
+
+//140304_2
+//	int kd=5;
+//	for (unsigned int i = 0;i < files.size();i++) {
+//
+//		int col = 3;
+//		int row = 2;
+//
+//		Mat _image1 = imread( dir+"/"+files[i], -1 );
+//		Mat __image1; cvtColor(_image1,__image1,CV_RGB2YCrCb);
+//		Size size = _image1.size();
+//		Size size2 (_image1.cols*2,_image1.rows*2);
+//
+//
+//		Mat _gray (size,CV_8UC1),_grayRGB;
+//		Mat _bilateral (size,CV_8UC1);
+//
+//		//Mat gradx(size,CV_8UC1);
+//		//Mat grady(size,CV_8UC1);
+//		Mat sobel(size,CV_8UC1);
+//
+//		Mat sobelColor_[3];
+//		Mat sobelColor;
+//		Mat sobelAND = Mat::zeros(size,CV_8UC1)+255;
+//		Mat sobelOR = Mat::zeros(size,CV_8UC1);
+//		Mat merged(_image1.rows*row, _image1.cols*col, CV_8UC3);
+//		Mat _image1_split[3];
+//		Mat _bilateral3 (size,CV_8UC3);
+//		Mat __image1_split[3];
+//		Mat __bilateral3 (size,CV_8UC3);
+//		//_bilateral3 = _image1;
+//		bilateralFilter (_image1, _bilateral3 , kd, kd*2, kd/2 );
+//		medianBlur(_bilateral3,_bilateral3,3);
+//		//medianBlur(_image1,_bilateral3,3);
+//		int dilation_type = MORPH_RECT;
+//		Mat elementL = getStructuringElement( dilation_type, Size( 3,3 ), Point( 1,1 ) );
+//		//			//dilate(__Gray,__Gray,elementL);
+//		//			//erode(__Gray,__Gray,elementL);
+//
+//	//		dilate(_image1,_bilateral3,elementL);
+//	//		erode(_bilateral3,_bilateral3,elementL);
+//	//		erode(_bilateral3,_bilateral3,elementL);
+//	//		dilate(_bilateral3,_bilateral3,elementL);
+//
+//		split (_bilateral3,_image1_split);
+//		bilateralFilter (__image1, __bilateral3 , kd, kd*2, kd/2 );
+//		medianBlur(__bilateral3,__bilateral3,3);
+//		//medianBlur(__image1,__bilateral3,3);
+//
+//	//		dilate(__image1,__bilateral3,elementL);
+//	//		erode(__bilateral3,__bilateral3,elementL);
+//	//		erode(__bilateral3,__bilateral3,elementL);
+//	//		dilate(__bilateral3,__bilateral3,elementL);
+//		split (__bilateral3,__image1_split);
+//
+//		//split (_image1,_image1_split);
+//		//split (__image1,__image1_split);
+//
+//
+//		cvtColor(_image1,_gray,CV_RGB2GRAY);
+//		cvtColor(_gray,_grayRGB,CV_GRAY2RGB);
+//
+//		Mat sobelxsqsum = Mat::zeros(size,CV_32FC1);
+//		Mat sobelysqsum = Mat::zeros(size,CV_32FC1);
+//		Mat gradx(size,CV_32FC1);
+//		Mat grady(size,CV_32FC1);
+//		 //dilation_type = MORPH_ELLIPSE;
+//		//int dilation_type = MORPH_RECT;
+//			//elementL = getStructuringElement( dilation_type, Size( 25,25 ), Point( 12,12 ) );
+//
+//			float stdsum=.0;
+//		for (int k=0; k<3; k++) {
+//
+//			Mat varmapa(size,CV_8UC1);
+//					Mat varmapa_(size,CV_32FC1);
+//					Mat varmapa__(size,CV_32FC1);
+//
+//			cvNica::VarianceFilter(_image1_split[k],varmapa_,7);
+//
+//			Mat canny_,canny__;
+//
+//			Canny( _image1_split[k], canny_, 30, 50, 3, 1 );
+//			canny_.convertTo(canny__,CV_32FC1);
+//
+//			//erode(varmapa_,varmapa_,elementL);
+//
+//			Mat sp32; _image1_split[k].convertTo(sp32,CV_32FC1);
+//			float spsum = sum(sp32)[0]/size.width/size.height;
+//			float spsqsum = sum(sp32.mul(sp32))[0];
+//			float std = sqrt(spsqsum/size.width/size.height - spsum*spsum);
+//			cout<<": "<<spsum<<": "<<spsqsum<<": "<<std<<endl;
+//
+//			std = (std<30)? 30:std;
+//			//cv::pow(varmapa_,1.1,varmapa_);
+//			stdsum += std;
+//
+//
+//			threshold(varmapa_,varmapa,std/6+2,255,THRESH_BINARY_INV);
+//			//threshold(varmapa_,varmapa,sqrt(std)+2,255,THRESH_BINARY_INV);
+//			//threshold(varmapa_,varmapa,8,255,THRESH_BINARY_INV);
+//			max(varmapa_,varmapa,varmapa);
+//
+//
+//			Mat sobelx(size,CV_32FC1);
+//			Mat sobely(size,CV_32FC1);
+//			Mat sobelxsq(size,CV_32FC1);
+//			Mat sobelysq(size,CV_32FC1);
+//			Sobel(_image1_split[k],sobelx,CV_32F,1,0,1,1, 0, BORDER_REPLICATE );
+//
+//
+//			sobelx/=varmapa/150;
+//			//sobelx=sobelx.mul(canny__/255);
+//			//sobelx=sobelx.mul(__Gray8);
+//			multiply(sobelx,sobelx,sobelxsq);
+//
+//			sobelxsqsum += sobelxsq*std;
+//			//convertScaleAbs( sobelx, gradx );
+//			Sobel(_image1_split[k],sobely,CV_32F,0,1,1,1, 0, BORDER_REPLICATE );
+//			sobely/=varmapa/150;
+//			//sobely=sobely.mul(canny__/255);
+//			//sobely=sobely.mul(__Gray8);
+//			multiply(sobely,sobely,sobelysq);
+//
+//			sobelysqsum += sobelysq*std;
+//
+//
+//
+//			convertScaleAbs( sobelx, gradx );
+//			convertScaleAbs( sobely, grady );
+//			addWeighted( gradx, 0.5, grady, 0.5, 0, sobelColor_[k] );
+//			Mat sobel8UU;
+//			sobelColor_[k].convertTo(sobel8UU,CV_8UC1);
+//			bitwise_and(sobel8UU,sobelAND,sobelAND);
+//			bitwise_or(sobel8UU,sobelOR,sobelOR);
+//			//convertScaleAbs( sobely, grady );
+//
+//		}
+//
+//		sobelxsqsum/=stdsum;
+//		sobelysqsum/=stdsum;
+//		sqrt (sobelxsqsum,gradx);
+//		sqrt (sobelysqsum,grady);
+//
+//		Mat canny2;Mat gradx2;Mat grady2;
+//		gradx.convertTo(gradx2,CV_16S);
+//		grady.convertTo(grady2,CV_16S);
+//		Canny( _gray, canny2, 60, 120, 3, 1 );
+//		addWeighted( gradx, 0.5, grady, 0.5, 0, sobel );
+//
+//		Point a1;
+//		Mat matchtresultAcc;
+//		Mat matchtresult;
+//		Mat kernel1;
+//		double thrval=0.7;
+//		int startIndex = 36;//98;//36;
+//		kernel1 = cvNica::kernels(startIndex,a1)*255;
+//		matchTemplate(sobel,kernel1,matchtresult,CV_TM_CCOEFF_NORMED);
+//		threshold(matchtresult,matchtresult,thrval,1,THRESH_BINARY);
+//		matchtresult.copyTo(matchtresultAcc);
+//
+//		kernel1 = cvNica::kernels(startIndex+1,a1)*255;
+//		matchTemplate(sobel,kernel1,matchtresult,CV_TM_CCOEFF_NORMED);
+//		threshold(matchtresult,matchtresult,thrval,1,THRESH_BINARY);
+//		matchtresultAcc += matchtresult;
+//
+//		kernel1 = cvNica::kernels(startIndex+2,a1)*255;
+//		matchTemplate(sobel,kernel1,matchtresult,CV_TM_CCOEFF_NORMED);
+//		threshold(matchtresult,matchtresult,thrval,1,THRESH_BINARY);
+//		matchtresultAcc += matchtresult;
+//
+//		kernel1 = cvNica::kernels(startIndex+3,a1)*255;
+//		matchTemplate(sobel,kernel1,matchtresult,CV_TM_CCOEFF_NORMED);
+//		threshold(matchtresult,matchtresult,thrval,1,THRESH_BINARY);
+//		matchtresultAcc += matchtresult;
+//
+//
+//
+//
+//
+//		Point a2;
+//		Mat matchtresultAcc2;
+//		Mat matchtresult2;
+//		Mat kernel2;
+//		Mat canny232F;
+//		canny2.convertTo(canny232F,CV_32FC1);
+//		kernel2 = cvNica::kernels(startIndex,a2)*255;
+//		matchTemplate(canny232F,kernel2,matchtresult2,CV_TM_CCOEFF_NORMED);
+//		threshold(matchtresult2,matchtresult2,thrval,1,THRESH_BINARY);
+//		matchtresult2.copyTo(matchtresultAcc2);
+//
+//		kernel2 = cvNica::kernels(startIndex+1,a1)*255;
+//		matchTemplate(canny232F,kernel1,matchtresult2,CV_TM_CCOEFF_NORMED);
+//		threshold(matchtresult2,matchtresult2,thrval,1,THRESH_BINARY);
+//		matchtresultAcc2 += matchtresult2;
+//
+//		kernel2 = cvNica::kernels(startIndex+2,a1)*255;
+//		matchTemplate(canny232F,kernel1,matchtresult2,CV_TM_CCOEFF_NORMED);
+//		threshold(matchtresult2,matchtresult2,thrval,1,THRESH_BINARY);
+//		matchtresultAcc2 += matchtresult2;
+//
+//		kernel2 = cvNica::kernels(startIndex+3,a1)*255;
+//		matchTemplate(canny232F,kernel1,matchtresult2,CV_TM_CCOEFF_NORMED);
+//		threshold(matchtresult2,matchtresult2,thrval,1,THRESH_BINARY);
+//		matchtresultAcc2 += matchtresult2;
+//
+//
+//
+//
+//		merge(sobelColor_,3,sobelColor);
+//
+//		Mat sobel8U2;Mat sobel8U;
+//
+//
+//
+//
+//		sobel.convertTo(sobel8U,CV_8UC1);
+//
+//
+//		Mat sobel222 = sobel/150;
+//		//namedWindow( "a", CV_WINDOW_AUTOSIZE );
+//		//				imshow( "a", sobel222);
+//		CvMat pSrc = sobel222;
+//		CvMat *pDst = cvCreateMat(size.height, size.width, CV_32FC1);;
+//
+//		cvNica::MorphologicalThinning(&pSrc,pDst);
+//		Mat dm = cv::Mat(pDst, true);
+//
+//		Mat sobelx(size,CV_8UC1);
+//		Mat sobely(size,CV_8UC1);
+//
+//		Mat varmapa(size,CV_8UC1);
+//		Mat varmapa_(size,CV_32FC1);
+//		cvNica::VarianceFilter(_gray,varmapa_,5);
+//
+//		varmapa_.convertTo(varmapa,CV_8UC1);
+//
+//		Mat canny3(size,CV_8UC1);
+//		Sobel(_gray,sobelx,CV_16SC1,1,0,3,1, 0, BORDER_DEFAULT );
+//		Sobel(_gray,sobely,CV_16SC1,0,1,3,1, 0, BORDER_DEFAULT );
+//		cvNica::Canny2( _gray, sobelx,sobely, canny3, 60, 120, 3, 1 );
+//
+//		convertScaleAbs( sobelx, gradx );
+//
+//		convertScaleAbs( sobely, grady );
+//		addWeighted( gradx, 0.5, grady, 0.5, 0, sobel );
+//
+//
+//
+//		Mat mergePos [col*row];
+//		for (int k=0; k<row; k++) {
+//			for (int j=0; j<col; j++) {
+//				mergePos[j+k*col] = Mat(merged, Rect(_image1.cols*(j%col), _image1.rows*((int)(j/col)+k), _image1.cols, _image1.rows));
+//			}
+//		}
+//		Mat sobel8URGB;
+//		Mat sobelRGB;
+//		Mat canny2RGB;
+//		Mat __GrayRGB;
+//		Mat matchtresultRGB;
+//		Mat matchtresult2RGB;
+//		Mat matchtresult8U;
+//		Mat matchtresult28U;
+//		cvtColor(sobel8U,sobel8URGB,CV_GRAY2RGB);
+//		cvtColor(sobel,sobelRGB,CV_GRAY2RGB);
+//		cvtColor(canny2,canny2RGB,CV_GRAY2RGB);
+//		matchtresultAcc*=255;
+//		matchtresultAcc2*=255;
+//		matchtresultAcc.convertTo(matchtresult8U,CV_8UC1);
+//		matchtresultAcc2.convertTo(matchtresult28U,CV_8UC1);
+//
+//		Mat matchtresultlarge(size,CV_8UC1);
+//		Mat matchtresult2large(size,CV_8UC1);
+//
+//		Mat matchtresulttemp = Mat(matchtresultlarge, Rect(3, 3, matchtresult.cols, matchtresult.rows));
+//		Mat matchtresult2temp = Mat(matchtresult2large, Rect(3, 3, matchtresult2.cols, matchtresult2.rows));
+//		matchtresult8U.copyTo(matchtresulttemp);
+//		matchtresult28U.copyTo(matchtresult2temp);
+//
+//		dilate(matchtresultlarge,matchtresultlarge,elementL);
+//		dilate(matchtresult2large,matchtresult2large,elementL);
+//		dilate(matchtresultlarge,matchtresultlarge,elementL);
+//		dilate(matchtresult2large,matchtresult2large,elementL);
+//
+//		cvtColor(matchtresultlarge,matchtresultRGB,CV_GRAY2RGB);
+//		cvtColor(matchtresult2large,matchtresult2RGB,CV_GRAY2RGB);
+//		//cvtColor(255-__Gray,__GrayRGB,CV_GRAY2RGB);
+//	//				namedWindow( "c", CV_WINDOW_AUTOSIZE );
+//	//				imshow( "c", matchtresultRGB);
+//	//				namedWindow( "d", CV_WINDOW_AUTOSIZE );
+//	//				imshow( "d", matchtresult2RGB);
+//	//				namedWindow( "e", CV_WINDOW_AUTOSIZE );
+//	//				imshow( "e", sobel);
+//	//				waitKey(0);
+//
+//	//				cout<<matchtresultRGB.cols<<endl;
+//	//				cout<<matchtresultRGB.rows<<endl; /// size not fit
+//
+//		bitwise_and(sobel8URGB,matchtresultRGB,matchtresultRGB);
+//		bitwise_and(canny2RGB,matchtresult2RGB,matchtresult2RGB);
+//
+//
+//
+//		cvtColor(matchtresultRGB,matchtresultlarge,CV_RGB2GRAY);
+//		cvtColor(matchtresult2RGB,matchtresult2large,CV_RGB2GRAY);
+//
+//		dilate(matchtresultlarge,matchtresultlarge,elementL);
+//		dilate(matchtresult2large,matchtresult2large,elementL);
+//
+//		Mat matchtresultmerged_[3] = {_gray-matchtresultlarge,_gray-matchtresultlarge,_gray+matchtresultlarge};
+//		Mat matchtresultmerged;
+//		merge(matchtresultmerged_,3,matchtresultmerged);
+//
+//		Mat matchtresultmerged2_[3] = {_gray-matchtresult2large,_gray-matchtresult2large,_gray+matchtresult2large};
+//		Mat matchtresultmerged2;
+//		merge(matchtresultmerged2_,3,matchtresultmerged2);
+//
+//		//_image1.copyTo(mergePos[0]);
+//
+//
+//
+//
+//		matchtresultmerged.copyTo(mergePos[3]);
+//		sobel8URGB.copyTo(mergePos[4]);
+//		matchtresultRGB.copyTo(mergePos[5]);
+//
+//		matchtresultmerged2.copyTo(mergePos[0]);
+//		canny2RGB.copyTo(mergePos[1]);
+//		matchtresult2RGB.copyTo(mergePos[2]);
+//
+//		imwrite(dir+"/set039/"+files[i]+".png",merged);
+//		cout<<files[i]<<endl;
+//		//_homoColor2.copyTo(mergePos[3]);
+//		//_homoThresholdColor.copyTo(mergePos[2]);
+//
+//
+//	}
+
+
+//140304_3 MD
+//	int kd=5;
+//	for (unsigned int i = 0;i < files.size();i++) {
+//
+//		int col = 3;
+//		int row = 2;
+//
+//		Mat _image = imread( dir+"/"+files[i], -1 );
+//		Size size = _image.size();
+//		Mat _bilateral3 (size,CV_8UC3);
+//
+//		//_bilateral3 = _image1;
+//		bilateralFilter (_image, _bilateral3 , kd, kd*2, kd/2 );
+//		medianBlur(_bilateral3,_bilateral3,3);
+//		Mat __bilateral3_split[3];
+//		Mat _image_split[3];
+//		Mat _DoG_split[3];
+//		Mat _DoG;
+//		split (_image,_image_split);
+//		split (_bilateral3,__bilateral3_split);
+//		Mat dst;
+//		cvNica::FourierLaplacian(_image_split[1],dst);
+//		Mat dst2;
+//		 Laplacian(_image_split[1], dst2, CV_8U,3,
+//				 1,128);
+//
+//		Mat maxMap;
+//		Mat minMap;
+//		int dilation_type = MORPH_CROSS;
+//		Mat elementL = getStructuringElement( dilation_type, Size( 21,1 ), Point( 10,0 ) );
+//
+//		dilate (dst2,maxMap,elementL);
+//		erode (dst2,minMap,elementL);
+//		Mat maxMinDiff = maxMap-minMap;
+//
+//
+//
+//		for (int k = 0; k<3; k++) {
+//			cvNica::DoG(_image_split[k],_DoG_split[k],0.2,1,-2,0,0,0,0);
+//		}
+//
+//		merge(_DoG_split,3,_DoG);
+//					namedWindow( "a", CV_WINDOW_AUTOSIZE );
+//					imshow( "a", maxMinDiff);
+//					namedWindow( "b", CV_WINDOW_AUTOSIZE );
+//					imshow( "b", dst2);
+//
+//
+//					namedWindow( "c", CV_WINDOW_AUTOSIZE );
+//					imshow( "c", _image_split[0]);
+//					namedWindow( "d", CV_WINDOW_AUTOSIZE );
+//					imshow( "d", _DoG_split[1]);
+//					namedWindow( "e", CV_WINDOW_AUTOSIZE );
+//					imshow( "e", _DoG_split[2]);
+//
+//					waitKey(0);
+//
+//	//				cout<<matchtresultRGB.cols<<endl;
+//	//				cout<<matchtresultRGB.rows<<endl; /// size not fit
+//
+//
+//
+//	}
+
+
+//140311
+	int kd=5;
+	for (unsigned int i = 0;i < files.size();i++) {
+
+		int col = 2;
+		int row = 2;
+
+		Mat _image1 = imread( dir+"/"+files[i], -1 );
+		Mat __image1; cvtColor(_image1,__image1,CV_RGB2YCrCb);
+		Size size = _image1.size();
+		Size size2 (_image1.cols*2,_image1.rows*2);
+
+
+		Mat _gray (size,CV_8UC1),_grayRGB;
+
+		Mat _bilateral (size,CV_8UC1);
+
+		//Mat gradx(size,CV_8UC1);
+		//Mat grady(size,CV_8UC1);
+		Mat sobel(size,CV_8UC1);
+
+		Mat sobelColor_[3];
+		Mat sobelColor;
+		Mat sobelAND = Mat::zeros(size,CV_8UC1)+255;
+		Mat sobelOR = Mat::zeros(size,CV_8UC1);
+		Mat merged(_image1.rows*row, _image1.cols*col, CV_8UC3);
+		Mat _image1_split[3];
+		Mat _bilateral3 (size,CV_8UC3);
+		Mat __image1_split[3];
+		Mat __bilateral3 (size,CV_8UC3);
+		//_bilateral3 = _image1;
+		bilateralFilter (_image1, _bilateral3 , kd, kd*2, kd/2 );
+		medianBlur(_bilateral3,_bilateral3,3);
+		//medianBlur(_image1,_bilateral3,3);
+		int dilation_type = MORPH_RECT;
+		Mat elementL = getStructuringElement( dilation_type, Size( 3,3 ), Point( 1,1 ) );
+		//			//dilate(__Gray,__Gray,elementL);
+		//			//erode(__Gray,__Gray,elementL);
+
+	//		dilate(_image1,_bilateral3,elementL);
+	//		erode(_bilateral3,_bilateral3,elementL);
+	//		erode(_bilateral3,_bilateral3,elementL);
+	//		dilate(_bilateral3,_bilateral3,elementL);
+
+		split (_bilateral3,_image1_split);
+		bilateralFilter (__image1, __bilateral3 , kd, kd*2, kd/2 );
+		medianBlur(__bilateral3,__bilateral3,3);
+		//medianBlur(__image1,__bilateral3,3);
+
+	//		dilate(__image1,__bilateral3,elementL);
+	//		erode(__bilateral3,__bilateral3,elementL);
+	//		erode(__bilateral3,__bilateral3,elementL);
+	//		dilate(__bilateral3,__bilateral3,elementL);
+		split (__bilateral3,__image1_split);
+
+		//split (_image1,_image1_split);
+		//split (__image1,__image1_split);
+
+
+		cvtColor(_image1,_gray,CV_RGB2GRAY);
+		cvtColor(_gray,_grayRGB,CV_GRAY2RGB);
+
+		Mat _imageF_;
+		Mat _imageF[3];
+		_grayRGB.convertTo(_imageF_,CV_32FC3);
+		_imageF_/=255;
+		split(_imageF_,_imageF);
+
+		Mat sobelxsqsum = Mat::zeros(size,CV_32FC1);
+		Mat sobelysqsum = Mat::zeros(size,CV_32FC1);
+		Mat gradx(size,CV_32FC1);
+		Mat grady(size,CV_32FC1);
+		 //dilation_type = MORPH_ELLIPSE;
+		//int dilation_type = MORPH_RECT;
+			//elementL = getStructuringElement( dilation_type, Size( 25,25 ), Point( 12,12 ) );
+
+			float stdsum=.0;
+		for (int k=0; k<3; k++) {
+
+			Mat varmapa(size,CV_8UC1);
+					Mat varmapa_(size,CV_32FC1);
+					Mat varmapa__(size,CV_32FC1);
+
+			cvNica::VarianceFilter(_image1_split[k],varmapa_,7);
+
+			Mat canny_,canny__;
+
+			Canny( _image1_split[k], canny_, 30, 50, 3, 1 );
+			canny_.convertTo(canny__,CV_32FC1);
+
+			//erode(varmapa_,varmapa_,elementL);
+
+			Mat sp32; _image1_split[k].convertTo(sp32,CV_32FC1);
+			float spsum = sum(sp32)[0]/size.width/size.height;
+			float spsqsum = sum(sp32.mul(sp32))[0];
+			float std = sqrt(spsqsum/size.width/size.height - spsum*spsum);
+			cout<<": "<<spsum<<": "<<spsqsum<<": "<<std<<endl;
+
+			std = (std<30)? 30:std;
+			//cv::pow(varmapa_,1.1,varmapa_);
+			stdsum += std;
+
+
+			threshold(varmapa_,varmapa,std/6+2,255,THRESH_BINARY_INV);
+			//threshold(varmapa_,varmapa,sqrt(std)+2,255,THRESH_BINARY_INV);
+			//threshold(varmapa_,varmapa,8,255,THRESH_BINARY_INV);
+			max(varmapa_,varmapa,varmapa);
+
+
+			Mat sobelx(size,CV_32FC1);
+			Mat sobely(size,CV_32FC1);
+			Mat sobelxsq(size,CV_32FC1);
+			Mat sobelysq(size,CV_32FC1);
+			Sobel(_image1_split[k],sobelx,CV_32F,1,0,1,1, 0, BORDER_REPLICATE );
+
+
+			sobelx/=varmapa/150;
+			//sobelx=sobelx.mul(canny__/255);
+			//sobelx=sobelx.mul(__Gray8);
+			multiply(sobelx,sobelx,sobelxsq);
+
+			sobelxsqsum += sobelxsq*std;
+			//convertScaleAbs( sobelx, gradx );
+			Sobel(_image1_split[k],sobely,CV_32F,0,1,1,1, 0, BORDER_REPLICATE );
+			sobely/=varmapa/150;
+			//sobely=sobely.mul(canny__/255);
+			//sobely=sobely.mul(__Gray8);
+			multiply(sobely,sobely,sobelysq);
+
+			sobelysqsum += sobelysq*std;
+
+
+
+			convertScaleAbs( sobelx, gradx );
+			convertScaleAbs( sobely, grady );
+			addWeighted( gradx, 0.5, grady, 0.5, 0, sobelColor_[k] );
+			Mat sobel8UU;
+			sobelColor_[k].convertTo(sobel8UU,CV_8UC1);
+			bitwise_and(sobel8UU,sobelAND,sobelAND);
+			bitwise_or(sobel8UU,sobelOR,sobelOR);
+			//convertScaleAbs( sobely, grady );
+
+		}
+
+		sobelxsqsum/=stdsum;
+		sobelysqsum/=stdsum;
+		sqrt (sobelxsqsum,gradx);
+		sqrt (sobelysqsum,grady);
+
+		Mat canny2;Mat gradx2;Mat grady2;
+		gradx.convertTo(gradx2,CV_16S);
+		grady.convertTo(grady2,CV_16S);
+		Canny( _gray, canny2, 60, 120, 3, 1 );
+		addWeighted( gradx, 0.5, grady, 0.5, 0, sobel );
+
+
+		Mat sobel8U2;Mat sobel8U;
+		sobel.convertTo(sobel8U,CV_8UC1);
+
+		Point a1;
+
+		Mat matchtresult[4];
+		Mat matchtresult_border[4];
+		Mat kernel1;
+		Mat matchtresultbinF;
+		Mat matchtresultbin = Mat::zeros (size,CV_8UC1);
+		double thrval=0.7;
+		int startIndex = 36;//98;//36;
+
+		for (int l=0; l<4; l++) {
+			kernel1 = cvNica::kernels(startIndex+l,a1)*255;
+			matchTemplate(sobel,kernel1,matchtresult[l],CV_TM_CCOEFF_NORMED);
+			threshold(matchtresult[l],matchtresult[l],thrval,1,THRESH_BINARY);
+			copyMakeBorder(matchtresult[l], matchtresult_border[l], 3, 3, 3, 3, BORDER_DEFAULT);
+			matchtresult_border[l]*=255;
+			matchtresult_border[l].convertTo(matchtresultbinF,CV_8UC1);
+			matchtresult_border[l]/=255;
+			bitwise_or(matchtresultbin,matchtresultbinF,matchtresultbin);
+			dilate(matchtresult_border[l],matchtresult_border[l],elementL);
+			dilate(matchtresult_border[l],matchtresult_border[l],elementL);
+			matchtresult_border[l]= matchtresult_border[l].mul(sobel/255);
+			dilate(matchtresult_border[l],matchtresult_border[l],elementL);
+			//bitwise_and(sobel,matchtresult_border[l],matchtresult_border[l]);
+//			namedWindow( "a", CV_WINDOW_AUTOSIZE );
+//							imshow( "a", matchtresult_border[l]);
+//							waitKey(0);
+		}
+
+		Mat matchtresultAcc_[3] = {_imageF[0]+matchtresult_border[0]+matchtresult_border[1]-matchtresult_border[2]-matchtresult_border[3],
+									_imageF[1]-matchtresult_border[0]+matchtresult_border[1]+matchtresult_border[2]+matchtresult_border[3],
+									_imageF[2]-matchtresult_border[0]-matchtresult_border[1]-matchtresult_border[2]+matchtresult_border[3]};
+		Mat matchtresultAcc;
+
+
+
+		merge(matchtresultAcc_,3,matchtresultAcc);
+//		namedWindow( "a", CV_WINDOW_AUTOSIZE );
+//						imshow( "a", matchtresultbin);
+//						waitKey(0);
+
+		Point a2;
+		Mat matchtresult2[4];
+		Mat matchtresult2_border[4];
+		Mat kernel2;
+		Mat canny232F;
+
+		canny2.convertTo(canny232F,CV_32FC1);
+
+		for (int l=0; l<4; l++) {
+			kernel2 = cvNica::kernels(startIndex+l,a2)*255;
+			matchTemplate(canny232F,kernel2,matchtresult2[l],CV_TM_CCOEFF_NORMED);
+			threshold(matchtresult2[l],matchtresult2[l],thrval,1,THRESH_BINARY);
+			copyMakeBorder(matchtresult2[l], matchtresult2_border[l], 3, 3, 3, 3, BORDER_DEFAULT);
+			//matchtresult2_border[l] = matchtresult2_border[l].mul(canny232F);
+
+			dilate(matchtresult2_border[l],matchtresult2_border[l],elementL);
+			dilate(matchtresult2_border[l],matchtresult2_border[l],elementL);
+			matchtresult2_border[l]=matchtresult2_border[l].mul(canny232F);
+			dilate(matchtresult2_border[l],matchtresult2_border[l],elementL);
+
+
+
+		}
+
+
+		Mat matchtresultAcc2_[3] =  {_imageF[0]+matchtresult2_border[0]+matchtresult2_border[1]-matchtresult2_border[2]-matchtresult2_border[3],
+									_imageF[1]-matchtresult2_border[0]+matchtresult2_border[1]+matchtresult2_border[2]+matchtresult2_border[3],
+									_imageF[2]-matchtresult2_border[0]-matchtresult2_border[1]-matchtresult2_border[2]+matchtresult2_border[3]};
+		Mat matchtresultAcc2;
+
+		merge(matchtresultAcc2_,3,matchtresultAcc2);
+//		namedWindow( "a", CV_WINDOW_AUTOSIZE );
+//						imshow( "a", matchtresultAcc2);
+//						waitKey(0);
+
+		merge(sobelColor_,3,sobelColor);
+
+
+
+		RNG rng(12345);
+
+		  vector<vector<Point> > contours;
+		  vector<Vec4i> hierarchy;
+
+
+//			  namedWindow( "Boxs2", CV_WINDOW_AUTOSIZE );
+//			  imshow( "Boxs2", matchtresultbin );
+//			  waitKey(0);
+		  Mat element13 = getStructuringElement( dilation_type, Size( 1,3 ), Point( 0,1 ) );
+		  Mat element31 = getStructuringElement( dilation_type, Size( 3,1 ), Point( 1,0 ) );
+
+		  vector < vector<Point2i> > blobs;
+			threshold(sobel8U,sobel8U,0,255,THRESH_OTSU);
+		  cvNica::FindBlobs(sobel8U,blobs);
+		  for( int di = 0; di< blobs.size(); di++ ) {
+			  int maxx=0;
+			  int maxy=0;
+			  int minx=1e5;
+			  int miny=1e5;
+			  int tc=0;
+			  Mat tempdrawing = Mat::zeros( size, CV_8UC1 );
+			  for( int dj = 0; dj< blobs[di].size(); dj++ ) {
+				  tempdrawing.at<uchar>(blobs[di][dj].y,blobs[di][dj].x)=255;
+				  int dx = blobs[di][dj].x;
+				  int dy = blobs[di][dj].y;
+				  if(maxx<dx)maxx=dx;
+				  if(minx>dx)minx=dx;
+				  if(maxy<dy)maxy=dy;
+				  if(miny>dy)miny=dy;
+			  }
+			  dilate(tempdrawing,tempdrawing,elementL);
+			  dilate(tempdrawing,tempdrawing,elementL);
+//			  				  namedWindow( "Boxs", CV_WINDOW_AUTOSIZE );
+//			  				  imshow( "Boxs", tempdrawing );
+//			  				  waitKey(0);
+
+			  for( int dy = 0; dy< size.height; dy++ ){
+				  for( int dx = 0; dx< size.width; dx++ ){
+
+					  if (matchtresultbin.at<uchar>(dy,dx) == 255 && tempdrawing.at<uchar>(dy,dx) == 255){
+						  tc++;
+					  }
+				  }
+			  }
+			  //cout<<" "<<minx<<", "<<miny<<", "<<maxx<<", "<<maxy<<", "<<endl;
+			  if (maxx>minx+6 && maxy>miny+6 && tc>1){
+				  rectangle(matchtresultAcc,Point(minx,miny),Point(maxx,maxy),Scalar(0,0,255));
+				  cout<<" "<<minx<<", "<<miny<<", "<<maxx<<", "<<maxy<<", "<<endl;
+			  }
+
+
+		  }
+
+		  //dilate(canny2,canny2,element13);
+		  ///erode(canny2,canny2,element13);
+//		  dilate(sobel8U,sobel8U,element31);
+//		  erode(sobel8U,sobel8U,element31);
+//		  Mat sobel8Ucopy;sobel8U.copyTo(sobel8Ucopy);
+//		  findContours( sobel8Ucopy, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
+//
+//		  /// Draw contours
+//		  Mat drawing = matchtresultAcc;//Mat::zeros( sobel8U.size(), CV_8UC3 );
+//		  Mat drawing2 = Mat::zeros( sobel8U.size(), CV_8UC3 );
+//		  for( int di = 0; di< contours.size(); di++ )
+//		     {
+//			  int maxx=0;
+//			  int maxy=0;
+//			  int minx=1e10;
+//			  int miny=1e10;
+//
+//			  if (contours[di].size()>10) {
+//		       Scalar color = Scalar( rng.uniform(100, 255), rng.uniform(100,255), rng.uniform(100,255) );
+//		       //drawContours( drawing, contours, di, color, 1, 8, hierarchy, 0, Point() );
+//		       Mat tempdrawing = Mat::zeros( sobel8U.size(), CV_8UC1 );
+//		       drawContours( tempdrawing, contours, di, Scalar(255,255,255), 3, 8, hierarchy, 0, Point() );
+////				  namedWindow( "Boxs", CV_WINDOW_AUTOSIZE );
+////				  imshow( "Boxs", tempdrawing );
+////				  waitKey(0);
+//				  for( int dy = 0; dy< size.height; dy++ ){
+//					  for( int dx = 0; dx< size.width; dx++ ){
+//						  if (matchtresultbin.at<uchar>(dy,dx) == 255 && tempdrawing.at<uchar>(dy,dx) == 255){
+//							  if(maxx<dx)maxx=dx;
+//							  if(minx>dx)minx=dx;
+//							  if(maxy<dy)maxy=dy;
+//							  if(miny>dy)miny=dy;
+//						  }
+//					  }
+//				  }
+//
+//				  rectangle(drawing,Point(minx,miny),Point(maxx,maxy),Scalar(0,0,255));
+//				  cout<<" "<<minx<<", "<<miny<<", "<<maxx<<", "<<maxy<<", "<<contours[di].size()<<endl;
+//
+//
+//			  }
+//		     }
+
+		  /// Show in a window
+//		  namedWindow( "Contours", CV_WINDOW_AUTOSIZE );
+//		  imshow( "Contours", drawing );
+////		  namedWindow( "Boxs", CV_WINDOW_AUTOSIZE );
+////		  imshow( "Boxs", drawing2 );
+//		  waitKey(0);
+
+
+
+		Mat sobel222 = sobel/150;
+		//namedWindow( "a", CV_WINDOW_AUTOSIZE );
+		//				imshow( "a", sobel222);
+		CvMat pSrc = sobel222;
+		CvMat *pDst = cvCreateMat(size.height, size.width, CV_32FC1);;
+
+		cvNica::MorphologicalThinning(&pSrc,pDst);
+		Mat dm = cv::Mat(pDst, true);
+
+		Mat sobelx(size,CV_8UC1);
+		Mat sobely(size,CV_8UC1);
+
+		Mat varmapa(size,CV_8UC1);
+		Mat varmapa_(size,CV_32FC1);
+		cvNica::VarianceFilter(_gray,varmapa_,5);
+
+		varmapa_.convertTo(varmapa,CV_8UC1);
+
+		Mat canny3(size,CV_8UC1);
+		Sobel(_gray,sobelx,CV_16SC1,1,0,3,1, 0, BORDER_DEFAULT );
+		Sobel(_gray,sobely,CV_16SC1,0,1,3,1, 0, BORDER_DEFAULT );
+		cvNica::Canny2( _gray, sobelx,sobely, canny3, 60, 120, 3, 1 );
+
+		convertScaleAbs( sobelx, gradx );
+
+		convertScaleAbs( sobely, grady );
+		addWeighted( gradx, 0.5, grady, 0.5, 0, sobel );
+
+
+
+		Mat mergePos [col*row];
+		for (int k=0; k<row; k++) {
+			for (int j=0; j<col; j++) {
+				mergePos[j+k*col] = Mat(merged, Rect(_image1.cols*(j%col), _image1.rows*((int)(j/col)+k), _image1.cols, _image1.rows));
+			}
+		}
+		Mat sobel8URGB;
+		Mat sobelRGB;
+		Mat canny2RGB;
+		Mat __GrayRGB;
+		Mat matchtresultRGB;
+		Mat matchtresult2RGB;
+		Mat matchtresult8U;
+		Mat matchtresult28U;
+
+		cvtColor(sobel8U,sobel8URGB,CV_GRAY2RGB);
+		cvtColor(sobel,sobelRGB,CV_GRAY2RGB);
+		cvtColor(canny2,canny2RGB,CV_GRAY2RGB);
+		matchtresultAcc*=255;
+		matchtresultAcc2*=255;
+		matchtresultAcc.convertTo(matchtresult8U,CV_8UC3);
+		matchtresultAcc2.convertTo(matchtresult28U,CV_8UC3);
+//
+//		Mat matchtresultlarge(size,CV_8UC3);
+//		Mat matchtresult2large(size,CV_8UC3);
+//
+//		Mat matchtresulttemp = matchtresultlarge;
+//		Mat matchtresult2temp = matchtresult2large;
+//		matchtresult8U.copyTo(matchtresulttemp);
+//		matchtresult28U.copyTo(matchtresult2temp);
+//
+//		dilate(matchtresultlarge,matchtresultlarge,elementL);
+//		dilate(matchtresult2large,matchtresult2large,elementL);
+//		dilate(matchtresultlarge,matchtresultRGB,elementL);
+//		dilate(matchtresult2large,matchtresult2RGB,elementL);
+//
+//
+//		bitwise_and(sobel8URGB,matchtresulttemp,matchtresulttemp);
+//		bitwise_and(canny2RGB,matchtresult2temp,matchtresult2temp);
+//
+//		bitwise_or(_grayRGB,matchtresulttemp,matchtresultRGB);
+//		bitwise_or(_grayRGB,matchtresult2temp,matchtresult2RGB);
+
+		//matchtresultmerged.copyTo(mergePos[3]);
+		sobel8URGB.copyTo(mergePos[2]);
+		matchtresult8U.copyTo(mergePos[3]);
+
+		//matchtresultmerged2.copyTo(mergePos[0]);
+		canny2RGB.copyTo(mergePos[0]);
+		matchtresult28U.copyTo(mergePos[1]);
+
+		imwrite(dir+"/set041/"+files[i]+".png",merged);
+		cout<<files[i]<<endl;
+		//_homoColor2.copyTo(mergePos[3]);
+		//_homoThresholdColor.copyTo(mergePos[2]);
+
+
+	}
+
+
+
+
+
+//	int kd=5;
+//	for (unsigned int i = 0;i < files.size();i++) {
+//
+//		int col = 3;
+//		int row = 2;
+//
+//		Mat _image1 = imread( dir+"/"+files[i], -1 );
+//		Mat __image1; cvtColor(_image1,__image1,CV_RGB2YCrCb);
+//		Size size = _image1.size();
+//		Size size2 (_image1.cols*2,_image1.rows*2);
+//
+//
+//		Mat _gray (size,CV_8UC1),_grayRGB;
+//		Mat _bilateral (size,CV_8UC1);
+//
+//		//Mat gradx(size,CV_8UC1);
+//		//Mat grady(size,CV_8UC1);
+//		Mat sobel(size,CV_8UC1);
+//
+//		Mat sobelColor_[3];
+//		Mat sobelColor;
+//		Mat sobelAND = Mat::zeros(size,CV_8UC1)+255;
+//		Mat sobelOR = Mat::zeros(size,CV_8UC1);
+//		Mat merged(_image1.rows*row, _image1.cols*col, CV_8UC3);
+//		Mat _image1_split[3];
+//		Mat _bilateral3 (size,CV_8UC3);
+//		Mat __image1_split[3];
+//		Mat __bilateral3 (size,CV_8UC3);
+//		//_bilateral3 = _image1;
+//		bilateralFilter (_image1, _bilateral3 , kd, kd*2, kd/2 );
+//		medianBlur(_bilateral3,_bilateral3,3);
+//		//medianBlur(_image1,_bilateral3,3);
+//		int dilation_type = MORPH_RECT;
+//		Mat elementL = getStructuringElement( dilation_type, Size( 3,3 ), Point( 1,1 ) );
+//		//			//dilate(__Gray,__Gray,elementL);
+//		//			//erode(__Gray,__Gray,elementL);
+//
+//	//		dilate(_image1,_bilateral3,elementL);
+//	//		erode(_bilateral3,_bilateral3,elementL);
+//	//		erode(_bilateral3,_bilateral3,elementL);
+//	//		dilate(_bilateral3,_bilateral3,elementL);
+//
+//		split (_bilateral3,_image1_split);
+//		bilateralFilter (__image1, __bilateral3 , kd, kd*2, kd/2 );
+//		medianBlur(__bilateral3,__bilateral3,3);
+//		//medianBlur(__image1,__bilateral3,3);
+//
+//	//		dilate(__image1,__bilateral3,elementL);
+//	//		erode(__bilateral3,__bilateral3,elementL);
+//	//		erode(__bilateral3,__bilateral3,elementL);
+//	//		dilate(__bilateral3,__bilateral3,elementL);
+//		split (__bilateral3,__image1_split);
+//
+//		//split (_image1,_image1_split);
+//		//split (__image1,__image1_split);
+//
+//
+//		cvtColor(_image1,_gray,CV_RGB2GRAY);
+//		cvtColor(_gray,_grayRGB,CV_GRAY2RGB);
+//
+//		Mat sobelxsqsum = Mat::zeros(size,CV_32FC1);
+//		Mat sobelysqsum = Mat::zeros(size,CV_32FC1);
+//		Mat gradx(size,CV_32FC1);
+//		Mat grady(size,CV_32FC1);
+//		 //dilation_type = MORPH_ELLIPSE;
+//		//int dilation_type = MORPH_RECT;
+//			//elementL = getStructuringElement( dilation_type, Size( 25,25 ), Point( 12,12 ) );
+//
+//			float stdsum=.0;
+//		for (int k=0; k<3; k++) {
+//
+//			Mat varmapa(size,CV_8UC1);
+//					Mat varmapa_(size,CV_32FC1);
+//					Mat varmapa__(size,CV_32FC1);
+//
+//			cvNica::VarianceFilter(_image1_split[k],varmapa_,7);
+//
+//			Mat canny_,canny__;
+//
+//			Canny( _image1_split[k], canny_, 30, 50, 3, 1 );
+//			canny_.convertTo(canny__,CV_32FC1);
+//
+//			//erode(varmapa_,varmapa_,elementL);
+//
+//			Mat sp32; _image1_split[k].convertTo(sp32,CV_32FC1);
+//			float spsum = sum(sp32)[0]/size.width/size.height;
+//			float spsqsum = sum(sp32.mul(sp32))[0];
+//			float std = sqrt(spsqsum/size.width/size.height - spsum*spsum);
+//			cout<<": "<<spsum<<": "<<spsqsum<<": "<<std<<endl;
+//
+//			std = (std<30)? 30:std;
+//			//cv::pow(varmapa_,1.1,varmapa_);
+//			stdsum += std;
+//
+//
+//			threshold(varmapa_,varmapa,std/6+2,255,THRESH_BINARY_INV);
+//			//threshold(varmapa_,varmapa,sqrt(std)+2,255,THRESH_BINARY_INV);
+//			//threshold(varmapa_,varmapa,8,255,THRESH_BINARY_INV);
+//			max(varmapa_,varmapa,varmapa);
+//
+//
+//			Mat sobelx(size,CV_32FC1);
+//			Mat sobely(size,CV_32FC1);
+//			Mat sobelxsq(size,CV_32FC1);
+//			Mat sobelysq(size,CV_32FC1);
+//			Sobel(_image1_split[k],sobelx,CV_32F,1,0,1,1, 0, BORDER_REPLICATE );
+//
+//
+//			sobelx/=varmapa/150;
+//			sobelx=sobelx.mul(canny__/255);
+//			//sobelx=sobelx.mul(__Gray8);
+//			multiply(sobelx,sobelx,sobelxsq);
+//
+//			sobelxsqsum += sobelxsq*std;
+//			//convertScaleAbs( sobelx, gradx );
+//			Sobel(_image1_split[k],sobely,CV_32F,0,1,1,1, 0, BORDER_REPLICATE );
+//			sobely/=varmapa/150;
+//			sobely=sobely.mul(canny__/255);
+//			//sobely=sobely.mul(__Gray8);
+//			multiply(sobely,sobely,sobelysq);
+//
+//			sobelysqsum += sobelysq*std;
+//
+//
+//
+//			convertScaleAbs( sobelx, gradx );
+//			convertScaleAbs( sobely, grady );
+//			addWeighted( gradx, 0.5, grady, 0.5, 0, sobelColor_[k] );
+//			Mat sobel8UU;
+//			sobelColor_[k].convertTo(sobel8UU,CV_8UC1);
+//			bitwise_and(sobel8UU,sobelAND,sobelAND);
+//			bitwise_or(sobel8UU,sobelOR,sobelOR);
+//			//convertScaleAbs( sobely, grady );
+//
+//		}
+//
+//		sobelxsqsum/=stdsum;
+//		sobelysqsum/=stdsum;
+//		sqrt (sobelxsqsum,gradx);
+//		sqrt (sobelysqsum,grady);
+//
+//		Mat canny2;Mat gradx2;Mat grady2;
+//		gradx.convertTo(gradx2,CV_16S);
+//		grady.convertTo(grady2,CV_16S);
+//		Canny( _gray, canny2, 60, 120, 3, 1 );
+//		addWeighted( gradx, 0.5, grady, 0.5, 0, sobel );
+//
+//		Mat sobel8URGB;
+//		Mat sobelRGB;
+//		Mat canny2RGB;
+//		Mat sobel8U2;Mat sobel8U;
+//		Mat mergePos [col*row];
+//		for (int k=0; k<row; k++) {
+//			for (int j=0; j<col; j++) {
+//				mergePos[j+k*col] = Mat(merged, Rect(_image1.cols*(j%col), _image1.rows*((int)(j/col)+k), _image1.cols, _image1.rows));
+//			}
+//		}
+//
+//		Mat matchtresultmerged;
+//		Mat matchtresultmerged2;
+//		_grayRGB.copyTo(matchtresultmerged);
+//		_grayRGB.copyTo(matchtresultmerged2);
+//
+//
+//		Point a1;
+//		Mat matchtresultAcc;
+//		Mat matchtresult;
+//		Mat kernel1;
+//		double thrval=0.7;
+//		int startIndex = 36;//98;//36;
+//		kernel1 = cvNica::kernels(startIndex,a1)*255;
+//		matchTemplate(sobel,kernel1,matchtresult,CV_TM_CCOEFF_NORMED);
+//		threshold(matchtresult,matchtresult,thrval,1,THRESH_BINARY);
+//		dilate(matchtresult,matchtresult,elementL);
+//		dilate(matchtresult,matchtresult,elementL);
+//	    for (int j=0; j<size.height; j++)
+//	    	for (int i=0; i<size.width; i++)
+//	    		if (matchtresult.at<float>(j,i)==1&&sobel.at<uchar>(j,i)>150)
+//	    			circle(matchtresultmerged,Point(i,j),3,Scalar(255,0,0));
+//
+//
+//
+//		kernel1 = cvNica::kernels(startIndex+1,a1)*255;
+//		matchTemplate(sobel,kernel1,matchtresult,CV_TM_CCOEFF_NORMED);
+//		threshold(matchtresult,matchtresult,thrval,1,THRESH_BINARY);
+//		dilate(matchtresult,matchtresult,elementL);
+//		dilate(matchtresult,matchtresult,elementL);
+//	    for (int j=0; j<size.height; j++)
+//	    	for (int i=0; i<size.width; i++)
+//	    		if (matchtresult.at<float>(j,i)==1&&sobel.at<uchar>(j,i)>150)
+//	    			circle(matchtresultmerged,Point(i,j),3,Scalar(0,255,0));
+//
+//		kernel1 = cvNica::kernels(startIndex+2,a1)*255;
+//		matchTemplate(sobel,kernel1,matchtresult,CV_TM_CCOEFF_NORMED);
+//		threshold(matchtresult,matchtresult,thrval,1,THRESH_BINARY);
+//		dilate(matchtresult,matchtresult,elementL);
+//		dilate(matchtresult,matchtresult,elementL);
+//	    for (int j=0; j<size.height; j++)
+//	    	for (int i=0; i<size.width; i++)
+//	    		if (matchtresult.at<float>(j,i)==1&&sobel.at<uchar>(j,i)>150)
+//	    			circle(matchtresultmerged,Point(i,j),3,Scalar(255,255,0));
+//
+//		kernel1 = cvNica::kernels(startIndex+3,a1)*255;
+//		matchTemplate(sobel,kernel1,matchtresult,CV_TM_CCOEFF_NORMED);
+//		threshold(matchtresult,matchtresult,thrval,1,THRESH_BINARY);
+//		dilate(matchtresult,matchtresult,elementL);
+//		dilate(matchtresult,matchtresult,elementL);
+//	    for (int j=0; j<size.height; j++)
+//	    	for (int i=0; i<size.width; i++)
+//	    		if (matchtresult.at<float>(j,i)==1&&sobel.at<uchar>(j,i)>150)
+//	    			circle(matchtresultmerged,Point(i,j),3,Scalar(0,255,255));
+//
+//
+//		Point a2;
+//		Mat matchtresultAcc2;
+//		Mat matchtresult2;
+//		Mat kernel2;
+//		Mat canny232F;
+//		canny2.convertTo(canny232F,CV_32FC1);
+//		kernel2 = cvNica::kernels(startIndex,a2)*255;
+//		matchTemplate(canny232F,kernel2,matchtresult2,CV_TM_CCOEFF_NORMED);
+//		threshold(matchtresult2,matchtresult2,thrval,1,THRESH_BINARY);
+//		dilate(matchtresult2,matchtresult2,elementL);
+//		dilate(matchtresult2,matchtresult2,elementL);
+//	    for (int j=0; j<size.height; j++)
+//	    	for (int i=0; i<size.width; i++)
+//	    		if (matchtresult2.at<float>(j,i)==1&&canny2.at<uchar>(j,i)>150)
+//	    			circle(matchtresultmerged2,Point(i,j),3,Scalar(255,0,0));
+//
+//
+//
+//		kernel2 = cvNica::kernels(startIndex+1,a1)*255;
+//		matchTemplate(canny232F,kernel1,matchtresult2,CV_TM_CCOEFF_NORMED);
+//		threshold(matchtresult2,matchtresult2,thrval,1,THRESH_BINARY);
+//		dilate(matchtresult2,matchtresult2,elementL);
+//		dilate(matchtresult2,matchtresult2,elementL);
+//	    for (int j=0; j<size.height; j++)
+//	    	for (int i=0; i<size.width; i++)
+//	    		if (matchtresult2.at<float>(j,i)==1&&canny2.at<uchar>(j,i)>150)
+//	    			circle(matchtresultmerged2,Point(i,j),3,Scalar(0,255,0));
+//
+//
+//		kernel2 = cvNica::kernels(startIndex+2,a1)*255;
+//		matchTemplate(canny232F,kernel1,matchtresult2,CV_TM_CCOEFF_NORMED);
+//		threshold(matchtresult2,matchtresult2,thrval,1,THRESH_BINARY);
+//		dilate(matchtresult2,matchtresult2,elementL);
+//		dilate(matchtresult2,matchtresult2,elementL);
+//	    for (int j=0; j<size.height; j++)
+//	    	for (int i=0; i<size.width; i++)
+//	    		if (matchtresult2.at<float>(j,i)==1&&canny2.at<uchar>(j,i)>150)
+//	    			circle(matchtresultmerged2,Point(i,j),3,Scalar(255,255,0));
+//
+//		kernel2 = cvNica::kernels(startIndex+3,a1)*255;
+//		matchTemplate(canny232F,kernel1,matchtresult2,CV_TM_CCOEFF_NORMED);
+//		threshold(matchtresult2,matchtresult2,thrval,1,THRESH_BINARY);
+//		dilate(matchtresult2,matchtresult2,elementL);
+//		dilate(matchtresult2,matchtresult2,elementL);
+//	    for (int j=0; j<size.height; j++)
+//	    	for (int i=0; i<size.width; i++)
+//	    		if (matchtresult2.at<float>(j,i)==1&&canny2.at<uchar>(j,i)>150)
+//	    			circle(matchtresultmerged2,Point(i,j),3,Scalar(0,255,255));
+//
+//
+//
+//
+//
+//		sobel.convertTo(sobel8U,CV_8UC1);
+//		cvtColor(sobel8U,sobel8URGB,CV_GRAY2RGB);
+//		cvtColor(sobel,sobelRGB,CV_GRAY2RGB);
+//		cvtColor(canny2,canny2RGB,CV_GRAY2RGB);
+//
+//
+//
+//
+//		matchtresultmerged.copyTo(mergePos[3]);
+//		sobel8URGB.copyTo(mergePos[4]);
+//		//matchtresultRGB.copyTo(mergePos[5]);
+//
+//		matchtresultmerged2.copyTo(mergePos[0]);
+//		canny2RGB.copyTo(mergePos[1]);
+//		//matchtresult2RGB.copyTo(mergePos[2]);
+//
+//		imwrite(dir+"/set040/"+files[i]+".png",merged);
+//		cout<<files[i]<<endl;
+//		//_homoColor2.copyTo(mergePos[3]);
+//		//_homoThresholdColor.copyTo(mergePos[2]);
+//
+//
+//	}
+
 }
+
+
+
 
 #endif
 
@@ -2860,15 +4679,27 @@ int main(int argc, char* argv[] ){
 			Mat _histeq(size,CV_8UC1);
 			//nicatio::MedianFilter(_image1.data,_deno1.data,_image1.cols,_image1.rows);
 			//nicatio::Denoise( _image1.data,_deno1.data,_image1.cols,_image1.rows);
+			//cvNica::Denoise(_image1,_deno1);
 			cvNica::Denoise(_image1,_deno1);
 			//_deno1=_image1;
 			//cvNica::DynamicMorphQuotImage(_deno1,_dmqi,0);
+
+			//cvNica::SelectiveMorphQuotImage(_deno1,_deno2,0);
 			cvNica::SelectiveMorphQuotImage(_deno1,_dmqi,0);
+
 			//_dmqi=_deno1;
 			//nicatio::DynamicMorphQuotImage( _deno1.data,_dmqi.data,_image1.cols,_image1.rows, 0);
 			//_dmqi = 255-_dmqi;
 			//equalizeHist(_dmqi,_histeq);
+
+
+
 			nicatio::HistEqualize(_dmqi.data,_histeq.data,_image1.cols,_image1.rows);
+
+
+
+
+
 			//nicatio::MedianFilter(_histeq.data,_deno2.data,_image1.cols,_image1.rows);
 			//nicatio::Gamma(_dmqi.data,_deno2.data,_image1.cols,_image1.rows,2.0);
 			//nicatio::Gamma(_histeq.data,_deno2.data,_image1.cols,_image1.rows,25.0);
@@ -2884,7 +4715,9 @@ int main(int argc, char* argv[] ){
 
 			//_deno2;// = _deno3(Rect(1,1,_deno1.size().width,_deno1.size().height));
 			//_deno2=_dmqi;
-			_deno2=_histeq;
+
+			//_deno2=_histeq;
+
 			//cvNica::IntensityShifting(_histeq, _deno2, 220);
 //			imwrite("ori.bmp",_image1);
 //			imwrite("dmqi.bmp",_dmqi);
@@ -2902,9 +4735,39 @@ int main(int argc, char* argv[] ){
 
 			unsigned found = files[i].rfind("bad");
 			vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
-			imwrite(dir+"/smqi/"+tokens[0]+"."+dataType,_deno2);
+			imwrite(dir+"/mdmqit/"+tokens[0]+"."+dataType,_histeq);
 			if (found!=std::string::npos)
-				rename( string(dir+"/smqi/"+tokens[0]+"."+dataType).c_str() , string(dir+"/smqi/"+tokens[0]+"."+dataType+".bad").c_str() );
+				rename( string(dir+"/mdmqit/"+tokens[0]+"."+dataType).c_str() , string(dir+"/mdmqit/"+tokens[0]+"."+dataType+".bad").c_str() );
+//			unsigned found = files[i].rfind("bad");
+//			vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
+//			imwrite(dir+"/deno/"+tokens[0]+"."+dataType,_deno2);
+//			if (found!=std::string::npos)
+//				rename( string(dir+"/deno/"+tokens[0]+"."+dataType).c_str() , string(dir+"/deno/"+tokens[0]+"."+dataType+".bad").c_str() );
+
+#endif
+
+#ifdef MDMQI_stretch
+			//cout << files[i] <<"\r"<< endl;
+			Mat _image1;
+			_image1 = imread( dir+"\\"+files[i], -1 );
+			//_image0.convertTo(_image1,CV_8UC1);
+			if (_image1.type()!= CV_8UC1) cvtColor(_image1, _image1, CV_RGB2GRAY);
+			Size size = _image1.size();
+			Mat _deno1(size,CV_8UC1);
+			Mat _deno2(size,CV_8UC1);
+			Mat _dmqi(size,CV_8UC1);
+			Mat _histeq(size,CV_8UC1);
+
+			cvNica::Denoise(_image1,_deno1);
+			cvNica::SelectiveMorphQuotImage(_deno1,_dmqi,0);
+			normalize(_dmqi,_histeq, 0, 255, CV_MINMAX);
+			//nicatio::HistEqualize(_dmqi.data,_histeq.data,_image1.cols,_image1.rows);
+
+			unsigned found = files[i].rfind("bad");
+			vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
+			imwrite(dir+"/mdmqi_stretch/"+tokens[0]+"."+dataType,_histeq);
+			if (found!=std::string::npos)
+				rename( string(dir+"/mdmqi_stretch/"+tokens[0]+"."+dataType).c_str() , string(dir+"/mdmqi_stretch/"+tokens[0]+"."+dataType+".bad").c_str() );
 
 #endif
 
@@ -5261,6 +7124,17 @@ int main(int argc, char* argv[] ){
 		} else {
 			frame_ = frame__;
 		}
+
+
+
+
+
+
+
+
+
+
+
 		//Mat frame___;
 		//cvtColor(frame__,frame___,CV_RGB2GRAY);
 		//cvtColor(frame___,frame_,CV_GRAY2RGB);
@@ -5277,10 +7151,19 @@ int main(int argc, char* argv[] ){
 		convertScaleAbs( sobely, grady );
 		addWeighted( gradx, 0.5, grady, 0.5, 0, sobel );
 
+		//Mat sobel8U, sobels[3];
+		///sobel.convertTo(sobel8U,CV_8UC3);
+		//split(sobel8U,sobels);
+
+
 		Mat sobelgray_,sobelgray__,sobelgray;
+
+		//max(sobels[0],sobels[1],sobelgray__);
+		//max(sobelgray__,sobels[2],sobelgray__);
 		cvtColor(sobel,sobelgray_,CV_RGB2GRAY);
 		sobelgray_.convertTo(sobelgray__,CV_8UC1);
-		GaussianBlur(sobelgray__,sobelgray__,Size(5,5),1);
+		//GaussianBlur(sobelgray__,sobelgray__,Size(5,5),1);
+		//threshold(sobelgray__,sobelgray__,100,255,THRESH_BINARY);
 
 		//resize(frame_,frame_,Size(0,0),.5,.5);
 
@@ -5292,144 +7175,17 @@ int main(int argc, char* argv[] ){
 		int h = frame_.rows;
 		int w4 = frame_.cols-4;
 		int h4 = frame_.rows-4;
-		int sz = w4*h4;
+		int sz4 = w4*h4;
+		int sz = w*h;
 
 	    Point2f src_center(w/2.0F, h/2.0F);
-	    double angle = 50;
-	    Mat rot_matrix = getRotationMatrix2D(src_center, angle, 1.);
 
-	    Mat rotated_img(Size(h, w), CV_8UC3);
-
-	    warpAffine(frame_, rotated_img, rot_matrix, frame_.size(),INTER_CUBIC);
-	    warpAffine(sobelgray__, sobelgray, rot_matrix, frame_.size(),INTER_CUBIC);
-
-
-	    for (int aa=1; aa<=10;aa++) {
-	    	Mat resampled;
-
-			Mat affinematrix = (Mat_<float>(2,3) << 1, 0, (float)aa/10, 0, 1, 0);;// Mat(2,3,CV_32F,affinematrix_);
-			stringstream d;
-			d<<"br_"<<aa<<".bmp";
-
-
-			warpAffine(frame_, resampled, affinematrix, frame_.size(),INTER_LINEAR);
-
-
-			imwrite("bf_.bmp",frame_);
-			imwrite(d.str().c_str(),resampled);
-	    }
-
-
-
-	    //imwrite("rotated.jpg", rotated_img);
-
-	    //rotated_img-=50;
-
-//
-//	    int thresh = 80;
-//	    int blockSize = 3;
-//	    int apertureSize = 3;
-//	    double k = 0.04;
-//	    Mat frame_gray,dst,dst_norm,dst_norm_scaled;
-//	    cvtColor(rotated_img,frame_gray,CV_RGB2GRAY);
-//	    //cvtColor(frame_,frame_gray,CV_RGB2GRAY);
-//	    /// Detecting corners
-//	    cornerHarris( frame_gray, dst, blockSize, apertureSize, k, BORDER_DEFAULT );
-//
-//	    /// Normalizing
-//	    normalize( dst, dst_norm, 0, 255, NORM_MINMAX, CV_32FC1, Mat() );
-//	    convertScaleAbs( dst_norm, dst_norm_scaled );
-//
-//	    /// Drawing a circle around corners
-//	    for( int j = 0; j < dst_norm.rows ; j++ )
-//	       { for( int i = 0; i < dst_norm.cols; i++ )
-//	            {
-//	              if( (int) dst_norm.at<float>(j,i) > thresh )
-//	                {
-//	                 circle( dst_norm_scaled, Point( i, j ), 5,  Scalar(0), 1, 8, 0 );
-//	                }
-//	            }
-//	       }
-//	    /// Showing the result
-//	    namedWindow( "d", CV_WINDOW_AUTOSIZE );
-//	    imshow( "d", dst_norm_scaled );
-//	    waitKey(0);
-
-
-
-
-
-//
-//		imageForFFT[0] = Mat(frame_, Rect(0, 0, w4, h4));
-//		imageForFFT[1] = Mat(frame_, Rect(1, 0, w4, h4));
-//		imageForFFT[2] = Mat(frame_, Rect(2, 0, w4, h4));
-//		imageForFFT[3] = Mat(frame_, Rect(3, 0, w4, h4));
-//		imageForFFT[4] = Mat(frame_, Rect(4, 0, w4, h4));
-//		imageForFFT[5] = Mat(frame_, Rect(4, 1, w4, h4));
-//		imageForFFT[6] = Mat(frame_, Rect(4, 2, w4, h4));
-//		imageForFFT[7] = Mat(frame_, Rect(4, 3, w4, h4));
-//		imageForFFT[8] = Mat(frame_, Rect(4, 4, w4, h4));
-//		imageForFFT[9] = Mat(frame_, Rect(3, 4, w4, h4));
-//		imageForFFT[10] = Mat(frame_, Rect(2, 4, w4, h4));
-//		imageForFFT[11] = Mat(frame_, Rect(1, 4, w4, h4));
-//		imageForFFT[12] = Mat(frame_, Rect(0, 4, w4, h4));
-//		imageForFFT[13] = Mat(frame_, Rect(0, 3, w4, h4));
-//		imageForFFT[14] = Mat(frame_, Rect(0, 2, w4, h4));
-//		imageForFFT[15] = Mat(frame_, Rect(0, 1, w4, h4));
-//		imageForFFT[16] = Mat(frame_, Rect(2, 2, w4, h4));
-//
-//		//n/amedWindow( "d", CV_WINDOW_AUTOSIZE );
-//		//imshow( "d", imageForFFT[0]);//thrCrCb[0] );
-//		//waitKey(0);
-//		int l=((88-2)*w4+159-2);
-//		//int l=((77-2)*w4+248-2);
-//		//int l=((187-2)*w4+166-2);
-//		//int l=((311-2)*w4+267-2);
-//		//int l=((189-2)*w4+169-2);
-//
-//		Vec3b intensity = imageForFFT[16].at<Vec3b>(l);
-//
-//		cout<<"a: "<<(uint)intensity.val[0]<<"a: "<<(uint)intensity.val[1]<<"a: "<<(uint)intensity.val[2]<<endl;
-//
-//		nicatio::cplx bufr[16];
-//		nicatio::cplx bufg[16];
-//		nicatio::cplx bufb[16];
-//
-//
-//		for(int m=0;m<16;m++) {
-//			Vec3b intensity = imageForFFT[m].at<Vec3b>(l);
-//			bufr[m]=intensity.val[0];
-//			bufg[m]=intensity.val[1];
-//			bufb[m]=intensity.val[2];
-//		}
-//
-//		nicatio::fft(bufr, 16);
-//		nicatio::fft(bufg, 16);
-//		nicatio::fft(bufb, 16);
-//
-//		double ar = atan2(cimag(bufr[1]),creal(bufr[1]));
-//		double ag = atan2(cimag(bufg[1]),creal(bufg[1]));
-//		double ab = atan2(cimag(bufb[1]),creal(bufb[1]));
-//
-//		float bufABS[24];
-//		int n=0;
-//		for (int m=1; m<8; m++){
-//			bufABS[n++] = cabsf(bufr[m]);
-//			bufABS[n++] = cabsf(bufg[m]);
-//			bufABS[n++] = cabsf(bufb[m]);
-//		}
-//		intensity = imageForFFT[16].at<Vec3b>(l);
-//		bufABS[n++] = intensity.val[0];
-//		bufABS[n++] = intensity.val[1];
-//		bufABS[n++] = intensity.val[2];
-
-		//Mat bufABSmat (24,1,CV_32FC1,bufABS);
-
-
+//	    int xx = 159;
+//	    int yy = 87;
+	    int xx = 242;
+	    int yy = 277;
 	    int l;
-//
-	    cvNica::FRID frid(frame_,FRID_16F);
-	    cvNica::FRID frid2(rotated_img,FRID_16F);
+	  //
 		double ar;
 		double ag;
 		double ab;
@@ -5442,135 +7198,514 @@ int main(int argc, char* argv[] ){
 		double bsr;
 		double bsg;
 		double bsb;
-	    Mat bufABSmat;
+
+
+		cvNica::FRID frid(frame_,FRID_16F);
+
+		//vector<int> fp = frid.getFeaturePoints();
+		vector<int> fp;
+
+
+
+
+
+
+		int thresh = 80;
+		int blockSize = 3;
+		int apertureSize = 3;
+		double k = 0.04;
+		Mat frame_gray,dst,dst_norm,dst_norm_scaled;
+		cvtColor(frame_,frame_gray,CV_RGB2GRAY);
+		//cvtColor(frame_,frame_gray,CV_RGB2GRAY);
+		/// Detecting corners
+		cornerHarris( frame_gray, dst, blockSize, apertureSize, k, BORDER_DEFAULT );
+		double min,max;
+		minMaxIdx(dst,&min,&max,0);
+		cout<<"max: "<<max<<endl;
+		cout<<"min: "<<min<<endl;
+
+		dst_norm = dst/max*255.;
+
+		/// Normalizing
+		//normalize( dst, dst_norm, 0, 255, NORM_MINMAX, CV_32FC1, Mat() );
+		//convertScaleAbs( dst_norm, dst_norm_scaled );
+		//dst_norm = dst*255*255;
+
+
+
+
+		//		int maxid[2];
+				//minMaxIdx(dst_norm,&min,&max,0);
+				//cout<<"max: "<<max<<endl;
+				//cout<<"max: "<<min<<endl;
+
+
+		dst_norm.convertTo(dst_norm_scaled,CV_8UC1);
+
+
+
+
+
+
+		threshold(dst_norm_scaled,dst_norm_scaled,40,255,THRESH_BINARY);
+
+		std::vector < std::vector<cv::Point2i > > blobs;
+		cvNica::FindBlobs(dst_norm_scaled, blobs);
+
+		for(size_t m=0; m < blobs.size(); m++) {
+			if (blobs[m].size()<50){
+				int sumx = 0;
+				int sumy = 0;
+				for(size_t n=0; n < blobs[m].size(); n++) {
+					int x = blobs[m][n].x;
+					int y = blobs[m][n].y;
+					sumx += x;
+					sumy += y;
+				}
+				fp.push_back(sumx/blobs[m].size());
+				fp.push_back(sumy/blobs[m].size());
+				cout<<(sumx/blobs[m].size())<<":"<<(sumy/blobs[m].size())<<endl;
+			}
+		}
+
+		/// Drawing a circle around corners
+		for( int j = 0; j < dst_norm.rows ; j++ )
+		   { for( int i = 0; i < dst_norm.cols; i++ )
+				{
+				  if( (int) dst_norm.at<float>(j,i) > thresh )
+					{
+					 circle( dst_norm_scaled, Point( i, j ), 25,  Scalar(0), 1, 8, 0 );
+//					 fp.push_back(i);
+//					 fp.push_back(j);
+					}
+				}
+		   }
+		/// Showing the result
+
+
+		//namedWindow( "b", CV_WINDOW_AUTOSIZE );
+		//imshow( "b", sobelgray);//thrCrCb[0] );
+		//imshow( "b", dst_norm_scaled);//thrCrCb[0] );
+		imwrite("dst_norm_scaled.bmp",dst_norm_scaled);
+
+		//namedWindow( "d", CV_WINDOW_AUTOSIZE );
+		//imshow( "d", corImg);//thrCrCb[0] );
+
+		//waitKey(0);
+
+
+
+
+		ofstream ofs;
+		ofs.open("angle.txt",ios::out|ios::binary);
+
+
+
+		int fpsize = fp.size();
+		int fpi;
+		GaussianBlur(frame_,frame_,Size(11,11),1,1);
+for(double angle=0; angle<360; angle+=1){
+	    //double angle = 50;
+	    Mat rot_matrix = getRotationMatrix2D(src_center, angle, 1.);
+	    Point2f newxys[3];
+
+
+	    //cout<<"new: "<<newxx<<", "<<newyy<<endl;
+
+
+
+
+	    Mat rotated_img(Size(h, w), CV_8UC3);
+
+	    warpAffine(frame_, rotated_img, rot_matrix, frame_.size(),INTER_CUBIC);
+	    warpAffine(sobelgray__, sobelgray_, rot_matrix, frame_.size(),INTER_CUBIC);
+
+
+	    Mat rotated_img = imread( dir+"/"+files[1], -1 );
+
+	    Mat cornerharrisdst,cornerharrisdst_norm,cornerharrisdst_norm_scaled,cornerharrisdst_norm_scaled2,cornerharrisdst_norm_scaled_cvt,rotated_img_gray;
+	    cvtColor(rotated_img,rotated_img_gray,CV_RGB2GRAY);
+		cornerHarris(rotated_img_gray, cornerharrisdst, blockSize, apertureSize, k, BORDER_DEFAULT );
+
+		minMaxIdx(cornerharrisdst,&min,&max,0);
+		cout<<"max: "<<max<<endl;
+		cout<<"min: "<<min<<endl;
+
+		cornerharrisdst_norm = cornerharrisdst/max*255.;
+
+
+
+
+		/// Normalizing
+		//normalize( cornerharrisdst, cornerharrisdst_norm, 0, 255, NORM_MINMAX, CV_32FC1, Mat() );
+		//convertScaleAbs( cornerharrisdst_norm, cornerharrisdst_norm_scaled );
+		//normalize( cornerharrisdst_norm_scaled, cornerharrisdst_norm_scaled2, 0, 255, NORM_MINMAX, CV_8UC1, Mat() );
+		minMaxIdx(cornerharrisdst_norm,&min,&max,0);
+		cout<<"max: "<<max<<endl;
+		cout<<"min: "<<min<<endl;
+		cornerharrisdst_norm.convertTo(cornerharrisdst_norm_scaled,CV_8UC1);
+
+
+		threshold(cornerharrisdst_norm_scaled,cornerharrisdst_norm_scaled_cvt,20,255,THRESH_BINARY);
+		//cornerharrisdst_norm_scaled.convertTo(cornerharrisdst_norm_scaled_cvt,CV_8UC1);
+
+//		cout<<"d:" << (cornerharrisdst_norm_scaled2.type()==CV_8UC1)<<endl;
+/*		namedWindow( "c", CV_WINDOW_AUTOSIZE );
+		imshow( "c",  cornerharrisdst_norm_scaled);//thrCrCb[0] );
+//		//namedWindow( "d", CV_WINDOW_AUTOSIZE );
+//		//imshow( "d", corImg);//thrCrCb[0] );
+//
+		waitKey(0);*/
+
+//	    for (int aa=1; aa<=10;aa++) {
+//	    	Mat resampled;
+//
+//			Mat affinematrix = (Mat_<float>(2,3) << 1, 0, (float)aa/10, 0, 1, 0);;// Mat(2,3,CV_32F,affinematrix_);
+//			stringstream d;
+//			d<<"br_"<<aa<<".bmp";
+//
+//
+//			warpAffine(frame_, resampled, affinematrix, frame_.size(),INTER_LINEAR);
+//
+//
+//			imwrite("bf_.bmp",frame_);
+//			imwrite(d.str().c_str(),resampled);
+//	    }
+
+
+
+
+		Mat cdmat;
+		//Mat(rotated_img, Rect(2, 2, w4, h4)).copyTo(cdmat);
+		//Mat(sobelgray_, Rect(2, 2, w4, h4)).copyTo(sobelgray);
+		rotated_img.copyTo(cdmat);
+		sobelgray_.copyTo(sobelgray);
+
+
+//		double min,max;
+//		int maxid[2];
+//		minMaxIdx(sobelgray,&min,&max,0,maxid);
+//
+//		cout<<"max: "<<max<<endl;
+
+
+		//Mat corImg = Mat::zeros(Size(w4,h4),CV_32FC1);
+
+
+		double t = (double)getTickCount();
+
+		cvNica::FRID frid2(rotated_img,FRID_16F);
+
+
+
+
 //	    frid.getFeatureVector(101-2,101-2,ar,ag,ab,asr,asg,asb).copyTo(bufABSmat);
-	    frid.getFeatureVector(159-2,87-2,ar,ag,ab,asr,asg,asb).copyTo(bufABSmat);
+	    //frid.getFeatureVector(xx-2,yy-2,ar,ag,ab,asr,asg,asb).copyTo(bufABSmat);
+
+		//int *adf = fp.data();
+		//Mat adfa2(fpsize/2,2,CV_32SC1,adf);
+		//Mat adfa2(3,2,CV_32SC1,adf);
+		//Mat adfa;
+		//adfa2.convertTo(adfa,CV_32FC1);
+
+		Point2f adfa[3]; //= {Point2f((float)fp[2],(float)fp[3]),Point2f((float)fp[4],(float)fp[5]),Point2f((float)fp[6],(float)fp[7])};
+		int a0=fp.at(0);
+		int a1=fp.at(1);
+		int a2=fp.at(2);
+		int a3=fp.at(3);
+		int a4=fp.at(4);
+		int a5=fp.at(5);
+//		int a0=fp.at(2);
+//		int a1=fp.at(3);
+//		int a2=fp.at(4);
+//		int a3=fp.at(5);
+//		int a4=fp.at(6);
+//		int a5=fp.at(7);
+
+		adfa[0].x = (float)a0;
+		adfa[0].y = (float)a1;
+		adfa[1].x = (float)a2;
+		adfa[1].y = (float)a3;
+		adfa[2].x = (float)a4;
+		adfa[2].y = (float)a5;
+
+//		cout<<" "<<(short)adfa2.at<short>(0)<<" "
+//				<<(short)adfa2.at<short>(1)<<" "
+//				<<(short)adfa2.at<short>(2)<<" "
+//				<<(short)adfa2.at<short>(3)<<" "
+//				<<(short)adfa2.at<short>(4)<<" "
+//				<<(short)adfa2.at<short>(5)<<" "
+//				<<(short)adfa2.at<short>(6)<<" "
+//				<<(short)adfa2.at<short>(7)<<" "
+//				<<endl;
+//
+//				cout<<" "<<(float)adfa.at<float>(0)<<" "
+//						<<(float)adfa.at<float>(1)<<" "
+//						<<(float)adfa.at<float>(2)<<" "
+//						<<(float)adfa.at<float>(3)<<" "
+//						<<(float)adfa.at<float>(4)<<" "
+//						<<(float)adfa.at<float>(5)<<" "
+//						<<(float)adfa.at<float>(6)<<" "
+//						<<(float)adfa.at<float>(7)<<" "
+//						<<endl;
+for(fpi=0;fpi<fpsize;fpi+=2) {
+	//Mat bufABSmat;
+	Mat corImg = Mat::zeros(Size(w,h),CV_32FC1);
+		xx = fp[fpi];
+		yy = fp[fpi+1];
+		cout<<"xy: "<<xx<<", "<<yy<<endl;
+	    double diffy = yy-src_center.y;
+	    double diffx = xx-src_center.x;
+	    double dist = sqrt((double)diffy*diffy+diffx*diffx);
+	    double angleb2wpt = atan2(diffy, diffx);
+	    double newxx = dist*cos(angleb2wpt-angle/180*PI)*1.+src_center.x;
+	    double newyy = dist*sin(angleb2wpt-angle/180*PI)*1.+src_center.y;
+	    float* bufABS = frid.getFeatureVector(xx,yy,ar,ag,ab,asr,asg,asb);
+//	    		cout<<" "<<bufABS[0]<<" "
+//	    				<<bufABS[1]<<" "
+//	    				<<bufABS[2]<<" "
+//	    				<<bufABS[3]<<" "
+//	    				<<bufABS[4]<<" "
+//	    				<<bufABS[5]<<" "
+//	    				<<bufABS[6]<<" "
+//	    				<<bufABS[7]<<" "
+//	    				<<bufABS[8]<<" "
+//	    				<<bufABS[9]<<" "<<endl;
 //	    frid.getFeatureVector(259-2,187-2,ar,ag,ab,asr,asg,asb).copyTo(bufABSmat);
 	    //frid.getFeatureVector(249-2,182-2,ar,ag,ab,asr,asg,asb).copyTo(bufABSmat);
+//		cout<<" "<<(float)bufABS3mat.at<float>(0,0)<<" "
+//				<<(float)bufABS3mat.at<float>(0,1)<<" "
+//				<<(float)bufABS3mat.at<float>(0,2)<<" "
+//				<<(float)bufABS3mat.at<float>(0,3)<<" "
+//				<<(float)bufABS3mat.at<float>(0,4)<<" "
+//				<<(float)bufABS3mat.at<float>(0,5)<<" "
+//				<<(float)bufABS3mat.at<float>(0,6)<<" "
+//				<<(float)bufABS3mat.at<float>(0,7)<<" "
+//				<<(float)bufABS3mat.at<float>(0,8)<<" "
+//				<<(float)bufABS3mat.at<float>(0,9)<<" "
+//				<<endl;
+
+		//waitKey(0);
 
 
-	    		Mat cdmat;
-	    		Mat(rotated_img, Rect(2, 2, w4, h4)).copyTo(cdmat);
-
-	    		Mat corImg (Size(w4,h4),CV_32FC1);
 	    		//cout<<"ff: " <<imageForFFT[0].data[w4]<<" d"<<endl;
 
 	    		for (l=0; l<sz; l++){
-	    			if (sobelgray.at<uchar>(l/w4,l%w4) < 30) continue;
-	    			Mat bufABS2mat,result1;
-	    			frid2.getFeatureVector(l%w4,l/w4,br,bg,bb,bsr,bsg,bsb).copyTo(bufABS2mat);
-	    			matchTemplate(bufABSmat, bufABS2mat, result1, CV_TM_CCOEFF_NORMED);
-	    			corImg.at<float>(l) = pow(result1.at<float>(0),10);
+	    			//if (sobelgray.at<uchar>(l/w4,l%w4) < 100) continue;
+	    			//if (sobelgray.at<uchar>(l/w,l%w) < 100) continue;
+	    			if (cornerharrisdst_norm_scaled_cvt.at<uchar>(l/w,l%w) < 100) continue;
+	    			float* bufABS2 = frid2.getFeatureVector(l%w,l/w,br,bg,bb,bsr,bsg,bsb);
+	    			Mat result1;
+	    			//frid2.getFeatureVector(l%w4,l/w4,br,bg,bb,bsr,bsg,bsb).copyTo(bufABS2mat);
+	    			//frid2.getFeatureVector(l%w,l/w,br,bg,bb,bsr,bsg,bsb).copyTo(bufABS2mat);
+	    			//matchTemplate(bufABSmat, bufABS2mat, result1, CV_TM_CCOEFF_NORMED);
+	    			//corImg.at<float>(l) = pow(result1.at<float>(0),10);
 	    			//cout<<(float)bufABSmat.at<float>(0) <<endl;
 	    			//if (creal(buf2r[0])>255 && creal(buf2g[0])>255 && creal(buf2b[0])>255)  {
-	    			if (bsr>255 && bsg>255 && bsb>255)  {
-	    				corImg.at<float>(l) = (result1.at<float>(0) > 0)? pow(result1.at<float>(0),10):0;
-	    			} else {
-	    				corImg.at<float>(l) = 0;
-	    			}
-	    			//cout<<result1.at<float>(0)<<endl;
+	    			//cout<<(float)pow(result1.at<float>(0),6)<<endl;
+//	    			cout<<(float)bufABS2mat.at<float>(0,0)<<" "
+//	    					<<(float)bufABS2mat.at<float>(0,1)<<" "
+//	    					<<(float)bufABS2mat.at<float>(0,2)<<" "
+//	    					<<(float)bufABS2mat.at<float>(0,3)<<" "
+//	    					<<(float)bufABS2mat.at<float>(0,4)<<" "
+//	    					<<(float)bufABS2mat.at<float>(0,5)<<" "
+//	    					<<(float)bufABS2mat.at<float>(0,6)<<" "
+//	    					<<(float)bufABS2mat.at<float>(0,7)<<" "
+//	    					<<(float)bufABS2mat.at<float>(0,8)<<" "
+//	    					<<(float)bufABS2mat.at<float>(0,9)<<" "
+//	    					<<endl;
+	    			//Mat bufABS4mat;bufABSmat.copyTo(bufABS4mat);
+//	    			cout<<" "<<(float)bufABSmat.at<float>(0,0)<<" "
+//	    					<<(float)bufABSmat.at<float>(0,1)<<" "
+//	    					<<(float)bufABSmat.at<float>(0,2)<<" "
+//	    					<<(float)bufABSmat.at<float>(0,3)<<" "
+//	    					<<(float)bufABSmat.at<float>(0,4)<<" "
+//	    					<<(float)bufABSmat.at<float>(0,5)<<" "
+//	    					<<(float)bufABSmat.at<float>(0,6)<<" "
+//	    					<<(float)bufABSmat.at<float>(0,7)<<" "
+//	    					<<(float)bufABSmat.at<float>(0,8)<<" "
+//	    					<<(float)bufABSmat.at<float>(0,9)<<" ";
+
+	    			Mat bufABSmat ((16/2-1)*3+3,1,CV_32FC1,bufABS);
+	    			Mat bufABS2mat ((16/2-1)*3+3,1,CV_32FC1,bufABS2);
+
+
+//	    			if ((float)bufABSmat.at<float>(0,0) == (float)bufABS2mat.at<float>(0,0)) {
+//	    				    			cout<<" "<<(float)bufABSmat.at<float>(0,0)<<" "
+//	    				    					<<(float)bufABSmat.at<float>(0,1)<<" "
+//	    				    					<<(float)bufABSmat.at<float>(0,2)<<" "
+//	    				    					<<(float)bufABSmat.at<float>(0,3)<<" "
+//	    				    					<<(float)bufABSmat.at<float>(0,4)<<" "
+//	    				    					<<(float)bufABSmat.at<float>(0,5)<<" "
+//	    				    					<<(float)bufABSmat.at<float>(0,6)<<" "
+//	    				    					<<(float)bufABSmat.at<float>(0,7)<<" "
+//	    				    					<<(float)bufABSmat.at<float>(0,8)<<" "
+//	    				    					<<(float)bufABSmat.at<float>(0,9)<<" "
+//	    				    					<<(float)bufABSmat.at<float>(0,10)<<" "
+//												<<(float)bufABSmat.at<float>(0,11)<<" "
+//												<<(float)bufABSmat.at<float>(0,12)<<" "
+//												<<(float)bufABSmat.at<float>(0,13)<<" "
+//												<<(float)bufABSmat.at<float>(0,14)<<" "
+//												<<(float)bufABSmat.at<float>(0,15)<<" "
+//												<<(float)bufABSmat.at<float>(0,16)<<" "
+//												<<(float)bufABSmat.at<float>(0,17)<<" "
+//												<<(float)bufABSmat.at<float>(0,18)<<" "
+//												<<(float)bufABSmat.at<float>(0,19)<<" "
+//												<<(float)bufABSmat.at<float>(0,20)<<" "
+//												<<(float)bufABSmat.at<float>(0,21)<<" "
+//												<<(float)bufABSmat.at<float>(0,22)<<" "
+//												<<(float)bufABSmat.at<float>(0,23)<<" "<<endl;
+//	    				    			cout<<" "<<(float)bufABS2mat.at<float>(0,0)<<" "
+//	    				    					<<(float)bufABS2mat.at<float>(0,1)<<" "
+//	    				    					<<(float)bufABS2mat.at<float>(0,2)<<" "
+//	    				    					<<(float)bufABS2mat.at<float>(0,3)<<" "
+//	    				    					<<(float)bufABS2mat.at<float>(0,4)<<" "
+//	    				    					<<(float)bufABS2mat.at<float>(0,5)<<" "
+//	    				    					<<(float)bufABS2mat.at<float>(0,6)<<" "
+//	    				    					<<(float)bufABS2mat.at<float>(0,7)<<" "
+//	    				    					<<(float)bufABS2mat.at<float>(0,8)<<" "
+//	    				    					<<(float)bufABS2mat.at<float>(0,9)<<" "
+//	    				    					<<(float)bufABS2mat.at<float>(0,10)<<" "
+//												<<(float)bufABS2mat.at<float>(0,11)<<" "
+//												<<(float)bufABS2mat.at<float>(0,12)<<" "
+//												<<(float)bufABS2mat.at<float>(0,13)<<" "
+//												<<(float)bufABS2mat.at<float>(0,14)<<" "
+//												<<(float)bufABS2mat.at<float>(0,15)<<" "
+//												<<(float)bufABS2mat.at<float>(0,16)<<" "
+//												<<(float)bufABS2mat.at<float>(0,17)<<" "
+//												<<(float)bufABS2mat.at<float>(0,18)<<" "
+//												<<(float)bufABS2mat.at<float>(0,19)<<" "
+//												<<(float)bufABS2mat.at<float>(0,20)<<" "
+//												<<(float)bufABS2mat.at<float>(0,21)<<" "
+//												<<(float)bufABS2mat.at<float>(0,22)<<" "
+//												<<(float)bufABS2mat.at<float>(0,23)<<" "<<endl;
+//	    			}
+
+	    			matchTemplate(bufABSmat, bufABS2mat, result1, CV_TM_CCOEFF_NORMED);
+	    			if (bsr>255 && bsg>255 && bsb>255 && pow(result1.at<float>(0),3)>0.5)  {
+	    				corImg.at<float>(l) = (result1.at<float>(0) > 0)? pow(result1.at<float>(0),3):0;
+	    			}// else {
+	    			//	corImg.at<float>(l) = 0;
+	    			//}
+//	    			if ((float)bufABSmat.at<float>(0,0) == (float)bufABS2mat.at<float>(0,0)) {
+//	    				cout<<" -- "<<result1.at<float>(0)<<endl;
+//	    			}
 
 
 	    		}
-//	    		namedWindow( "d", CV_WINDOW_AUTOSIZE );
-//	    		imshow( "d", corImg);//thrCrCb[0] );
-//	    		waitKey(0);
 
-//		Mat(rotated_img, Rect(0, 0, w4, h4)).copyTo(imageForFFT[0]);
-//		Mat(rotated_img, Rect(1, 0, w4, h4)).copyTo(imageForFFT[1]);
-//		Mat(rotated_img, Rect(2, 0, w4, h4)).copyTo(imageForFFT[2]);
-//		Mat(rotated_img, Rect(3, 0, w4, h4)).copyTo(imageForFFT[3]);
-//		Mat(rotated_img, Rect(4, 0, w4, h4)).copyTo(imageForFFT[4]);
-//		Mat(rotated_img, Rect(4, 1, w4, h4)).copyTo(imageForFFT[5]);
-//		Mat(rotated_img, Rect(4, 2, w4, h4)).copyTo(imageForFFT[6]);
-//		Mat(rotated_img, Rect(4, 3, w4, h4)).copyTo(imageForFFT[7]);
-//		Mat(rotated_img, Rect(4, 4, w4, h4)).copyTo(imageForFFT[8]);
-//		Mat(rotated_img, Rect(3, 4, w4, h4)).copyTo(imageForFFT[9]);
-//		Mat(rotated_img, Rect(2, 4, w4, h4)).copyTo(imageForFFT[10]);
-//		Mat(rotated_img, Rect(1, 4, w4, h4)).copyTo(imageForFFT[11]);
-//		Mat(rotated_img, Rect(0, 4, w4, h4)).copyTo(imageForFFT[12]);
-//		Mat(rotated_img, Rect(0, 3, w4, h4)).copyTo(imageForFFT[13]);
-//		Mat(rotated_img, Rect(0, 2, w4, h4)).copyTo(imageForFFT[14]);
-//		Mat(rotated_img, Rect(0, 1, w4, h4)).copyTo(imageForFFT[15]);
-//		Mat(rotated_img, Rect(2, 2, w4, h4)).copyTo(imageForFFT[16]);
-//
-//		Mat cdmat;
-//		Mat(rotated_img, Rect(2, 2, w4, h4)).copyTo(cdmat);
-//
-//		Mat corImg (Size(w4,h4),CV_32FC1);
-//		//cout<<"ff: " <<imageForFFT[0].data[w4]<<" d"<<endl;
-//
-//		for (l=0; l<sz; l++){
-//			nicatio::cplx buf2r[16];
-//			nicatio::cplx buf2g[16];
-//			nicatio::cplx buf2b[16];
-//
-//			for(int m=0;m<16;m++) {
-//				Vec3b intensity = imageForFFT[m].at<Vec3b>(l);
-//				buf2r[m]=intensity.val[0];
-//				buf2g[m]=intensity.val[1];
-//				buf2b[m]=intensity.val[2];
-//			}
-//
-//			nicatio::fft(buf2r, 16);
-//			nicatio::fft(buf2g, 16);
-//			nicatio::fft(buf2b, 16);
-//
-//			float bufABS2[24];
-//			int n=0;
-//			for (int m=1; m<8; m++){
-//				bufABS2[n++] = cabsf(buf2r[m]);
-//				bufABS2[n++] = cabsf(buf2g[m]);
-//				bufABS2[n++] = cabsf(buf2b[m]);
-//			}
-//			Vec3b intensity = imageForFFT[16].at<Vec3b>(l);
-//			bufABS2[n++] = intensity.val[0];
-//			bufABS2[n++] = intensity.val[1];
-//			bufABS2[n++] = intensity.val[2];
-//
-//			Mat bufABS2mat (24,1,CV_32FC1,bufABS2);
-//			Mat result1;
-//
-//			matchTemplate(bufABSmat, bufABS2mat, result1, CV_TM_CCOEFF_NORMED);
-//
-//			if (creal(buf2r[0])>255 && creal(buf2g[0])>255 && creal(buf2b[0])>255)  {
-//				corImg.at<float>(l) = (result1.at<float>(0) > 0)? pow(result1.at<float>(0),10):0;
-//			} else {
-//				corImg.at<float>(l) = 0;
-//			}
-//			//cout<<result1.at<float>(0)<<endl;
-//
-//
-//		}
-
-//		nicatio::show("Data: ",buf);
-//		nicatio::fft(buf, 16);
-//		nicatio::show("\nFFT : ",buf);
 
 		double min,max;
 		int maxid[2];
 		minMaxIdx(corImg,&min,&max,0,maxid);
-		cout<< "d"<<maxid[0]<<maxid[1]<<endl;
-		frid2.getFeatureVector(maxid[1],maxid[0],br,bg,bb,bsr,bsg,bsb);
-//		nicatio::cplx buf2r[16];
-//		nicatio::cplx buf2g[16];
-//		nicatio::cplx buf2b[16];
-//		l=maxid[0]*w4+maxid[1];
-//		for(int m=0;m<16;m++) {
-//			Vec3b intensity = imageForFFT[m].at<Vec3b>(l);
-//			buf2r[m]=intensity.val[0];
-//			buf2g[m]=intensity.val[1];
-//			buf2b[m]=intensity.val[2];
-//		}
-//
-//		nicatio::fft(buf2r, 16);
-//		nicatio::fft(buf2g, 16);
-//		nicatio::fft(buf2b, 16);
+		//cout<< "d: "<<maxid[1]<<", "<<maxid[0]<<endl;
 
-//		double br = atan2(cimag(buf2r[1]),creal(buf2r[1]));
-//		double bg = atan2(cimag(buf2g[1]),creal(buf2g[1]));
-//		double bb = atan2(cimag(buf2b[1]),creal(buf2b[1]));
+		frid2.getFeatureVector(maxid[1],maxid[0],br,bg,bb,bsr,bsg,bsb);
+
+
+		double dist_ = sqrt((maxid[1]-newxx)*(maxid[1]-newxx)+(maxid[0]-newyy)*(maxid[0]-newyy));
+
+		//if(fpi>0) {
+//			newxys[(fpi/2)-1].x = (float)maxid[1];
+//			newxys[(fpi/2)-1].y = (float)maxid[0];
+//		}
+		if(fpi<6) {
+			newxys[(fpi/2)].x = (float)maxid[1];
+			newxys[(fpi/2)].y = (float)maxid[0];
+		}
+		//newxys.push_back(maxid[1]);
+		//newxys.push_back(maxid[0]);
+
+		cout<<"dist: "<<(double)dist_<<endl;
+//		namedWindow( "c", CV_WINDOW_AUTOSIZE );
+//		imshow( "c", sobelgray);//thrCrCb[0] );
+//		namedWindow( "d", CV_WINDOW_AUTOSIZE );
+//		imshow( "d", corImg);//thrCrCb[0] );
 //
+//		waitKey(0);
+
+		if (dist_>3)
+			circle( cdmat, Point(maxid[1],maxid[0]), 8, Scalar( 0, 0, 255 ), -1, 8 );
+		else
+			circle( cdmat, Point(maxid[1],maxid[0]), 8, Scalar( 0, 255, 0 ), -1, 8 );
+		//circle( cdmat, Point(newxx,newyy), 1, Scalar( 0, 255, 0 ), -1, 8 );
+
+
+}
+		//int *newxyss = newxys.data();
+		//Mat adfa3(fpsize/2,2,CV_32SC1,newxyss);
+		//Mat adfa3(3,2,CV_32SC1,newxyss);
+		//Mat adfa4;
+		///adfa3.convertTo(adfa4,CV_32FC1);
+	t = ((double)getTickCount() - t)/getTickFrequency();
+	cout<<"elapsed: "<<(double)t<<endl;
+		Mat aff = getAffineTransform(adfa, newxys);
+		cout<<" "<<(double)aff.at<double>(0)<<" "
+						<<(double)aff.at<double>(1)<<" "
+						<<(double)aff.at<double>(2)<<" "
+						<<(double)aff.at<double>(3)<<" "
+						<<(double)aff.at<double>(4)<<" "
+						<<(double)aff.at<double>(5)<<" "
+						<<endl;
+		cout<<" "<<(double)rot_matrix.at<double>(0)<<" "
+						<<(double)rot_matrix.at<double>(1)<<" "
+						<<(double)rot_matrix.at<double>(2)<<" "
+						<<(double)rot_matrix.at<double>(3)<<" "
+						<<(double)rot_matrix.at<double>(4)<<" "
+						<<(double)rot_matrix.at<double>(5)<<" "
+						<<endl;
+		double size1 = sqrt(rot_matrix.at<double>(0)*rot_matrix.at<double>(0)+rot_matrix.at<double>(1)*rot_matrix.at<double>(1));
+		double size11 = sqrt(rot_matrix.at<double>(3)*rot_matrix.at<double>(3)+rot_matrix.at<double>(4)*rot_matrix.at<double>(4));
+		double size2 = sqrt(aff.at<double>(0)*aff.at<double>(0)+aff.at<double>(1)*aff.at<double>(1));
+		double size21 = sqrt(aff.at<double>(4)*aff.at<double>(4)+aff.at<double>(3)*aff.at<double>(3));
+		cout<<" "<<size1<<endl;
+		cout<<" "<<size2<<endl;
+		cout<<" "<<(acos(rot_matrix.at<double>(0)/size1)+acos(rot_matrix.at<double>(4)/size1)+asin(rot_matrix.at<double>(1)/size11)+asin(rot_matrix.at<double>(3)/size11))/2/PI*180<<endl;
+		cout<<" "<<(acos(aff.at<double>(0)/size2)+acos(aff.at<double>(4)/size21)+asin(aff.at<double>(1)/size2)+asin(aff.at<double>(3)/size21))/2/PI*180<<endl;
+
+		ofs<<size2<<"\t"<<(  acos((double)((aff.at<double>(0)/size2)))
+							+asin((double)((aff.at<double>(1)/size2)))
+							+asin((double)((aff.at<double>(3)/size21)))
+							+acos((double)((aff.at<double>(4)/size21))))/2/PI*180<<endl;
+
+//		ofs<<size2<<"\t"<<(  acos((double)((abs(aff.at<double>(0)/size2)>=1)?((abs(aff.at<double>(0)/size2)>=1)?1:-1):(aff.at<double>(0)/size2)))
+//							+asin((double)((abs(aff.at<double>(1)/size2)>=1)?((abs(aff.at<double>(1)/size2)>=1)?1:-1):(aff.at<double>(1)/size2)))
+//							+asin((double)((abs(aff.at<double>(3)/size21)>=1)?((abs(aff.at<double>(3)/size21)>=1)?1:-1):(aff.at<double>(3)/size21)))
+//							+acos((double)((abs(aff.at<double>(4)/size21)>=1)?((abs(aff.at<double>(4)/size21)>=1)?1:-1):(aff.at<double>(4)/size21))))/2/PI*180<<endl;
+
+//		cout<<" "<<(float)aff.at<float>(0)<<" "
+//				<<(float)aff.at<float>(1)<<" "
+//				<<(float)aff.at<float>(2)<<" "
+//				<<(float)aff.at<float>(3)<<" "
+//				<<(float)aff.at<float>(4)<<" "
+//				<<(float)aff.at<float>(5)<<" "
+//				<<endl;
+
+		imwrite("cornerharrisdst_norm_scaled_cvt.bmp",cornerharrisdst_norm_scaled_cvt);
+		imwrite("cdmat.bmp",cdmat);
+
+		namedWindow( "b", CV_WINDOW_AUTOSIZE );
+		//imshow( "b", sobelgray);//thrCrCb[0] );
+		imshow( "b", cornerharrisdst_norm_scaled_cvt);//thrCrCb[0] );
+
+		namedWindow( "c", CV_WINDOW_AUTOSIZE );
+		imshow( "c", cdmat);//thrCrCb[0] );
+		//namedWindow( "d", CV_WINDOW_AUTOSIZE );
+		//imshow( "d", corImg);//thrCrCb[0] );
+
+		waitKey(0);
+
+
+
+
+
+	}
+ofs.close();
+waitKey(0);
+/*
+		cout<<"el: "<<(double)t<<endl;
+
+
 		double cc;
 		frid2.getFeatureVector(maxid[1],maxid[0],br,bg,bb,bsr,bsg,bsb);
 		cc = ((ar-br)/PI*180+(ag-bg)/PI*180+(ab-bb)/PI*180)/3;
@@ -5644,6 +7779,7 @@ int main(int argc, char* argv[] ){
 		imwrite("bori.bmp",cdmat);
 		imwrite("bsobel.bmp",sobel);
 		waitKey(0);
+		*/
 	}
 }
 

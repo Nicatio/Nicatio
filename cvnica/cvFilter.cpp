@@ -90,7 +90,7 @@ void FindBlobs(
             }
 
             cv::Rect rect;
-            cv::floodFill(label_image, cv::Point(x,y), cv::Scalar(label_count), &rect, cv::Scalar(0), cv::Scalar(0), 4);
+            cv::floodFill(label_image, cv::Point(x,y), cv::Scalar(label_count), &rect, cv::Scalar(0), cv::Scalar(0), 8);
 
             std::vector <cv::Point2i> blob;
 

@@ -46,7 +46,8 @@ class FRID
 	FRID(
 			InputArray						src,
 			int								type);
-	Mat getFeatureVector(
+	int getOrder();
+	float* getFeatureVector(
 			int								x,
 			int								y,
 			double&							phr,
@@ -55,6 +56,7 @@ class FRID
 			double&							sumr,
 			double&							sumg,
 			double&							sumb);
+	vector<int> getFeaturePoints();
 };
 
 
