@@ -53,7 +53,15 @@ using namespace std;
 //#define DMQI
 
 
-#define MDMQI_stretch
+//#define MDMQI_stretch
+//#define MDMQI_lhe
+//#define MDMQI_lhe_he
+//#define MDMQI_clahe
+
+//#define closing
+
+//#define MDMQI_LBP
+
 
 //#define SMQI
 
@@ -4770,6 +4778,278 @@ int main(int argc, char* argv[] ){
 				rename( string(dir+"/mdmqi_stretch/"+tokens[0]+"."+dataType).c_str() , string(dir+"/mdmqi_stretch/"+tokens[0]+"."+dataType+".bad").c_str() );
 
 #endif
+
+#ifdef MDMQI_lhe
+//			//cout << files[i] <<"\r"<< endl;
+//			Mat _image1;
+//			_image1 = imread( dir+"\\"+files[i], -1 );
+//			//_image0.convertTo(_image1,CV_8UC1);
+//			if (_image1.type()!= CV_8UC1) cvtColor(_image1, _image1, CV_RGB2GRAY);
+//			Size size = _image1.size();
+//			Mat _deno1(size,CV_8UC1);
+//			Mat _deno2(size,CV_8UC1);
+//			Mat _dmqi(size,CV_8UC1);
+//			Mat _histeq(size,CV_8UC1);
+//
+//			cvNica::Denoise(_image1,_deno1);
+//			cvNica::SelectiveMorphQuotImage(_deno1,_dmqi,0);
+//			//normalize(_dmqi,_histeq, 0, 255, CV_MINMAX);
+//			//nicatio::HistEqualize(_dmqi.data,_histeq.data,_image1.cols,_image1.rows);
+//			nicatio::localHistogramEqualization(_dmqi.data,_histeq.data,_image1.cols,_image1.rows,81);
+//
+//			unsigned found = files[i].rfind("bad");
+//			vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
+//			imwrite(dir+"/mdmqi_lhe81/"+tokens[0]+"."+dataType,_histeq);
+//			if (found!=std::string::npos)
+//				rename( string(dir+"/mdmqi_lhe81/"+tokens[0]+"."+dataType).c_str() , string(dir+"/mdmqi_lhe81/"+tokens[0]+"."+dataType+".bad").c_str() );
+
+			//cout << files[i] <<"\r"<< endl;
+			Mat _image1;
+			_image1 = imread( dir+"\\"+files[i], -1 );
+			//_image0.convertTo(_image1,CV_8UC1);
+			if (_image1.type()!= CV_8UC1) cvtColor(_image1, _image1, CV_RGB2GRAY);
+			Size size = _image1.size();
+			Mat _deno1(size,CV_8UC1);
+			Mat _deno2(size,CV_8UC1);
+			Mat _dmqi(size,CV_8UC1);
+			Mat _histeq(size,CV_8UC1);
+
+			cvNica::Denoise(_image1,_deno1);
+			cvNica::SelectiveMorphQuotImage(_deno1,_dmqi,0);
+			//normalize(_dmqi,_histeq, 0, 255, CV_MINMAX);
+			//nicatio::HistEqualize(_dmqi.data,_histeq.data,_image1.cols,_image1.rows);
+			nicatio::localHistogramEqualization(_image1.data,_histeq.data,_image1.cols,_image1.rows,9);
+
+			unsigned found = files[i].rfind("bad");
+			vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
+			imwrite(dir+"/lhe9/"+tokens[0]+"."+dataType,_histeq);
+			if (found!=std::string::npos)
+				rename( string(dir+"/lhe9/"+tokens[0]+"."+dataType).c_str() , string(dir+"/lhe9/"+tokens[0]+"."+dataType+".bad").c_str() );
+
+#endif
+
+#ifdef MDMQI_lhe_he
+//			//cout << files[i] <<"\r"<< endl;
+//			Mat _image1;
+//			_image1 = imread( dir+"\\"+files[i], -1 );
+//			//_image0.convertTo(_image1,CV_8UC1);
+//			if (_image1.type()!= CV_8UC1) cvtColor(_image1, _image1, CV_RGB2GRAY);
+//			Size size = _image1.size();
+//			Mat _deno1(size,CV_8UC1);
+//			Mat _deno2(size,CV_8UC1);
+//			Mat _dmqi(size,CV_8UC1);
+//			Mat _histeq(size,CV_8UC1);
+//
+//			cvNica::Denoise(_image1,_deno1);
+//			cvNica::SelectiveMorphQuotImage(_deno1,_dmqi,0);
+//			//normalize(_dmqi,_histeq, 0, 255, CV_MINMAX);
+//			//nicatio::HistEqualize(_dmqi.data,_histeq.data,_image1.cols,_image1.rows);
+//			nicatio::localHistogramEqualization(_dmqi.data,_histeq.data,_image1.cols,_image1.rows,81);
+//
+//			unsigned found = files[i].rfind("bad");
+//			vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
+//			imwrite(dir+"/mdmqi_lhe81/"+tokens[0]+"."+dataType,_histeq);
+//			if (found!=std::string::npos)
+//				rename( string(dir+"/mdmqi_lhe81/"+tokens[0]+"."+dataType).c_str() , string(dir+"/mdmqi_lhe81/"+tokens[0]+"."+dataType+".bad").c_str() );
+
+			//cout << files[i] <<"\r"<< endl;
+			Mat _image1;
+			_image1 = imread( dir+"\\"+files[i], -1 );
+			//_image0.convertTo(_image1,CV_8UC1);
+			if (_image1.type()!= CV_8UC1) cvtColor(_image1, _image1, CV_RGB2GRAY);
+			Size size = _image1.size();
+			Mat _deno1(size,CV_8UC1);
+			Mat _deno2(size,CV_8UC1);
+			Mat _dmqi(size,CV_8UC1);
+			Mat _histeq(size,CV_8UC1);
+
+			cvNica::Denoise(_image1,_deno1);
+			cvNica::SelectiveMorphQuotImage(_deno1,_dmqi,0);
+			//normalize(_dmqi,_histeq, 0, 255, CV_MINMAX);
+			//nicatio::HistEqualize(_dmqi.data,_histeq.data,_image1.cols,_image1.rows);
+			nicatio::localHistogramEqualization(_dmqi.data,_deno2.data,_image1.cols,_image1.rows,91);
+
+			nicatio::HistEqualize(_deno2.data,_histeq.data,_image1.cols,_image1.rows);
+
+			unsigned found = files[i].rfind("bad");
+			vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
+			imwrite(dir+"/mdmqi_lhe_he91/"+tokens[0]+"."+dataType,_histeq);
+			if (found!=std::string::npos)
+				rename( string(dir+"/mdmqi_lhe_he91/"+tokens[0]+"."+dataType).c_str() , string(dir+"/mdmqi_lhe_he91/"+tokens[0]+"."+dataType+".bad").c_str() );
+
+#endif
+
+
+#ifdef MDMQI_clahe
+			//cout << files[i] <<"\r"<< endl;
+			Mat _image1;
+			_image1 = imread( dir+"\\"+files[i], -1 );
+			//_image0.convertTo(_image1,CV_8UC1);
+			if (_image1.type()!= CV_8UC1) cvtColor(_image1, _image1, CV_RGB2GRAY);
+			Size size = _image1.size();
+			Mat _deno1(size,CV_8UC1);
+			Mat _deno2(size,CV_8UC1);
+			Mat _dmqi(size,CV_8UC1);
+			Mat _histeq(size,CV_8UC1);
+
+			cvNica::Denoise(_image1,_deno1);
+			cvNica::SelectiveMorphQuotImage(_deno1,_dmqi,0);
+			//normalize(_dmqi,_histeq, 0, 255, CV_MINMAX);
+			//nicatio::HistEqualize(_dmqi.data,_histeq.data,_image1.cols,_image1.rows);
+			//nicatio::localHistogramEqualization(_dmqi.data,_histeq.data,_image1.cols,_image1.rows,81);
+			nicatio::CLAHE (_dmqi.data, _image1.cols, _image1.rows, 0, 255, 8, 8, 256, 16);
+
+//			Ptr<CLAHE> clahe;// = createCLAHE();
+//			clahe->setClipLimit(4);
+//
+//			Mat dst;
+//			clahe->apply(m,dst);
+//			imshow("lena_CLAHE",dst);
+
+			unsigned found = files[i].rfind("bad");
+			vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
+			imwrite(dir+"/mdmqi_clahe2/"+tokens[0]+"."+dataType,_dmqi);
+			if (found!=std::string::npos)
+				rename( string(dir+"/mdmqi_clahe2/"+tokens[0]+"."+dataType).c_str() , string(dir+"/mdmqi_clahe2/"+tokens[0]+"."+dataType+".bad").c_str() );
+
+//			unsigned found = files[i].rfind("bad");
+//			vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
+//			imwrite(dir+"/mdmqi_clahe/"+tokens[0]+"."+dataType,_dmqi);
+//			if (found!=std::string::npos)
+//				rename( string(dir+"/mdmqi_clahe/"+tokens[0]+"."+dataType).c_str() , string(dir+"/mdmqi_clahe/"+tokens[0]+"."+dataType+".bad").c_str() );
+
+			//unsigned found = files[i].rfind("bad");
+//			vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
+//			imwrite(dir+"/clahe/"+tokens[0]+"."+dataType,_image1);
+//			if (found!=std::string::npos)
+//				rename( string(dir+"/clahe/"+tokens[0]+"."+dataType).c_str() , string(dir+"/clahe/"+tokens[0]+"."+dataType+".bad").c_str() );
+
+#endif
+
+
+
+
+
+#ifdef closing
+			//cout << files[i] <<"\r"<< endl;
+			Mat _image1;
+			_image1 = imread( dir+"\\"+files[i], -1 );
+			//_image0.convertTo(_image1,CV_8UC1);
+			if (_image1.type()!= CV_8UC1) cvtColor(_image1, _image1, CV_RGB2GRAY);
+			Size size = _image1.size();
+			Mat _deno1(size,CV_8UC1);
+			Mat _deno2(size,CV_8UC1);
+			Mat _dmqi(size,CV_8UC1);
+			Mat _histeq(size,CV_8UC1);
+
+			int dilation_type = MORPH_RECT;
+			Mat elementL = getStructuringElement( dilation_type, Size( 9,9 ), Point( 4,4 ) );
+			//Mat elementM = getStructuringElement( dilation_type, Size( 7,7 ), Point( 3,3 ) );
+			Mat elementS = getStructuringElement( dilation_type, Size( 5,5), Point( 2,2 ) );
+			//Mat elementSS = getStructuringElement( dilation_type, Size( 3,3 ), Point( 1,1 ) );
+
+			dilate( _image1, _deno1, elementL);
+			//dilate( src, m, elementM);
+			//dilate( src, ss, elementSS);
+			erode( _deno1, _dmqi, elementL);
+
+//			Ptr<CLAHE> clahe;// = createCLAHE();
+//			clahe->setClipLimit(4);
+//
+//			Mat dst;
+//			clahe->apply(m,dst);
+//			imshow("lena_CLAHE",dst);
+
+			unsigned found = files[i].rfind("bad");
+			vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
+			imwrite(dir+"/closing/"+tokens[0]+"."+dataType,_dmqi);
+			if (found!=std::string::npos)
+				rename( string(dir+"/closing/"+tokens[0]+"."+dataType).c_str() , string(dir+"/closing/"+tokens[0]+"."+dataType+".bad").c_str() );
+
+			//unsigned found = files[i].rfind("bad");
+//			vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
+//			imwrite(dir+"/clahe/"+tokens[0]+"."+dataType,_image1);
+//			if (found!=std::string::npos)
+//				rename( string(dir+"/clahe/"+tokens[0]+"."+dataType).c_str() , string(dir+"/clahe/"+tokens[0]+"."+dataType+".bad").c_str() );
+
+#endif
+
+#ifdef MDMQI_LBP
+
+			//cout << files[i] <<"\r"<< endl;
+			Mat _image1;
+			_image1 = imread( dir+"\\"+files[i], -1 );
+			//_image0.convertTo(_image1,CV_8UC1);
+			if (_image1.type()!= CV_8UC1) cvtColor(_image1, _image1, CV_RGB2GRAY);
+			Size size = _image1.size();
+			Mat _deno1(size,CV_8UC1);
+			Mat _deno2(size,CV_8UC1);
+			Mat _dmqi(size,CV_8UC1);
+			Mat _histeq(size,CV_8UC1);
+
+			Mat lbp(size,CV_8UC1);
+
+			cvNica::Denoise(_image1,_deno1);
+			cvNica::SelectiveMorphQuotImage(_deno1,_dmqi,0);
+			Mat Image=_image1;
+			int center = 0;
+						  int center_lbp = 0;
+
+						  for (int row = 1; row < Image.rows; row++)
+						  {
+						    for (int col = 1; col < Image.cols; col++)
+						    {
+						      center = Image.at<uchar>(row, col);
+						      center_lbp = 0;
+
+						      if ( center <= Image.at<uchar>(row-1, col-1) )
+						    center_lbp += 1;
+
+						      if ( center <= Image.at<uchar>(row-1, col)   )
+						        center_lbp += 2;
+
+						      if ( center <= Image.at<uchar>(row-1, col+1) )
+						        center_lbp += 4;
+
+						      if ( center <= Image.at<uchar>(row, col-1)   )
+						        center_lbp += 8;
+
+						      if ( center <= Image.at<uchar>(row, col+1)   )
+						        center_lbp += 16;
+
+						      if ( center <= Image.at<uchar>(row+1, col-1) )
+						        center_lbp += 32;
+
+						      if ( center <= Image.at<uchar>(row+1, col)   )
+						        center_lbp += 64;
+
+						      if ( center <= Image.at<uchar>(row+1, col+1) )
+						        center_lbp += 128;
+
+						     // cout << "center lbp value: " << center_lbp << endl;
+						      lbp.at<uchar>(row, col) = center_lbp;
+						    }
+						  }
+
+						    //imshow("lbp_image", lbp);
+
+//			unsigned found = files[i].rfind("bad");
+//			vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
+//			imwrite(dir+"/mdmqi_lbp/"+tokens[0]+"."+dataType,lbp);
+//			if (found!=std::string::npos)
+//				rename( string(dir+"/mdmqi_lbp/"+tokens[0]+"."+dataType).c_str() , string(dir+"/mdmqi_lbp/"+tokens[0]+"."+dataType+".bad").c_str() );
+
+			unsigned found = files[i].rfind("bad");
+			vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
+			imwrite(dir+"/lbp/"+tokens[0]+"."+dataType,lbp);
+			if (found!=std::string::npos)
+				rename( string(dir+"/lbp/"+tokens[0]+"."+dataType).c_str() , string(dir+"/lbp/"+tokens[0]+"."+dataType+".bad").c_str() );
+
+
+
+#endif
+
+
 
 #ifdef DMQIADVANCED
 			cout << files[i] <<"\r"<< endl;

@@ -10,6 +10,14 @@
 #include "core.h"
 #include "math.h"
 
+
+
+typedef unsigned char kz_pixel_t;	 /* for 8 bit-per-pixel images */
+#define uiNR_OF_GREY (256)
+#define uiMAX_REG_X 16	  /* max. # contextual regions in x-direction */
+#define uiMAX_REG_Y 16	  /* max. # contextual regions in y-direction */
+
+
 namespace nicatio {
 
 void MorphColor (
@@ -130,6 +138,28 @@ void HistEqualize2(
 		unsigned char					*outputImg,
 		const int&						width,
 		const int&						height);
+
+void localHistogramEqualization(
+		unsigned char				*image,
+		unsigned char					*out,
+		int 							width,
+		int 							height,
+		int 							wsize) ;
+
+/******** Prototype of CLAHE function. Put this in a separate include file. *****/
+int CLAHE(kz_pixel_t* pImage, unsigned int uiXRes, unsigned int uiYRes, kz_pixel_t Min,
+	  kz_pixel_t Max, unsigned int uiNrX, unsigned int uiNrY,
+	  unsigned int uiNrBins, float fCliplimit);
+
+/*********************** Local prototypes ************************/
+static void ClipHistogram (unsigned long*, unsigned int, unsigned long);
+static void MakeHistogram (kz_pixel_t*, unsigned int, unsigned int, unsigned int,
+		unsigned long*, unsigned int, kz_pixel_t*);
+static void MapHistogram (unsigned long*, kz_pixel_t, kz_pixel_t,
+	       unsigned int, unsigned long);
+static void MakeLut (kz_pixel_t*, kz_pixel_t, kz_pixel_t, unsigned int);
+static void Interpolate (kz_pixel_t*, int, unsigned long*, unsigned long*,
+	unsigned long*, unsigned long*, unsigned int, unsigned int, kz_pixel_t*);
 
 }
 

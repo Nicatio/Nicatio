@@ -278,6 +278,8 @@ void FaceRecognition::getScoreTestImageBased(
 		}
 
 		RecognitionResult.at<ushort>(nFileIndex,0) = maxSubjectIndex;
+		cout<<"now: "<<maxSubjectIndex<<endl;
+		cout<<"score: "<<max<<endl;
 	} else if (criterion == METHOD_L2NORM){
 		max=1e100;
 		for (int j = 0; j < nTotalReferenceImages; j++,ptr_rpx++,ptr_rpy++,ptr_rs++){
