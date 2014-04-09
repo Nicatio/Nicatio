@@ -19,7 +19,7 @@ using namespace std;
 //#define PGM
 
 #define DATA_TYPE_SELECT
-#define DATA_TYPE 2
+#define DATA_TYPE 3
 // 0: bmp
 // 1: png
 // 2: pgm
@@ -38,7 +38,7 @@ using namespace std;
 //#define FA
 
 
-#define FR_for_integrated
+//#define FR_for_integrated
 //#define FR_for_separated
 //#define FR_REGION
 //#define Fileout
@@ -50,7 +50,9 @@ using namespace std;
 //#define DMQIDOG
 //#define DOGDMQI
 //#define DMQICONTRASTSHIFT
+#define crop
 //#define DMQI
+//#define DMQIHE
 
 
 //#define MDMQI_stretch
@@ -3680,6 +3682,7 @@ int main(int argc, char* argv[] ){
 	if (DATA_TYPE == 0) dataType = "bmp";
 	else if (DATA_TYPE == 1) dataType = "png";
 	else if (DATA_TYPE == 2) dataType = "pgm";
+	else if (DATA_TYPE == 3) dataType = "jpeg";
 	else dataType = "bmp";
 #endif
 
@@ -3823,7 +3826,7 @@ int main(int argc, char* argv[] ){
 		string refLocation = string(argv[2]);
 
 		vector<string> files = vector<string>();
-
+		cout<<dataType<<endl;
 		if (nicatio::getdirType(dir,dataType,files,0)) {
 			cout<< "Error: Invalid file location \n" <<endl;
 			return -1;
@@ -4619,6 +4622,42 @@ int main(int argc, char* argv[] ){
 //			}
 #endif
 
+#ifdef crop
+			//cout << files[i] <<"\r"<< endl;
+			Mat _image1;
+			_image1 = imread( dir+"\\"+files[i], -1 );
+			//if (_image1.type()!= CV_8UC1) cvtColor(_image1, _image1, CV_RGB2GRAY);
+			Mat ccc = Mat(_image1,Rect(0,0,_image1.cols,_image1.rows-12));
+			vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
+			imwrite(dir+tokens[0]+".png",ccc);
+
+			//imwrite("dmqi.bmp",_dmqi);
+			//nicatio::DynamicMorphQuotImage( _deno1.data,_dmqi.data,_image1.cols,_image1.rows, 0);
+			//nicatio::HistEqualize(_deno2.data,_histeq.data,_image1.cols,_image1.rows);
+			//nicatio::HistEqualize2(_dmqi.data,_histeq2.data,_image1.cols,_image1.rows);
+			//imwrite("histeq.bmp",_histeq);
+			//imwrite("histeq2.bmp",_histeq2);
+			//_deno2=_dmqi;
+			//cvNica::IntensityShifting(_histeq, _deno2, 128);
+//			unsigned found = files[i].rfind("bad");
+//			if (found!=std::string::npos) {
+//				vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
+//				imwrite(dir+"\\dmqi\\"+tokens[0]+".pgm",_deno2);
+//				rename( string(dir+"\\dmqi\\"+tokens[0]+".pgm").c_str() , string(dir+"\\dmqi\\"+tokens[0]+".pgm.bad").c_str() );
+//
+//			} else {
+//
+//				imwrite(dir+"\\dmqi\\"+files[i],_deno2);
+//
+//			}
+
+
+				//imwrite(dir+"\\dmqi\\"+files[i],_deno2);
+
+
+#endif
+
+
 #ifdef DMQI
 			//cout << files[i] <<"\r"<< endl;
 			Mat _image1;
@@ -4635,17 +4674,72 @@ int main(int argc, char* argv[] ){
 			//imwrite("ori.bmp",_image1);
 			//imwrite("deno.bmp",_deno1);
 			cvNica::DynamicMorphQuotImage(_deno1,_dmqi,0);
-			cvNica::RemoveGrainyNoise(_dmqi,_deno1,50);
-			cvNica::RemoveGrainyNoise(_deno1,_deno2,50);
+			//cvNica::RemoveGrainyNoise(_dmqi,_deno1,50);
+			//cvNica::RemoveGrainyNoise(_deno1,_deno2,50);
 
-			//cvNica::RemoveGrainyNoise(_dmqi,_histeq,30);
+			cvNica::RemoveGrainyNoise(_dmqi,_histeq,30);
 			//nicatio::HistEqualize(_dmqi.data,_deno2.data,_image1.cols,_image1.rows);
 
 			unsigned found = files[i].rfind("bad");
 						vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
-						imwrite(dir+"/dmqi/"+tokens[0]+"."+dataType,_deno2);
+						imwrite(dir+"/dmqi/"+tokens[0]+"."+dataType,_histeq);
 						if (found!=std::string::npos)
 							rename( string(dir+"/dmqi/"+tokens[0]+"."+dataType).c_str() , string(dir+"/dmqi/"+tokens[0]+"."+dataType+".bad").c_str() );
+
+
+			//imwrite("dmqi.bmp",_dmqi);
+			//nicatio::DynamicMorphQuotImage( _deno1.data,_dmqi.data,_image1.cols,_image1.rows, 0);
+			//nicatio::HistEqualize(_deno2.data,_histeq.data,_image1.cols,_image1.rows);
+			//nicatio::HistEqualize2(_dmqi.data,_histeq2.data,_image1.cols,_image1.rows);
+			//imwrite("histeq.bmp",_histeq);
+			//imwrite("histeq2.bmp",_histeq2);
+			//_deno2=_dmqi;
+			//cvNica::IntensityShifting(_histeq, _deno2, 128);
+//			unsigned found = files[i].rfind("bad");
+//			if (found!=std::string::npos) {
+//				vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
+//				imwrite(dir+"\\dmqi\\"+tokens[0]+".pgm",_deno2);
+//				rename( string(dir+"\\dmqi\\"+tokens[0]+".pgm").c_str() , string(dir+"\\dmqi\\"+tokens[0]+".pgm.bad").c_str() );
+//
+//			} else {
+//
+//				imwrite(dir+"\\dmqi\\"+files[i],_deno2);
+//
+//			}
+
+
+				//imwrite(dir+"\\dmqi\\"+files[i],_deno2);
+
+
+#endif
+
+#ifdef DMQIHE
+			//cout << files[i] <<"\r"<< endl;
+			Mat _image1;
+			_image1 = imread( dir+"\\"+files[i], -1 );
+			if (_image1.type()!= CV_8UC1) cvtColor(_image1, _image1, CV_RGB2GRAY);
+			Size size = _image1.size();
+			Mat _deno1(size,CV_8UC1);
+			Mat _deno2(size,CV_8UC1);
+			Mat _dmqi(size,CV_8UC1);
+			Mat _histeq(size,CV_8UC1);
+			//Mat _histeq2(size,CV_8UC1);
+			//nicatio::Denoise( _image1.data,_deno1.data,_image1.cols,_image1.rows);
+			cvNica::Denoise(_image1,_deno1);
+			//imwrite("ori.bmp",_image1);
+			//imwrite("deno.bmp",_deno1);
+			cvNica::DynamicMorphQuotImage(_deno1,_dmqi,0);
+			//cvNica::RemoveGrainyNoise(_dmqi,_deno1,50);
+			//cvNica::RemoveGrainyNoise(_deno1,_deno2,50);
+
+			cvNica::RemoveGrainyNoise(_dmqi,_deno1,30);
+			nicatio::HistEqualize(_deno1.data,_histeq.data,_image1.cols,_image1.rows);
+
+			unsigned found = files[i].rfind("bad");
+						vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
+						imwrite(dir+"/dmqihewrgn/"+tokens[0]+"."+dataType,_histeq);
+						if (found!=std::string::npos)
+							rename( string(dir+"/dmqihewrgn/"+tokens[0]+"."+dataType).c_str() , string(dir+"/dmqihewrgn/"+tokens[0]+"."+dataType+".bad").c_str() );
 
 
 			//imwrite("dmqi.bmp",_dmqi);
