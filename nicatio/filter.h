@@ -152,13 +152,13 @@ int CLAHE(kz_pixel_t* pImage, unsigned int uiXRes, unsigned int uiYRes, kz_pixel
 	  unsigned int uiNrBins, float fCliplimit);
 
 /*********************** Local prototypes ************************/
-static void ClipHistogram (unsigned long*, unsigned int, unsigned long);
-static void MakeHistogram (kz_pixel_t*, unsigned int, unsigned int, unsigned int,
+void ClipHistogram (unsigned long*, unsigned int, unsigned long);
+void MakeHistogram (kz_pixel_t*, unsigned int, unsigned int, unsigned int,
 		unsigned long*, unsigned int, kz_pixel_t*);
-static void MapHistogram (unsigned long*, kz_pixel_t, kz_pixel_t,
+void MapHistogram (unsigned long*, kz_pixel_t, kz_pixel_t,
 	       unsigned int, unsigned long);
-static void MakeLut (kz_pixel_t*, kz_pixel_t, kz_pixel_t, unsigned int);
-static void Interpolate (kz_pixel_t*, int, unsigned long*, unsigned long*,
+void MakeLut (kz_pixel_t*, kz_pixel_t, kz_pixel_t, unsigned int);
+void Interpolate (kz_pixel_t*, int, unsigned long*, unsigned long*,
 	unsigned long*, unsigned long*, unsigned int, unsigned int, kz_pixel_t*);
 
 }

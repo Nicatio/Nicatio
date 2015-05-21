@@ -114,7 +114,8 @@ public:
 	int getCorrects();
 	int getBadImages();
 	int getFiles();
-
+	void PrintScore(
+			char* 							s);
 
 	Mat norm_0_255(
 			const Mat& 							src);

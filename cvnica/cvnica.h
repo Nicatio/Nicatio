@@ -19,5 +19,6 @@
 #include "CornerDescriptor.h"
 #include "LineTracker.h"
 #include "uhd.h"
-#include "FRID.h"
+//#include "FRID.h"
+#include "SWT.h"
 #endif /* CVNICA_H_ */

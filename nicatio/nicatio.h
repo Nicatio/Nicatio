@@ -16,6 +16,6 @@
 #include "hausdorff.h"
 #include "io.h"
 #include "DifferenceOfGaussian.h"
-#include "fft.h"
+//#include "fft.h"
 
 #endif /* NICATIO_H_ */

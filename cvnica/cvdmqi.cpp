@@ -143,6 +143,9 @@ void SelectiveClosing(
 	erode( s, _s, elementS);
 	//erode( ss, _ss, elementSS);
 
+
+	//GaussianBlur(src, _s, Size(9,9), 1.0, 1.0, BORDER_DEFAULT);
+
 	//unsigned char *ptrL = _l.data, *ptrM = _m.data, *ptrS = _s.data, *ptrSS = _ss.data;
 	unsigned char *ptrL = _l.data, *ptrS = _s.data;
 	unsigned char *ptrDst = dst.data;
@@ -181,11 +184,133 @@ void SelectiveClosing(
 		else *(ptrDst) = 0xff;*/
 	}
 
-	imwrite("k1.bmp",src);
-	imwrite("k5.bmp",_s);
-	imwrite("k9.bmp",_l);
-	imwrite("kk.bmp",dst);
+//	imwrite("k1.bmp",src);
+//	imwrite("k5.bmp",_s);
+//	imwrite("k9.bmp",_l);
+//	imwrite("kk.bmp",dst);
 }
+
+
+void AdaptiveClosing(
+		InputArray 						_src,
+		OutputArray						_dst,
+		double							percent)
+{
+	Mat src = _src.getMat();
+	_dst.create(src.size(),src.type());
+	Mat dst = _dst.getMat();
+
+	int sz = _src.total();
+
+	Mat l = Mat(src.size(),src.type());
+	//Mat m = Mat(src.size(),src.type());
+	Mat s = Mat(src.size(),src.type());
+	//Mat ss = Mat(src.size(),src.type());
+
+	Mat _l = Mat(src.size(),src.type());
+	//Mat _m = Mat(src.size(),src.type());
+	Mat _s = Mat(src.size(),src.type());
+	//Mat _ss = Mat(src.size(),src.type());
+
+	int dilation_type = MORPH_RECT;
+	Mat elementL = getStructuringElement( dilation_type, Size( 9,9 ), Point( 4,4 ) );
+	//Mat elementM = getStructuringElement( dilation_type, Size( 7,7 ), Point( 3,3 ) );
+	Mat elementS = getStructuringElement( dilation_type, Size( 5,5), Point( 2,2 ) );
+	//Mat elementSS = getStructuringElement( dilation_type, Size( 3,3 ), Point( 1,1 ) );
+
+	dilate( src, l, elementL);
+	//dilate( src, m, elementM);
+	dilate( src, s, elementS);
+	//dilate( src, ss, elementSS);
+	erode( l, _l, elementL);
+	//erode( m, _m, elementM);
+	erode( s, _s, elementS);
+	//erode( ss, _ss, elementSS);
+
+	Mat __div = Mat(src.size(),CV_32FC1);
+
+	//unsigned char *ptrL = _l.data, *ptrM = _m.data, *ptrS = _s.data, *ptrSS = _ss.data;
+	unsigned char *ptrL = _l.data, *ptrS = _s.data;
+	unsigned char *ptrDst = dst.data;
+	unsigned char *ptrSrc = src.data;
+
+
+	for (int i=0; i<src.rows; i++){
+		for (int j=0; j<src.cols; j++,ptrL++,ptrS++){
+			double __l = (double)*(ptrL);
+			double __s = (double)*(ptrS);
+			float div;
+			if (__s==0)
+				div = 1;
+			else
+				div = __l/__s;
+			__div.at<float>(i,j) = div;
+			//std::cout<<div;
+		}
+	}
+
+	double minVal;
+	double maxVal;
+
+	minMaxIdx(__div,&minVal,&maxVal);
+
+	ptrL = _l.data;
+	ptrS = _s.data;
+	for (int i=0; i<src.rows; i++){
+		for (int j=0; j<src.cols; j++,ptrL++,ptrS++){
+			double __l = (double)*(ptrL);
+			double __s = (double)*(ptrS);
+			if (__s==0 && __l>0)
+				__div.at<float>(i,j) = maxVal;
+		}
+	}
+
+	Mat __div2;
+	__div = __div.reshape(0,1);
+	sort(__div,__div2,CV_SORT_DESCENDING);
+	int splitInd = __div2.cols*percent;
+	double newalpha = __div2.at<float>(0,splitInd);
+
+	//std::cout<<minVal<<" "<<maxVal<<" "<<__div2.rows<<" "<<__div2.cols<<" "<<splitInd<<" "<<newalpha<<std::endl;
+	//for (int i=0; i<sz; i++,ptrL++,ptrM++,ptrS++,ptrSS++,ptrDst++,ptrSrc++){
+	ptrL = _l.data;
+	ptrS = _s.data;
+	for (int i=0; i<sz; i++,ptrL++,ptrS++,ptrDst++,ptrSrc++){
+		double __l = (double)*(ptrL);
+		//double __m = (double)*(ptrM);
+		double __s = (double)*(ptrS);
+		//double __ss = (double)*(ptrSS);
+		//double _sb = __s*1.4;//beta;
+		double _sa = __s*newalpha;//alpha;
+		//double _sc = __s*1.4;
+//		if(__l>_sa) *(ptrDst) = __l;
+//		else if((__l>_sb)&&(__l<=_sa)) *(ptrDst) = __m;
+//		else if((__l>_sc)&&(__l<=_sb)) *(ptrDst) = __s;
+//		else *(ptrDst) = __ss;
+
+
+//		if(__l>_sa) *(ptrDst) = __l;
+//		else if((__l>_sb)&&(__l<=_sa)) *(ptrDst) = __m;
+//		else if((__l>_sc)&&(__l<=_sb)) *(ptrDst) = __s;
+//		else *(ptrDst) = *(ptrSrc);
+//		if(__l>_sa) *(ptrDst) = 0x00;
+//		else if((__l>_sb)&&(__l<=_sa)) *(ptrDst) = 0x50;
+//		else if((__l>_sc)&&(__l<=_sb)) *(ptrDst) = 0xa0;
+//		else *(ptrDst) = 0xf0;
+		if(__l>_sa) *(ptrDst) = 0xff;//__l;
+		//else if((__l>_sb)&&(__l<=_sa)) *(ptrDst) = __m;
+		else *(ptrDst) = 0x00;//__s;
+/*		if(__l>_sa) *(ptrDst) = 0x00;
+		else if((__l>_sb)&&(__l<=_sa)) *(ptrDst) = 0x80;
+		else *(ptrDst) = 0xff;*/
+	}
+
+//	imwrite("k1.bmp",src);
+//	imwrite("k5.bmp",_s);
+//	imwrite("k9.bmp",_l);
+//	imwrite("kk.bmp",dst);
+}
+
 
 void NormDynamicMorphQuotImage(
 		InputArray 						_src,
@@ -274,6 +399,20 @@ void SelectiveMorphQuotImage(
 	Mat dc = Mat(src.size(),src.type());
 	SelectiveClosing (src,dc);
 	Reflectance(src,dc,_dst);
+
+}
+
+void AdaptiveMorphQuotImage(
+		InputArray 						_src,
+		OutputArray						_dst,
+		double							percent,
+		const int&						equalize)
+{
+	Mat src = _src.getMat();
+	Mat dc = Mat(src.size(),src.type());
+	AdaptiveClosing (src,_dst,percent);
+	//AdaptiveClosing (src,dc,percent);
+	//Reflectance(src,dc,_dst);
 
 }
 
@@ -376,9 +515,9 @@ void DynamicClosing(
 	unsigned char *ptrL = _l.data, *ptrM = _m.data, *ptrS = _s.data;
 	unsigned char *ptrDst = dst.data;
 
-	imwrite("l.bmp",_l);
-	imwrite("m.bmp",_m);
-	imwrite("s.bmp",_s);
+//	imwrite("l.bmp",_l);
+//	imwrite("m.bmp",_m);
+//	imwrite("s.bmp",_s);
 
 	int sz = _src.total();
 
@@ -498,7 +637,7 @@ void SelectiveClosingParam(
 		double __s = (double)*(ptrS);
 		//double __ss = (double)*(ptrSS);
 		//double _sb = __s*1.4;//beta;
-		double _sa = __s*1.4;//alpha;
+		double _sa = __s*alpha;
 		//double _sc = __s*1.4;
 //		if(__l>_sa) *(ptrDst) = __l;
 //		else if((__l>_sb)&&(__l<=_sa)) *(ptrDst) = __m;
@@ -531,11 +670,12 @@ void SelectiveMorphQuotImageParam(
 		OutputArray						_dst,
 		const int&						large,
 		const int&						small,
+		const double&					alpha,
 		const int&						equalize)
 {
 	Mat src = _src.getMat();
 	Mat dc = Mat(src.size(),src.type());
-	SelectiveClosingParam(src,dc,large,small);
+	SelectiveClosingParam(src,dc,large,small,alpha);
 	Reflectance(src,dc,_dst);
 	//dc.convertTo(_dst,CV_8UC1);
 

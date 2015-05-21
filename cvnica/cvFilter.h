@@ -35,6 +35,8 @@ void FindBlobs(
 		const Mat &binary,
 		vector < vector<Point2i> > 		&blobs);
 
+
+void ELBP(const Mat& src, Mat& dst, int radius, int neighbors, int th);
 }
 
 

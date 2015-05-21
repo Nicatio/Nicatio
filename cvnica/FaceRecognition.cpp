@@ -17,6 +17,9 @@ FaceRecognition::FaceRecognition(
 		int								testImageorder,
 		vector<Mat>						referenceImage)
 {
+	bDatabaseType = 0;
+
+
 	setUseOptimized(true);
 	setNumThreads(8);
 	nRefImageOrder = refImageorder;
@@ -28,7 +31,7 @@ FaceRecognition::FaceRecognition(
 	if (nSubject%refImagesPerSubject==0) {
 		refImage = referenceImage;
 		nRefImagesPerSubject = refImagesPerSubject;
-		nSearchRadius = 5;
+		nSearchRadius = 7;
 	} else {
 		std::cout<<"Error: invalid imagesPerSubject or number of subjects."<<std::endl;
 	}
@@ -51,7 +54,7 @@ FaceRecognition::FaceRecognition(
 	nRefImagesPerSubject = 0;
 	nTestImageOrder = 0;
 	nRefImageOrder = 0;
-	nSearchRadius = 5;
+	nSearchRadius = 7;
 	nCorrect = 0;
 	nFiles = 0;
 	nBadImages = 0;
@@ -164,8 +167,17 @@ void FaceRecognition::getScoreTestImageBased(
 		const int						searchRadius,
 		const int						criterion)
 {
-
 	int nTotalReferenceImages = inputA.size();
+//	vector<Mat> inputA(nTotalReferenceImages);
+//		for (int j = 0; j < nTotalReferenceImages; j++){
+//			inputA[j]=inputA___[j](Rect (50,50,68,92));
+//		}
+//
+//
+//	Mat inputB=inputB___(Rect (50,50,68,92));
+
+
+//	int nTotalReferenceImages = inputA.size();
 	int upper, lower;
 	upper = searchRadius>>1;
 	lower = (searchRadius%2)? (-upper):(-upper+1);
@@ -202,7 +214,7 @@ void FaceRecognition::getScoreTestImageBased(
 
 			Mat inputBCrop=inputB32(Rect (*(ptr__a),*(ptr__b),*(ptr_c_),*(ptr_d_)));
 			Mat inputBBCrop=inputBB32(Rect (*(ptr__a),*(ptr__b),*(ptr_c_),*(ptr_d_)));
-			Mat multResult(*(ptr_c_),*(ptr_d_),CV_32F);
+			//Mat multResult(*(ptr_c_),*(ptr_d_),CV_32F);
 
 			*(ptr_inputBB_) = sum(inputBBCrop)[0];
 			*(ptr_inputB_) = sum(inputBCrop)[0];
@@ -241,24 +253,28 @@ void FaceRecognition::getScoreTestImageBased(
 
 					int a_=*(ptr_a_),b_=*(ptr_b_),c_=*(ptr_c_),d_=*(ptr_d_);
 					int _a=*(ptr__a),_b=*(ptr__b);
+					int s = c_*d_;
 
 					Mat inputACrop=inputA32(Rect (a_,b_,c_,d_));
 					Mat inputBCrop=inputB32(Rect (_a,_b,c_,d_));
 					Mat inputAACrop=inputAA32(Rect (a_,b_,c_,d_));
 					Mat multResult(c_,d_,CV_32F);
-					multiply (inputACrop,inputBCrop,multResult);
 
-					Ms = sum(multResult)[0];
 					Asq = sum(inputAACrop)[0];
 					Bsq = *(ptr_inputBB_);
 					As = sum(inputACrop)[0];
 					Bs = *(ptr_inputB_);
 
-					int s = c_*d_;
+					multiply (inputACrop-As/s,inputBCrop-Bs/s,multResult);
+					threshold(multResult,multResult, 0, 99999, THRESH_TOZERO);
+					Ms = sum(multResult)[0];
+
+
 
 					float refSigma = sqrt((double)s*Asq-(double)As*As);
 					float tesSigma = sqrt((double)s*Bsq-(double)Bs*Bs);
-					float corrCoef = ((double)s*Ms - (double)As*Bs)/(refSigma*tesSigma);
+//					float corrCoef = ((double)s*Ms - (double)As*Bs)/(refSigma*tesSigma);
+					float corrCoef = ((double)s*Ms)/(refSigma*tesSigma);
 					if (refSigma*tesSigma == 0) continue;
 					if (maxCorrCoef < corrCoef) {
 						maxCorrCoef = corrCoef;
@@ -278,6 +294,7 @@ void FaceRecognition::getScoreTestImageBased(
 		}
 
 		RecognitionResult.at<ushort>(nFileIndex,0) = maxSubjectIndex;
+		cout<<(int)RecognitionPositionX.at<char>(nFileIndex,maxSubjectIndex)<<","<<(int)RecognitionPositionY.at<char>(nFileIndex,maxSubjectIndex)<<endl;
 		cout<<"now: "<<maxSubjectIndex<<endl;
 		cout<<"score: "<<max<<endl;
 	} else if (criterion == METHOD_L2NORM){
@@ -801,6 +818,21 @@ void FaceRecognition::getPCAscore(
 
 }
 
+void FaceRecognition::PrintScore(
+		char* 							s)
+{
+	ofstream a;
+	a.open(s,ios::out);
+	int nTotalReferenceImages = nSubject*nRefImagesPerSubject;
+	for (int i = 0; i<nFiles; i++){
+		for (int j = 0; j<nTotalReferenceImages; j++){
+			a<<(float)RecognitionScore.at<float>(i,j)<<endl;
+		}
+	}
+
+	a.close();
+}
+
 void FaceRecognition::_Recognition(
 		vector<Mat>						referenceImage,
 		vector<string>					files,
@@ -864,13 +896,17 @@ void FaceRecognition::_Recognition(
 		}
 		else {
 			if (startAngle == endAngle) {
+//				int difx;
+//				int dify;
 				for (int i = 0; i < nFiles; i++) {
-					cout << files[i] << endl;
+					//if (i<32*64) continue;
+					//if (i>=33*64) continue;
+					//cout << files[i] << endl;
 					Mat testImage = imread( DirectoryLocation+"/"+files[i], -1 );
 					double t=(double)getTickCount();
 					getScoreTestImageBased(referenceImage, testImage, i, nSearchRadius, criterion);
 					t = ((double)getTickCount() - t)/getTickFrequency();
-					cout << "Registration Time : " << t << " sec" << endl;
+					//cout << "Registration Time : " << t << " sec" << endl;
 				}
 			} else {
 				for (int i = 0; i < nFiles; i++) {
@@ -1030,6 +1066,8 @@ float FaceRecognition::getAccuracyIncludingBadImages()
 			}
 		} else {
 			for (int i=0; i<h; i++,ptr_rr++,ptr_bi++) {
+				//if (i<32*64) continue;
+				//if (i>=33*64) continue;
 				if (*(ptr_rr)%nSubject == ((i/nTestImagesPerSubject)%nSubject) && !*(ptr_bi)) {
 					correctCounter++;
 				}

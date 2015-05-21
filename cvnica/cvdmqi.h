@@ -39,6 +39,11 @@ void SelectiveClosing(
 		const double&					alpha=1.8,
 		const double&					beta=1.35);
 
+void AdaptiveClosing(
+		InputArray 						_src,
+		OutputArray						_dst,
+		double							percent);
+
 void NormDynamicMorphQuotImage(
 		InputArray 						_src,
 		OutputArray						_dst,
@@ -52,6 +57,12 @@ void GaussianMorphQuotImage(
 void SelectiveMorphQuotImage(
 		InputArray 						_src,
 		OutputArray						_dst,
+		const int&						equalize=0);
+
+void AdaptiveMorphQuotImage(
+		InputArray 						_src,
+		OutputArray						_dst,
+		double							percent,
 		const int&						equalize=0);
 
 void DynamicMorphQuotImage(
@@ -94,7 +105,8 @@ void SelectiveMorphQuotImageParam(
 		OutputArray						_dst,
 		const int&						large,
 		const int&						small,
-		const int&						equalize=0);
+		const double&					alpha,
+		const int&						equalize);
 }
 
 

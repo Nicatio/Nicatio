@@ -141,6 +141,22 @@ void VarianceMap(
 		OutputArray						_dst,
 		int								type);
 
+void CorrCoefMap(
+		InputArray 						_src,
+		OutputArray						_dst);
+
+void CorrCoefMap2(
+		InputArray 						_src,
+		OutputArray						_dst);
+
+void CorrCoefMap3(
+		InputArray 						_src,
+		OutputArray						_dst);
+
+void CorrCoefMap4(
+		InputArray 						_src,
+		OutputArray						_dst);
+
 void DifferenceOfVariance(
 		InputArray 						_src,
 		OutputArray						_dst);

@@ -2784,7 +2784,18 @@ Mat kernels(
 			point = Point(-1,-1);
 	}
 
-
+	if (type==-3){
+			kernel = (Mat_<float>(3,3) << 1,1,1 , 1,1,1 , 1,1,1);
+			point = Point(-1,-1);
+	}
+	if (type==-2){
+			kernel = (Mat_<float>(2,3) << 1,1,1,1,1,1);
+			point = Point(0,0);
+	}
+	if (type==-1){
+			kernel = (Mat_<float>(3,2) << 1,1,1,1,1,1);
+			point = Point(0,0);
+	}
 	else if (type==0){
 		kernel = (Mat_<float>(5,5) << 1,1,1,1,1 , 1,1,1,1,1 , 1,1,0,0,0 , 1,1,0,0,0 , 1,1,0,0,0);
 		point = Point(-1,-1);
@@ -3470,6 +3481,65 @@ Mat kernels(
 		}
 
 
+		else if (type==102){
+			kernel = (Mat_<float>(5,5) << 0,0,1,0,0 ,
+										  0,0,1,0,0 ,
+										  0,0,1,0,0 ,
+										  0,0,1,0,0 ,
+										  0,0,1,0,0);
+			point = Point(-1,-1);
+		} else if (type==103){
+			kernel = (Mat_<float>(5,5) << 0,0,0,0,0 ,
+										  0,0,0,0,0 ,
+										  1,1,1,1,1 ,
+										  0,0,0,0,0 ,
+										  0,0,0,0,0);
+			point = Point(-1,-1);
+		} else if (type==104){
+			kernel = (Mat_<float>(5,5) << 1,0,0,0,0 ,
+										  0,1,0,0,0 ,
+										  0,0,1,0,0 ,
+										  0,0,0,1,0 ,
+										  0,0,0,0,1);
+			point = Point(-1,-1);
+		} else if (type==105){
+			kernel = (Mat_<float>(5,5) << 0,0,0,0,1 ,
+										  0,0,0,1,0 ,
+										  0,0,1,0,0 ,
+										  0,1,0,0,0 ,
+										  1,0,0,0,0);
+			point = Point(-1,-1);
+		}
+
+		else if (type==106){
+			kernel = (Mat_<float>(5,5) <<  0,1,1,.0,0 ,
+											0,.75,1,.25,0 ,
+											0,.5,1,.5,0 ,
+											0,.25,1,.75,0 ,
+											0,.0,1,1,0);
+			point = Point(-1,-1);
+		} else if (type==107){
+			kernel = (Mat_<float>(5,5) <<  0,.0,1,1,0 ,
+											0,.25,1,.75,0 ,
+											0,.5,1,.5,0 ,
+											0,.75,1,.25,0 ,
+											0,1,1,.0,0);
+			point = Point(-1,-1);
+		} else if (type==108){
+			kernel = (Mat_<float>(5,5) <<  0,0,0,0,0 ,
+											.0,.25,.5,.75,1 ,
+											1,1,1,1,1 ,
+											1,.75,.5,.25,.0 ,
+											0,0,0,0,0);
+			point = Point(-1,-1);
+		} else if (type==109){
+			kernel = (Mat_<float>(5,5) <<  0,0,0,0,0 ,
+											1,.75,.5,.25,.0 ,
+											1,1,1,1,1 ,
+											.0,.25,.5,.75,1 ,
+											0,0,0,0,0);
+			point = Point(-1,-1);
+		}
 	return kernel;
 }
 
@@ -4355,14 +4425,17 @@ void VarianceMap(
 
 	kernel = kernels(type,point);
 
-	filter2D (src,temp,CV_32F,kernel,point,0,BORDER_CONSTANT);
-	filter2D (src.mul(src),temp2,CV_32F,kernel,point,0,BORDER_CONSTANT);
+	//filter2D (src,temp,CV_32F,kernel,point,0,BORDER_CONSTANT);
+	//filter2D (src.mul(src),temp2,CV_32F,kernel,point,0,BORDER_CONSTANT);
+
+	filter2D (src,temp,CV_32F,kernel,point,0,BORDER_REPLICATE);
+	filter2D (src.mul(src),temp2,CV_32F,kernel,point,0,BORDER_REPLICATE);
 
 	temp /= sum(kernel)[0];
 	temp2 /= sum(kernel)[0];
 
 	var = temp2 -  temp.mul(temp);
-	var /= 255/4;
+	var /= 255/16;
 
 	minMaxLoc(var,&min,&max);
 	var.convertTo(_dst,CV_8UC1);
@@ -4370,6 +4443,535 @@ void VarianceMap(
 //	namedWindow( "c", CV_WINDOW_AUTOSIZE );
 //	imshow( "c", _dst);//thrCrCb[0] );
 //	waitKey(0);
+}
+
+
+void CorrCoefMap(
+		InputArray 						_src,
+		OutputArray						_dst)
+{
+
+	Mat src = _src.getMat();
+
+	Mat dst = Mat(src.rows-2,src.cols-2,CV_32FC1);
+	for (int i=0; i<dst.rows; i++) {
+		for (int j=0; j<dst.cols; j++) {
+			//				std::cout<<i<<j<<std::endl;
+//							Mat sub = Mat(src, Rect(j,i,3,3));
+//							Mat sub2 = sub.reshape(1);
+//							sub2 = sub2.clone();
+//							Mat sub3 = sub2.reshape(0,9);
+//
+//							Mat cov, mu;
+//							cv::calcCovarMatrix(sub3, cov, mu, CV_COVAR_NORMAL | CV_COVAR_ROWS);
+//
+//
+//							float t = determinant(cov)/255/255/255;
+//							if (t<0) t*=-1;
+//							dst.at<float>(i,j)=pow(t,0.1);
+
+
+
+
+////				std::cout<<i<<j<<std::endl;
+//				Mat sub = Mat(src, Rect(j,i,3,3));
+//				Mat sub2 = sub.reshape(1);
+//				sub2 = sub2.clone();
+//				Mat sub3 = sub2.reshape(0,9);
+//
+//				Mat cov, mu;
+//				cv::calcCovarMatrix(sub3, cov, mu, CV_COVAR_NORMAL | CV_COVAR_ROWS);
+////				if (sqrt((cov.at<double>(0,0)+cov.at<double>(1,1)+cov.at<double>(2,2))/3)<12 ) {
+////					//if (sqrt((cov.at<double>(0,0)+cov.at<double>(1,1)+cov.at<double>(2,2))/3)==0) {
+////						dst.at<float>(i,j)=1;
+//////					} else {
+//////						dst.at<float>(i,j)=3/sqrt((cov.at<double>(0,0)+cov.at<double>(1,1)+cov.at<double>(2,2)));
+//////					}
+////					continue;
+////				}
+//				Mat diag__ = cov.diag();
+//
+//				Mat diag_sq = diag__*diag__.t();
+//				sqrt(diag_sq,diag_sq);
+//				divide(cov,diag_sq,diag_sq);
+//				//diag_sq-=0.1;
+////				diag_sq.at<double>(0,0)=1.;
+////				diag_sq.at<double>(1,1)=1.;
+////				diag_sq.at<double>(2,2)=1.;
+//
+//				float t = determinant(diag_sq);
+//				if (t<0) t*=-1;
+//				dst.at<float>(i,j)=sqrt(sqrt(sqrt(t)));
+				//dst.at<float>(i,j)=sqrt((cov.at<double>(0,0)+cov.at<double>(1,1)+cov.at<double>(2,2))/3)/255.;
+
+			//				std::cout<<i<<j<<std::endl;
+							Mat sub = Mat(src, Rect(j,i,3,3));
+							Mat sub2 = sub.reshape(1);
+							sub2 = sub2.clone();
+							Mat sub3 = sub2.reshape(0,9);
+
+							Mat cov, mu;
+							cv::calcCovarMatrix(sub3, cov, mu, CV_COVAR_NORMAL | CV_COVAR_ROWS);
+			//				if (sqrt((cov.at<double>(0,0)+cov.at<double>(1,1)+cov.at<double>(2,2))/3)<12 ) {
+			//					//if (sqrt((cov.at<double>(0,0)+cov.at<double>(1,1)+cov.at<double>(2,2))/3)==0) {
+			//						dst.at<float>(i,j)=1;
+			////					} else {
+			////						dst.at<float>(i,j)=3/sqrt((cov.at<double>(0,0)+cov.at<double>(1,1)+cov.at<double>(2,2)));
+			////					}
+			//					continue;
+			//				}
+							Mat diag_ = cov.diag();
+							Mat diag__;
+							sqrt(diag_,diag__);
+							Mat diag_sq = diag__*diag__.t();
+							divide(cov,diag_sq,diag_sq);
+							//diag_sq-=0.1;
+			//				diag_sq.at<double>(0,0)=1.;
+			//				diag_sq.at<double>(1,1)=1.;
+			//				diag_sq.at<double>(2,2)=1.;
+
+							float t = determinant(diag_sq);
+							if (t<0) t*=-1;
+							dst.at<float>(i,j)=(sqrt(sqrt(sqrt(t))));
+
+							if (determinant(cov)<0.00001)dst.at<float>(i,j)=1;
+							//dst.at<float>(i,j)=sqrt((cov.at<double>(0,0)+cov.at<double>(1,1)+cov.at<double>(2,2))/3)/255.;
+
+
+
+//				if(j<7 && i<7){
+//					std::cout << "cov: " << std::endl;
+//					std::cout << cov << std::endl;
+//					std::cout << "diag_sq: " << std::endl;
+//					std::cout << diag_sq << std::endl;
+//
+//					std::cout << "det: " << std::endl;
+//					std::cout << determinant(cov)<<std::endl;
+//					std::cout << t <<std::endl;
+//					std::cout << sqrt(sqrt(sqrt(t)))<<std::endl;
+//				}
+
+		}
+	}
+
+	dst.convertTo(_dst,CV_32FC1);
+	//	cout << "rows: " << sub3.rows << endl;
+	//	cout << "cols: " << sub3.cols << endl;
+	//	cout << "1: " << (int) sub3.at<uchar>(0,0) << endl;
+	//	cout << "2: " << (int)sub3.at<uchar>(0,1) << endl;
+	//	cout << "3: " << (int)sub3.at<uchar>(0,2) << endl;
+	//
+	//	cout << "5: " << (int)sub3.at<uchar>(8,0) << endl;
+	//	cout << "6: " << (int)sub3.at<uchar>(8,1) << endl;
+	//	cout << "4: " << (int)sub3.at<uchar>(8,2) << endl;
+	//
+	////	cout << "7: " << (int)_image_split[0].at<uchar>(0,0) << endl;
+	////	cout << "8: " << (int)_image_split[1].at<uchar>(0,0) << endl;
+	////	cout << "9: " << (int)_image_split[2].at<uchar>(0,0) << endl;
+	//
+	//	cout << "7: " << (int)_image_split[0].at<uchar>(2,2) << endl;
+	//	cout << "8: " << (int)_image_split[1].at<uchar>(2,2) << endl;
+	//	cout << "9: " << (int)_image_split[2].at<uchar>(2,2) << endl;
+
+	//cout << determinant(diag_sq) << endl;
+	//cout <<  diag_sq << endl;
+	//
+	//	cout << "cov: " << endl;
+	//	cout << cov << endl;
+	//
+	//	cout << "mu: " << endl;
+	//	cout << mu << endl;
+
+}
+
+
+void CorrCoefMap2(
+		InputArray 						_src,
+		OutputArray						_dst)
+{
+
+	Mat src = _src.getMat();
+
+	Mat dst = Mat(src.rows-2,src.cols-2,CV_32FC1);
+	for (int i=0; i<dst.rows; i++) {
+		for (int j=0; j<dst.cols; j++) {
+			//				std::cout<<i<<j<<std::endl;
+//							Mat sub = Mat(src, Rect(j,i,3,3));
+//							Mat sub2 = sub.reshape(1);
+//							sub2 = sub2.clone();
+//							Mat sub3 = sub2.reshape(0,9);
+//
+//							Mat cov, mu;
+//							cv::calcCovarMatrix(sub3, cov, mu, CV_COVAR_NORMAL | CV_COVAR_ROWS);
+//
+//
+//							float t = determinant(cov)/255/255/255;
+//							if (t<0) t*=-1;
+//							dst.at<float>(i,j)=pow(t,0.1);
+
+
+
+
+////				std::cout<<i<<j<<std::endl;
+//				Mat sub = Mat(src, Rect(j,i,3,3));
+//				Mat sub2 = sub.reshape(1);
+//				sub2 = sub2.clone();
+//				Mat sub3 = sub2.reshape(0,9);
+//
+//				Mat cov, mu;
+//				cv::calcCovarMatrix(sub3, cov, mu, CV_COVAR_NORMAL | CV_COVAR_ROWS);
+////				if (sqrt((cov.at<double>(0,0)+cov.at<double>(1,1)+cov.at<double>(2,2))/3)<12 ) {
+////					//if (sqrt((cov.at<double>(0,0)+cov.at<double>(1,1)+cov.at<double>(2,2))/3)==0) {
+////						dst.at<float>(i,j)=1;
+//////					} else {
+//////						dst.at<float>(i,j)=3/sqrt((cov.at<double>(0,0)+cov.at<double>(1,1)+cov.at<double>(2,2)));
+//////					}
+////					continue;
+////				}
+//				Mat diag__ = cov.diag();
+//
+//				Mat diag_sq = diag__*diag__.t();
+//				sqrt(diag_sq,diag_sq);
+//				divide(cov,diag_sq,diag_sq);
+//				//diag_sq-=0.1;
+////				diag_sq.at<double>(0,0)=1.;
+////				diag_sq.at<double>(1,1)=1.;
+////				diag_sq.at<double>(2,2)=1.;
+//
+//				float t = determinant(diag_sq);
+//				if (t<0) t*=-1;
+//				dst.at<float>(i,j)=sqrt(sqrt(sqrt(t)));
+				//dst.at<float>(i,j)=sqrt((cov.at<double>(0,0)+cov.at<double>(1,1)+cov.at<double>(2,2))/3)/255.;
+
+			//				std::cout<<i<<j<<std::endl;
+							Mat sub = Mat(src, Rect(j,i,3,3));
+							Mat sub2 = sub.reshape(1);
+							sub2 = sub2.clone();
+							Mat sub3 = sub2.reshape(0,9);
+
+							Mat cov, mu;
+							cv::calcCovarMatrix(sub3, cov, mu, CV_COVAR_NORMAL | CV_COVAR_ROWS);
+			//				if (sqrt((cov.at<double>(0,0)+cov.at<double>(1,1)+cov.at<double>(2,2))/3)<12 ) {
+			//					//if (sqrt((cov.at<double>(0,0)+cov.at<double>(1,1)+cov.at<double>(2,2))/3)==0) {
+			//						dst.at<float>(i,j)=1;
+			////					} else {
+			////						dst.at<float>(i,j)=3/sqrt((cov.at<double>(0,0)+cov.at<double>(1,1)+cov.at<double>(2,2)));
+			////					}
+			//					continue;
+			//				}
+//							Mat diag_ = cov.diag();
+//							Mat diag__;
+//							sqrt(diag_,diag__);
+//							Mat diag_sq = diag__*diag__.t();
+//							divide(cov,diag_sq,diag_sq);
+							//diag_sq-=0.1;
+			//				diag_sq.at<double>(0,0)=1.;
+			//				diag_sq.at<double>(1,1)=1.;
+			//				diag_sq.at<double>(2,2)=1.;
+
+							float t = determinant(cov)/255/255/100;
+							if (t<0) t=0;
+							dst.at<float>(i,j)=((sqrt(sqrt(t))));
+
+							//if (determinant(cov)<0.00001)dst.at<float>(i,j)=1;
+							//dst.at<float>(i,j)=sqrt((cov.at<double>(0,0)+cov.at<double>(1,1)+cov.at<double>(2,2))/3)/255.;
+
+
+
+//				if(j<7 && i<7){
+//					std::cout << "cov: " << std::endl;
+//					std::cout << cov << std::endl;
+//					std::cout << "diag_sq: " << std::endl;
+//					std::cout << diag_sq << std::endl;
+//
+//					std::cout << "det: " << std::endl;
+//					std::cout << determinant(cov)<<std::endl;
+//					std::cout << t <<std::endl;
+//					std::cout << sqrt(sqrt(sqrt(t)))<<std::endl;
+//				}
+
+		}
+	}
+
+	dst.convertTo(_dst,CV_32FC1);
+	//	cout << "rows: " << sub3.rows << endl;
+	//	cout << "cols: " << sub3.cols << endl;
+	//	cout << "1: " << (int) sub3.at<uchar>(0,0) << endl;
+	//	cout << "2: " << (int)sub3.at<uchar>(0,1) << endl;
+	//	cout << "3: " << (int)sub3.at<uchar>(0,2) << endl;
+	//
+	//	cout << "5: " << (int)sub3.at<uchar>(8,0) << endl;
+	//	cout << "6: " << (int)sub3.at<uchar>(8,1) << endl;
+	//	cout << "4: " << (int)sub3.at<uchar>(8,2) << endl;
+	//
+	////	cout << "7: " << (int)_image_split[0].at<uchar>(0,0) << endl;
+	////	cout << "8: " << (int)_image_split[1].at<uchar>(0,0) << endl;
+	////	cout << "9: " << (int)_image_split[2].at<uchar>(0,0) << endl;
+	//
+	//	cout << "7: " << (int)_image_split[0].at<uchar>(2,2) << endl;
+	//	cout << "8: " << (int)_image_split[1].at<uchar>(2,2) << endl;
+	//	cout << "9: " << (int)_image_split[2].at<uchar>(2,2) << endl;
+
+	//cout << determinant(diag_sq) << endl;
+	//cout <<  diag_sq << endl;
+	//
+	//	cout << "cov: " << endl;
+	//	cout << cov << endl;
+	//
+	//	cout << "mu: " << endl;
+	//	cout << mu << endl;
+
+}
+
+void CorrCoefMap3(
+		InputArray 						_src,
+		OutputArray						_dst)
+{
+
+	Mat src = _src.getMat();
+
+	Mat dst = Mat(src.rows-2,src.cols-2,CV_32FC1);
+	for (int i=0; i<dst.rows; i++) {
+		for (int j=0; j<dst.cols; j++) {
+			//				std::cout<<i<<j<<std::endl;
+//							Mat sub = Mat(src, Rect(j,i,3,3));
+//							Mat sub2 = sub.reshape(1);
+//							sub2 = sub2.clone();
+//							Mat sub3 = sub2.reshape(0,9);
+//
+//							Mat cov, mu;
+//							cv::calcCovarMatrix(sub3, cov, mu, CV_COVAR_NORMAL | CV_COVAR_ROWS);
+//
+//
+//							float t = determinant(cov)/255/255/255;
+//							if (t<0) t*=-1;
+//							dst.at<float>(i,j)=pow(t,0.1);
+
+
+
+
+////				std::cout<<i<<j<<std::endl;
+//				Mat sub = Mat(src, Rect(j,i,3,3));
+//				Mat sub2 = sub.reshape(1);
+//				sub2 = sub2.clone();
+//				Mat sub3 = sub2.reshape(0,9);
+//
+//				Mat cov, mu;
+//				cv::calcCovarMatrix(sub3, cov, mu, CV_COVAR_NORMAL | CV_COVAR_ROWS);
+////				if (sqrt((cov.at<double>(0,0)+cov.at<double>(1,1)+cov.at<double>(2,2))/3)<12 ) {
+////					//if (sqrt((cov.at<double>(0,0)+cov.at<double>(1,1)+cov.at<double>(2,2))/3)==0) {
+////						dst.at<float>(i,j)=1;
+//////					} else {
+//////						dst.at<float>(i,j)=3/sqrt((cov.at<double>(0,0)+cov.at<double>(1,1)+cov.at<double>(2,2)));
+//////					}
+////					continue;
+////				}
+//				Mat diag__ = cov.diag();
+//
+//				Mat diag_sq = diag__*diag__.t();
+//				sqrt(diag_sq,diag_sq);
+//				divide(cov,diag_sq,diag_sq);
+//				//diag_sq-=0.1;
+////				diag_sq.at<double>(0,0)=1.;
+////				diag_sq.at<double>(1,1)=1.;
+////				diag_sq.at<double>(2,2)=1.;
+//
+//				float t = determinant(diag_sq);
+//				if (t<0) t*=-1;
+//				dst.at<float>(i,j)=sqrt(sqrt(sqrt(t)));
+				//dst.at<float>(i,j)=sqrt((cov.at<double>(0,0)+cov.at<double>(1,1)+cov.at<double>(2,2))/3)/255.;
+
+			//				std::cout<<i<<j<<std::endl;
+							Mat sub = Mat(src, Rect(j,i,3,3));
+							Mat sub2 = sub.reshape(1);
+							sub2 = sub2.clone();
+							Mat sub3 = sub2.reshape(0,9);
+
+							Mat cov, mu;
+							cv::calcCovarMatrix(sub3, cov, mu, CV_COVAR_NORMAL | CV_COVAR_ROWS);
+			//				if (sqrt((cov.at<double>(0,0)+cov.at<double>(1,1)+cov.at<double>(2,2))/3)<12 ) {
+			//					//if (sqrt((cov.at<double>(0,0)+cov.at<double>(1,1)+cov.at<double>(2,2))/3)==0) {
+			//						dst.at<float>(i,j)=1;
+			////					} else {
+			////						dst.at<float>(i,j)=3/sqrt((cov.at<double>(0,0)+cov.at<double>(1,1)+cov.at<double>(2,2)));
+			////					}
+			//					continue;
+			//				}
+							Mat diag_ = cov.diag();
+							Mat diag__=diag_;
+//							sqrt(diag_,diag__);
+//							Mat diag_sq = diag__*diag__.t();
+//							divide(cov,diag_sq,diag_sq);
+							//diag_sq-=0.1;
+			//				diag_sq.at<double>(0,0)=1.;
+			//				diag_sq.at<double>(1,1)=1.;
+			//				diag_sq.at<double>(2,2)=1.;
+
+							float t = (diag__.at<double>(0,0)+diag__.at<double>(1,0)+diag__.at<double>(2,0))/255/255;
+							if (t<0) t=0;
+							dst.at<float>(i,j)=sqrt(t);
+
+							//if (determinant(cov)<0.00001)dst.at<float>(i,j)=1;
+							//dst.at<float>(i,j)=sqrt((cov.at<double>(0,0)+cov.at<double>(1,1)+cov.at<double>(2,2))/3)/255.;
+
+
+
+//				if(j<7 && i<7){
+//					std::cout << "cov: " << std::endl;
+//					std::cout << cov << std::endl;
+//					std::cout << "diag_sq: " << std::endl;
+//					std::cout << diag_sq << std::endl;
+//
+//					std::cout << "det: " << std::endl;
+//					std::cout << determinant(cov)<<std::endl;
+//					std::cout << t <<std::endl;
+//					std::cout << sqrt(sqrt(sqrt(t)))<<std::endl;
+//				}
+
+		}
+	}
+
+	dst.convertTo(_dst,CV_32FC1);
+	//	cout << "rows: " << sub3.rows << endl;
+	//	cout << "cols: " << sub3.cols << endl;
+	//	cout << "1: " << (int) sub3.at<uchar>(0,0) << endl;
+	//	cout << "2: " << (int)sub3.at<uchar>(0,1) << endl;
+	//	cout << "3: " << (int)sub3.at<uchar>(0,2) << endl;
+	//
+	//	cout << "5: " << (int)sub3.at<uchar>(8,0) << endl;
+	//	cout << "6: " << (int)sub3.at<uchar>(8,1) << endl;
+	//	cout << "4: " << (int)sub3.at<uchar>(8,2) << endl;
+	//
+	////	cout << "7: " << (int)_image_split[0].at<uchar>(0,0) << endl;
+	////	cout << "8: " << (int)_image_split[1].at<uchar>(0,0) << endl;
+	////	cout << "9: " << (int)_image_split[2].at<uchar>(0,0) << endl;
+	//
+	//	cout << "7: " << (int)_image_split[0].at<uchar>(2,2) << endl;
+	//	cout << "8: " << (int)_image_split[1].at<uchar>(2,2) << endl;
+	//	cout << "9: " << (int)_image_split[2].at<uchar>(2,2) << endl;
+
+	//cout << determinant(diag_sq) << endl;
+	//cout <<  diag_sq << endl;
+	//
+	//	cout << "cov: " << endl;
+	//	cout << cov << endl;
+	//
+	//	cout << "mu: " << endl;
+	//	cout << mu << endl;
+
+}
+
+void CorrCoefMap4(
+		InputArray 						_src,
+		OutputArray						_dst)
+{
+
+	Mat src = _src.getMat();
+
+	Mat dst = Mat(src.rows-1,src.cols,CV_32FC1);
+	for (int i=0; i<dst.rows; i++) {
+		for (int j=0; j<dst.cols; j++) {
+			//				std::cout<<i<<j<<std::endl;
+//							Mat sub = Mat(src, Rect(j,i,3,3));
+//							Mat sub2 = sub.reshape(1);
+//							sub2 = sub2.clone();
+//							Mat sub3 = sub2.reshape(0,9);
+//
+//							Mat cov, mu;
+//							cv::calcCovarMatrix(sub3, cov, mu, CV_COVAR_NORMAL | CV_COVAR_ROWS);
+//
+//
+//							float t = determinant(cov)/255/255/255;
+//							if (t<0) t*=-1;
+//							dst.at<float>(i,j)=pow(t,0.1);
+
+
+
+
+////				std::cout<<i<<j<<std::endl;
+//				Mat sub = Mat(src, Rect(j,i,3,3));
+//				Mat sub2 = sub.reshape(1);
+//				sub2 = sub2.clone();
+//				Mat sub3 = sub2.reshape(0,9);
+//
+//				Mat cov, mu;
+//				cv::calcCovarMatrix(sub3, cov, mu, CV_COVAR_NORMAL | CV_COVAR_ROWS);
+////				if (sqrt((cov.at<double>(0,0)+cov.at<double>(1,1)+cov.at<double>(2,2))/3)<12 ) {
+////					//if (sqrt((cov.at<double>(0,0)+cov.at<double>(1,1)+cov.at<double>(2,2))/3)==0) {
+////						dst.at<float>(i,j)=1;
+//////					} else {
+//////						dst.at<float>(i,j)=3/sqrt((cov.at<double>(0,0)+cov.at<double>(1,1)+cov.at<double>(2,2)));
+//////					}
+////					continue;
+////				}
+//				Mat diag__ = cov.diag();
+//
+//				Mat diag_sq = diag__*diag__.t();
+//				sqrt(diag_sq,diag_sq);
+//				divide(cov,diag_sq,diag_sq);
+//				//diag_sq-=0.1;
+////				diag_sq.at<double>(0,0)=1.;
+////				diag_sq.at<double>(1,1)=1.;
+////				diag_sq.at<double>(2,2)=1.;
+//
+//				float t = determinant(diag_sq);
+//				if (t<0) t*=-1;
+//				dst.at<float>(i,j)=sqrt(sqrt(sqrt(t)));
+				//dst.at<float>(i,j)=sqrt((cov.at<double>(0,0)+cov.at<double>(1,1)+cov.at<double>(2,2))/3)/255.;
+
+			//				std::cout<<i<<j<<std::endl;
+							Mat sub = Mat(src, Rect(j,i,1,2));
+							Mat sub2 = sub.reshape(1);
+							sub2 = sub2.clone();
+							Mat sub3 = sub2.reshape(0,2);
+
+							Mat cov, mu;
+							cv::calcCovarMatrix(sub3, cov, mu, CV_COVAR_NORMAL | CV_COVAR_COLS);
+			//				if (sqrt((cov.at<double>(0,0)+cov.at<double>(1,1)+cov.at<double>(2,2))/3)<12 ) {
+			//					//if (sqrt((cov.at<double>(0,0)+cov.at<double>(1,1)+cov.at<double>(2,2))/3)==0) {
+			//						dst.at<float>(i,j)=1;
+			////					} else {
+			////						dst.at<float>(i,j)=3/sqrt((cov.at<double>(0,0)+cov.at<double>(1,1)+cov.at<double>(2,2)));
+			////					}
+			//					continue;
+			//				}
+							Mat diag_ = cov.diag();
+							Mat diag__=diag_;
+							sqrt(diag_,diag__);
+							Mat diag_sq = diag__*diag__.t();
+							divide(cov,diag_sq,diag_sq);
+							//diag_sq-=0.1;
+			//				diag_sq.at<double>(0,0)=1.;
+			//				diag_sq.at<double>(1,1)=1.;
+			//				diag_sq.at<double>(2,2)=1.;
+
+							float t = diag_sq.at<double>(0,0);
+							if (t<0) t=0;
+							dst.at<float>(i,j)=(sqrt(t));
+
+							if (determinant(cov)==0) dst.at<float>(i,j)=1;
+							//dst.at<float>(i,j)=sqrt((cov.at<double>(0,0)+cov.at<double>(1,1)+cov.at<double>(2,2))/3)/255.;
+
+
+
+				if(j<7 && i<7){
+					std::cout << "cov: " << std::endl;
+					std::cout << cov << std::endl;
+					std::cout << "diag_sq: " << std::endl;
+					std::cout << diag_sq << std::endl;
+//
+//					std::cout << "det: " << std::endl;
+//					std::cout << determinant(cov)<<std::endl;
+					std::cout << t <<std::endl;
+//					std::cout << sqrt(sqrt(sqrt(t)))<<std::endl;
+				}
+
+		}
+	}
+
+	dst.convertTo(_dst,CV_32FC1);
+
+
 }
 
 void DifferenceOfVariance(
