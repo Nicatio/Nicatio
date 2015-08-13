@@ -160,7 +160,7 @@ void SelectiveClosing(
 		double __s = (double)*(ptrS);
 		//double __ss = (double)*(ptrSS);
 		//double _sb = __s*1.4;//beta;
-		double _sa = __s*1.4;//alpha;
+		double _sa = __s*1.35;//alpha;
 		//double _sc = __s*1.4;
 //		if(__l>_sa) *(ptrDst) = __l;
 //		else if((__l>_sb)&&(__l<=_sa)) *(ptrDst) = __m;
@@ -520,7 +520,7 @@ void DynamicClosing(
 //	imwrite("s.bmp",_s);
 
 	int sz = _src.total();
-
+	std::cout<<alpha<<beta<<std::endl;
 	for (int i=0; i<sz; i++,ptrL++,ptrM++,ptrS++,ptrDst++){
 		double __l = (double)*(ptrL);
 		double __m = (double)*(ptrM);

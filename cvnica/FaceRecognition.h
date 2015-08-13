@@ -22,6 +22,7 @@
 #define METHOD_CORR		3
 #define METHOD_DIFF		4
 #define METHOD_PCA		5
+#define METHOD_L2NORM2	6
 
 #define DB_YALEB		0
 
