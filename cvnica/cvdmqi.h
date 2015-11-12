@@ -39,6 +39,17 @@ void SelectiveClosing(
 		const double&					alpha=1.8,
 		const double&					beta=1.35);
 
+void ContinuousClosing(
+		InputArray 						_src,
+		OutputArray						_dst,
+		const double&					alpha,
+		const double&					k);
+
+void Closing(
+		InputArray 						_src,
+		OutputArray						_dst,
+		const double&					strE);
+
 void AdaptiveClosing(
 		InputArray 						_src,
 		OutputArray						_dst,
@@ -58,6 +69,18 @@ void SelectiveMorphQuotImage(
 		InputArray 						_src,
 		OutputArray						_dst,
 		const int&						equalize=0);
+
+void ContinuousMorphQuotImage(
+		InputArray 						_src,
+		OutputArray						_dst,
+		const double&					alpha,
+		const double&					k,
+		const int&						equalize=0);
+
+void MorphQuotImage(
+		InputArray 						_src,
+		OutputArray						_dst,
+		const double&					strE);
 
 void AdaptiveMorphQuotImage(
 		InputArray 						_src,

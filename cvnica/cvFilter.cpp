@@ -140,10 +140,15 @@ void ELBP(const Mat& src, Mat& dst, int radius, int neighbors, int th) {
         // iterate through your data
         for(int i=radius; i < src.rows-radius;i++) {
             for(int j=radius;j < src.cols-radius;j++) {
+
                 float t = w1*src.at<uchar>(i+fy,j+fx) + w2*src.at<uchar>(i+fy,j+cx) + w3*src.at<uchar>(i+cy,j+fx) + w4*src.at<uchar>(i+cy,j+cx)+th;
                 // we are dealing with floating point precision, so add some little tolerance
                 //std::cout<<(((t > src.at<uchar>(i,j)) && (abs(t-src.at<uchar>(i,j)) > std::numeric_limits<float>::epsilon())) << n)<<std::endl;
                 dst.at<unsigned int>(i-radius,j-radius) += ((t > src.at<uchar>(i,j)) && (abs(t-src.at<uchar>(i,j)) > std::numeric_limits<float>::epsilon())) << n;
+            	if ((i==3)&&(j==9)) {
+            		std::cout<<"\t"<<n<<"\t"<<t<<"\t"<<(double)src.at<uchar>(i,j)<<"\t"<<abs(t-src.at<uchar>(i,j))<<"\t"<<(abs(t-src.at<uchar>(i,j)) > std::numeric_limits<float>::epsilon())<<"\t"<<(((t > src.at<uchar>(i,j)) && (abs(t-src.at<uchar>(i,j)) > std::numeric_limits<float>::epsilon())) << n)<<std::endl;
+            		//j=7;
+            	}
             }
         }
     }

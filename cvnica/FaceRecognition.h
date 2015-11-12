@@ -23,6 +23,7 @@
 #define METHOD_DIFF		4
 #define METHOD_PCA		5
 #define METHOD_L2NORM2	6
+#define METHOD_CORRBIN	7
 
 #define DB_YALEB		0
 
@@ -116,7 +117,7 @@ public:
 	int getBadImages();
 	int getFiles();
 	void PrintScore(
-			char* 							s);
+			const char* 							s);
 
 	Mat norm_0_255(
 			const Mat& 							src);

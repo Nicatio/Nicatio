@@ -160,7 +160,8 @@ void SelectiveClosing(
 		double __s = (double)*(ptrS);
 		//double __ss = (double)*(ptrSS);
 		//double _sb = __s*1.4;//beta;
-		double _sa = __s*1.35;//alpha;
+
+		double _sa = __s*1.4;//alpha;
 		//double _sc = __s*1.4;
 //		if(__l>_sa) *(ptrDst) = __l;
 //		else if((__l>_sb)&&(__l<=_sa)) *(ptrDst) = __m;
@@ -190,6 +191,131 @@ void SelectiveClosing(
 //	imwrite("kk.bmp",dst);
 }
 
+void ContinuousClosing(
+		InputArray 						_src,
+		OutputArray						_dst,
+		const double&					alpha,
+		const double&					k)
+{
+	Mat src = _src.getMat();
+	_dst.create(src.size(),src.type());
+	Mat dst = _dst.getMat();
+
+	Mat l = Mat(src.size(),src.type());
+	//Mat m = Mat(src.size(),src.type());
+	Mat s = Mat(src.size(),src.type());
+	//Mat ss = Mat(src.size(),src.type());
+
+	Mat _l = Mat(src.size(),src.type());
+	//Mat _m = Mat(src.size(),src.type());
+	Mat _s = Mat(src.size(),src.type());
+	//Mat _ss = Mat(src.size(),src.type());
+
+	int dilation_type = MORPH_RECT;
+	Mat elementL = getStructuringElement( dilation_type, Size( 11,11), Point( 5,5 ) );
+	//Mat elementL = getStructuringElement( dilation_type, Size( 9,9), Point( 4,4 ) );
+	//Mat elementM = getStructuringElement( dilation_type, Size( 7,7 ), Point( 3,3 ) );
+	Mat elementS = getStructuringElement( dilation_type, Size( 5,5), Point( 2,2 ) );
+	//Mat elementSS = getStructuringElement( dilation_type, Size( 3,3 ), Point( 1,1 ) );
+
+	dilate( src, l, elementL);
+	//dilate( src, m, elementM);
+	dilate( src, s, elementS);
+	//dilate( src, ss, elementSS);
+	erode( l, _l, elementL);
+	//erode( m, _m, elementM);
+	erode( s, _s, elementS);
+	//erode( ss, _ss, elementSS);
+
+
+	//GaussianBlur(src, _s, Size(9,9), 1.0, 1.0, BORDER_DEFAULT);
+
+	//unsigned char *ptrL = _l.data, *ptrM = _m.data, *ptrS = _s.data, *ptrSS = _ss.data;
+	unsigned char *ptrL = _l.data, *ptrS = _s.data;
+	unsigned char *ptrDst = dst.data;
+	unsigned char *ptrSrc = src.data;
+
+	int sz = _src.total();
+
+	//for (int i=0; i<sz; i++,ptrL++,ptrM++,ptrS++,ptrSS++,ptrDst++,ptrSrc++){
+	for (int i=0; i<sz; i++,ptrL++,ptrS++,ptrDst++,ptrSrc++){
+		double __l = (double)*(ptrL);
+		//double __m = (double)*(ptrM);
+		double __s = (double)*(ptrS);
+		//double __ss = (double)*(ptrSS);
+		//double _sb = __s*1.4;//beta;
+		double _sa = __l/__s;//alpha;
+//		_sa = 1./(1+exp(-20*(_sa-1.5))); //cmqi2 and cmqi3 (1.4 condition)
+		//_sa = 1./(1+exp(-20*(_sa-1.4)));//2363
+//		_sa = 1./(1+exp(-20*(_sa-1.3)));//2369
+		//_sa = 1./(1+exp(-20*(_sa-1.25)));//2371
+		_sa = 1./(1+exp(-k*(_sa-alpha)));//2371
+
+		//_sa = 1./pow((1+exp(-20*(_sa-1.5))),0.9);
+		//_sa = 1./(1+exp(-50*(_sa-1.3)));
+		*(ptrDst) = (unsigned char)(__s*(1-_sa)+__l*_sa);
+
+		//_sa = __s*1.4;//alpha;
+
+		//if(__l>_sa) *(ptrDst) = __l;
+		//else *(ptrDst) = __s;
+
+
+		//double _sc = __s*1.4;
+//		if(__l>_sa) *(ptrDst) = __l;
+//		else if((__l>_sb)&&(__l<=_sa)) *(ptrDst) = __m;
+//		else if((__l>_sc)&&(__l<=_sb)) *(ptrDst) = __s;
+//		else *(ptrDst) = __ss;
+
+
+//		if(__l>_sa) *(ptrDst) = __l;
+//		else if((__l>_sb)&&(__l<=_sa)) *(ptrDst) = __m;
+//		else if((__l>_sc)&&(__l<=_sb)) *(ptrDst) = __s;
+//		else *(ptrDst) = *(ptrSrc);
+//		if(__l>_sa) *(ptrDst) = 0x00;
+//		else if((__l>_sb)&&(__l<=_sa)) *(ptrDst) = 0x50;
+//		else if((__l>_sc)&&(__l<=_sb)) *(ptrDst) = 0xa0;
+//		else *(ptrDst) = 0xf0;
+//		if(__l>_sa) *(ptrDst) = __l;
+		//else if((__l>_sb)&&(__l<=_sa)) *(ptrDst) = __m;
+//		else *(ptrDst) = __s;
+/*		if(__l>_sa) *(ptrDst) = 0x00;
+		else if((__l>_sb)&&(__l<=_sa)) *(ptrDst) = 0x80;
+		else *(ptrDst) = 0xff;*/
+	}
+
+//	imwrite("k1.bmp",src);
+//	imwrite("k5.bmp",_s);
+//	imwrite("k9.bmp",_l);
+//	imwrite("kk.bmp",dst);
+}
+
+void Closing(
+		InputArray 						_src,
+		OutputArray						_dst,
+		const double&					strE)
+{
+	Mat src = _src.getMat();
+	_dst.create(src.size(),src.type());
+	Mat dst = _dst.getMat();
+
+	Mat l = Mat(src.size(),src.type());
+	Mat _l = Mat(src.size(),src.type());
+	int dilation_type = MORPH_RECT;
+	Mat elementL = getStructuringElement( dilation_type, Size( strE,strE ), Point( floor(strE/2), floor(strE/2) ) );
+
+	dilate( src, l, elementL);
+	erode( l, _l, elementL);
+
+	unsigned char *ptrL = _l.data;
+	unsigned char *ptrDst = dst.data;
+	unsigned char *ptrSrc = src.data;
+
+	int sz = _src.total();
+	for (int i=0; i<sz; i++,ptrL++,ptrDst++){
+		*(ptrDst) = (double)*(ptrL);
+	}
+}
 
 void AdaptiveClosing(
 		InputArray 						_src,
@@ -402,6 +528,31 @@ void SelectiveMorphQuotImage(
 
 }
 
+void ContinuousMorphQuotImage(
+		InputArray 						_src,
+		OutputArray						_dst,
+		const double&					alpha,
+		const double&					k,
+		const int&						equalize)
+{
+	Mat src = _src.getMat();
+	Mat dc = Mat(src.size(),src.type());
+	ContinuousClosing (src,dc,alpha,k);
+	Reflectance(src,dc,_dst);
+
+}
+
+void MorphQuotImage(
+		InputArray 						_src,
+		OutputArray						_dst,
+		const double&					strE)
+{
+	Mat src = _src.getMat();
+	Mat dc = Mat(src.size(),src.type());
+	Closing (src,dc,strE);
+	Reflectance(src,dc,_dst);
+}
+
 void AdaptiveMorphQuotImage(
 		InputArray 						_src,
 		OutputArray						_dst,
@@ -425,7 +576,7 @@ void DynamicMorphQuotImage(
 	Mat dc = Mat(src.size(),src.type());
 	DynamicClosing (src,dc);
 	//imwrite("dc.bmp",dc);
-	Reflectance(src,dc,_dst,200);
+	Reflectance(src,dc,_dst);//,200);
 
 }
 

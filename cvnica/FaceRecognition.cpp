@@ -7,6 +7,7 @@
 
 
 #include "FaceRecognition.h"
+#define SEARCHRADIUS 7
 using namespace cv;
 
 namespace cvNica {
@@ -31,7 +32,7 @@ FaceRecognition::FaceRecognition(
 	if (nSubject%refImagesPerSubject==0) {
 		refImage = referenceImage;
 		nRefImagesPerSubject = refImagesPerSubject;
-		nSearchRadius =5;
+		nSearchRadius = SEARCHRADIUS;
 	} else {
 		std::cout<<"Error: invalid imagesPerSubject or number of subjects."<<std::endl;
 	}
@@ -54,7 +55,7 @@ FaceRecognition::FaceRecognition(
 	nRefImagesPerSubject = 0;
 	nTestImageOrder = 0;
 	nRefImageOrder = 0;
-	nSearchRadius =5;
+	nSearchRadius = SEARCHRADIUS;
 	nCorrect = 0;
 	nFiles = 0;
 	nBadImages = 0;
@@ -90,7 +91,7 @@ FaceRecognition::FaceRecognition(
 			}
 			Mat temp; refImage[i].convertTo(temp,CV_32FC1);
 			aveImg += temp;
-			cout<<"complete: "<<i<<refImage[i].cols<<refImage[i].rows<<endl;
+			//cout<<"complete: "<<i<<refImage[i].cols<<refImage[i].rows<<endl;
 		}
 		aveImg/=nSubject*nRefImagesPerSubject;
 		Mat aveImg2; aveImg.convertTo(aveImg2,CV_8UC1);
@@ -181,6 +182,7 @@ void FaceRecognition::getScoreTestImageBased(
 	int upper, lower;
 	upper = searchRadius>>1;
 	lower = (searchRadius%2)? (-upper):(-upper+1);
+	//float max=-9999999999;//-2;
 	float max=-2;
 	ushort maxSubjectIndex = 0;
 	Mat inputB32; inputB.convertTo(inputB32,CV_32F);
@@ -203,28 +205,42 @@ void FaceRecognition::getScoreTestImageBased(
 	char *ptr_rpx = &(RecognitionPositionX.at<char>(nFileIndex,0));
 	char *ptr_rpy = &(RecognitionPositionY.at<char>(nFileIndex,0));
 	float *ptr_rs = &(RecognitionScore.at<float>(nFileIndex,0));
+	if (criterion == METHOD_CORRBIN){
+		for (int i=lower; i<=upper; i++) {
+			for (int j=lower; j<=upper; j++,ptr_a_++,ptr_b_++,ptr_c_++,ptr_d_++,ptr__a++,ptr__b++,ptr_inputB_++,ptr_inputBB_++) {
 
-	for (int i=lower; i<=upper; i++) {
-		for (int j=lower; j<=upper; j++,ptr_a_++,ptr_b_++,ptr_c_++,ptr_d_++,ptr__a++,ptr__b++,ptr_inputB_++,ptr_inputBB_++) {
+				if(i<0) { 	*(ptr_a_) = -i;		*(ptr__a) = 0;		*(ptr_c_) = w+i; }
+				else 	{	*(ptr_a_) = 0; 		*(ptr__a) = i;		*(ptr_c_) = w-i; }
+				if(j<0) {	*(ptr_b_) = -j;		*(ptr__b) = 0;		*(ptr_d_) = h+j; }
+				else 	{	*(ptr_b_) = 0;		*(ptr__b) = j;		*(ptr_d_) = h-j; }
 
-			if(i<0) { 	*(ptr_a_) = -i;		*(ptr__a) = 0;		*(ptr_c_) = w+i; }
-			else 	{	*(ptr_a_) = 0; 		*(ptr__a) = i;		*(ptr_c_) = w-i; }
-			if(j<0) {	*(ptr_b_) = -j;		*(ptr__b) = 0;		*(ptr_d_) = h+j; }
-			else 	{	*(ptr_b_) = 0;		*(ptr__b) = j;		*(ptr_d_) = h-j; }
+				Mat inputBCrop=inputB32(Rect (*(ptr__a),*(ptr__b),*(ptr_c_),*(ptr_d_)));
+				*(ptr_inputB_) = sum(inputBCrop)[0];
+			}
+		}
+	} else {
+		for (int i=lower; i<=upper; i++) {
+			for (int j=lower; j<=upper; j++,ptr_a_++,ptr_b_++,ptr_c_++,ptr_d_++,ptr__a++,ptr__b++,ptr_inputB_++,ptr_inputBB_++) {
 
-			Mat inputBCrop=inputB32(Rect (*(ptr__a),*(ptr__b),*(ptr_c_),*(ptr_d_)));
-			Mat inputBBCrop=inputBB32(Rect (*(ptr__a),*(ptr__b),*(ptr_c_),*(ptr_d_)));
-			//Mat multResult(*(ptr_c_),*(ptr_d_),CV_32F);
+				if(i<0) { 	*(ptr_a_) = -i;		*(ptr__a) = 0;		*(ptr_c_) = w+i; }
+				else 	{	*(ptr_a_) = 0; 		*(ptr__a) = i;		*(ptr_c_) = w-i; }
+				if(j<0) {	*(ptr_b_) = -j;		*(ptr__b) = 0;		*(ptr_d_) = h+j; }
+				else 	{	*(ptr_b_) = 0;		*(ptr__b) = j;		*(ptr_d_) = h-j; }
 
-			*(ptr_inputBB_) = sum(inputBBCrop)[0];
-			*(ptr_inputB_) = sum(inputBCrop)[0];
+				Mat inputBCrop=inputB32(Rect (*(ptr__a),*(ptr__b),*(ptr_c_),*(ptr_d_)));
+				Mat inputBBCrop=inputBB32(Rect (*(ptr__a),*(ptr__b),*(ptr_c_),*(ptr_d_)));
+				//Mat multResult(*(ptr_c_),*(ptr_d_),CV_32F);
+
+				*(ptr_inputBB_) = sum(inputBBCrop)[0];
+				*(ptr_inputB_) = sum(inputBCrop)[0];
+			}
 		}
 	}
 
-
 	if (criterion == METHOD_CORR){
 		for (int j = 0; j < nTotalReferenceImages; j++,ptr_rpx++,ptr_rpy++,ptr_rs++){
-			float maxCorrCoef = -1;
+			if ((j>0)&&(j%100==0)) cout<<"\t"<<j<<endl;
+			float maxCorrCoef = -2;
 			int posX = 0;
 			int posY = 0;
 
@@ -260,7 +276,8 @@ void FaceRecognition::getScoreTestImageBased(
 					Mat inputAACrop=inputAA32(Rect (a_,b_,c_,d_));
 					Mat multResult(c_,d_,CV_32F);
 					Mat multResult2(c_,d_,CV_32F);
-
+//					Mat multResult3(c_,d_,CV_32F);
+//					Mat multResult4(c_,d_,CV_32F);
 					Asq = sum(inputAACrop)[0];
 					Bsq = *(ptr_inputBB_);
 					As = sum(inputACrop)[0];
@@ -269,15 +286,56 @@ void FaceRecognition::getScoreTestImageBased(
 					float refSigma = sqrt((double)s*Asq-(double)As*As);
 					float tesSigma = sqrt((double)s*Bsq-(double)Bs*Bs);
 
-//					multiply (inputACrop,inputBCrop,multResult);
-//					Ms = sum(multResult)[0];
-//					float corrCoef = ((double)s*Ms - (double)As*Bs)/(refSigma*tesSigma);
+//					float refSigma = sqrt((double)s*As-(double)As*As);
+//					float tesSigma = sqrt((double)s*Bs-(double)Bs*Bs);
+//
+					multiply (inputACrop,inputBCrop,multResult);
+					Ms = sum(multResult)[0];
+					float corrCoef = ((double)s*Ms - (double)As*Bs)/(refSigma*tesSigma);
 
-					multiply (inputACrop-As/s,inputBCrop-Bs/s,multResult);
-					threshold(multResult,multResult2, 0, 99999, THRESH_TOZERO);
-					threshold(multResult,multResult, 0, 99999, THRESH_TOZERO_INV);
-					Ms = sum(multResult2)[0] + sum(multResult)[0];
-					float corrCoef = (double)(s*Ms)/(refSigma*tesSigma);
+
+//
+//					multResult = inputACrop-inputBCrop;
+//					multResult = abs(multResult);
+//					multResult2 = 255-multResult;
+//					min(multResult,multResult2,multResult2);
+//					float corrCoef = -(sum(multResult2)[0])/s/255;
+					//724     767 772
+
+//					multiply (inputACrop-As/s,inputBCrop-Bs/s,multResult);
+//					threshold(multResult,multResult2, 0, 99999, THRESH_TOZERO);
+//					threshold(multResult,multResult, 0, 99999, THRESH_TOZERO_INV);
+//					Ms = sum(multResult2)[0] + sum(multResult)[0];
+//					float corrCoef = (double)(s*Ms)/(refSigma*tesSigma);
+					//724 729 772 768 corr-result2-769 binresult277-768
+					//				  pcorr-result2-768
+					//			      corr-result3-764 pcorr-result3-760
+					//									bin-pcorr-result3-764
+					//									bin-corr-result3-764
+
+//					float ssuumm1 = (sum(inputACrop)[0]+sum(inputBCrop)[0])/s;
+//					float ssuumm2 = (sum(1-inputACrop)[0]+sum(1-inputBCrop)[0])/s;
+//					float ssuumm3 = (sum(inputACrop)[0]+sum(1-inputBCrop)[0])/s;
+//					float ssuumm4 = (sum(1-inputACrop)[0]+sum(inputBCrop)[0])/s;
+//									cout<<sum(inputACrop)[0]<<endl;
+//									cout<<sum(1-inputACrop)[0]<<endl;
+//									cout<<sum(inputBCrop)[0]<<endl;
+//									cout<<sum(1-inputBCrop)[0]<<endl;
+////									cout<<sum(multResult)[0]<<endl;
+////									cout<<sum(multResult2)[0]<<endl;
+//									cout<<"k"<<endl;
+					//multiply (inputACrop,inputBCrop,multResult);
+					//multiply (1-inputACrop,1-inputBCrop,multResult2);
+					//Ms = sum(multResult2)[0]*sqrt(sqrt(ssuumm1))+ sum(multResult)[0]*sqrt(sqrt(ssuumm2)); // 14
+					//Ms = sum(multResult2)[0]*sqrt(ssuumm1)+ sum(multResult)[0]*sqrt(ssuumm2); //13
+					//Ms = sum(multResult2)[0]*(ssuumm1)*(ssuumm1)+ sum(multResult)[0]*sqrt(ssuumm2)*sqrt(ssuumm2); //53
+					//Ms = sqrt(sum(multResult2)[0])+sqrt(sum(multResult)[0]); //28
+					//Ms = sum(multResult2)[0]*1.035+ sum(multResult)[0]*0.965; //15
+					//Ms = sum(multResult2)[0]+ sum(multResult)[0]; //
+//					Ms = sum(multResult2)[0]*ssuumm1+ sum(multResult)[0]*ssuumm2; //24
+//					Ms = sum(multResult2)[0]*ssuumm3+ sum(multResult)[0]*ssuumm4; //16
+//					Ms = sum(multResult2)[0]*ssuumm4+ sum(multResult)[0]*ssuumm3; //27
+					//float corrCoef = (double)(Ms)/s;
 
 
 //					float corrCoef = (((double)s*Ms)/(refSigma*tesSigma)-0.5)*2;
@@ -303,9 +361,9 @@ void FaceRecognition::getScoreTestImageBased(
 		}
 
 		RecognitionResult.at<ushort>(nFileIndex,0) = maxSubjectIndex;
-		cout<<(int)RecognitionPositionX.at<char>(nFileIndex,maxSubjectIndex)<<","<<(int)RecognitionPositionY.at<char>(nFileIndex,maxSubjectIndex)<<endl;
-		cout<<"now: "<<maxSubjectIndex<<endl;
-		cout<<"score: "<<max<<endl;
+		//cout<<(int)RecognitionPositionX.at<char>(nFileIndex,maxSubjectIndex)<<","<<(int)RecognitionPositionY.at<char>(nFileIndex,maxSubjectIndex)<<endl;
+		//cout<<"now: "<<maxSubjectIndex<<endl;
+		//cout<<"score: "<<max<<endl;
 	} else if (criterion == METHOD_L2NORM){
 		max=1e100;
 		for (int j = 0; j < nTotalReferenceImages; j++,ptr_rpx++,ptr_rpy++,ptr_rs++){
@@ -453,6 +511,142 @@ void FaceRecognition::getScoreTestImageBased(
 			*(ptr_rpy) = posY;
 			*(ptr_rs)  = maxCorrCoef;
 			if (maxCorrCoef<max) {
+				max = maxCorrCoef;
+				maxSubjectIndex = j;
+			}
+		}
+
+		RecognitionResult.at<ushort>(nFileIndex,0) = maxSubjectIndex;
+		cout<<(int)RecognitionPositionX.at<char>(nFileIndex,maxSubjectIndex)<<","<<(int)RecognitionPositionY.at<char>(nFileIndex,maxSubjectIndex)<<endl;
+		cout<<"now: "<<maxSubjectIndex<<endl;
+		cout<<"score: "<<max<<endl;
+	} else if (criterion == METHOD_CORRBIN){
+		for (int j = 0; j < nTotalReferenceImages; j++,ptr_rpx++,ptr_rpy++,ptr_rs++){
+			if ((j>0)&&(j%100==0)) cout<<"\t"<<j<<endl;
+			float maxCorrCoef = -2;
+			int posX = 0;
+			int posY = 0;
+
+			if(inputA[j].type() != inputB.type()) return;
+			if(inputA[j].size() != inputB.size()) return;
+			// based on offset of the reference image
+
+			ptr_a_ = a__;
+			ptr_b_ = a__+sRsize;
+			ptr_c_ = ptr_b_+sRsize;
+			ptr_d_ = ptr_c_+sRsize;
+			ptr__a = ptr_d_+sRsize;
+			ptr__b = ptr__a+sRsize;
+			ptr_inputB_ = inputB_;
+			ptr_inputBB_ = inputB_+sRsize;
+
+
+			Mat inputA32; inputA[j].convertTo(inputA32,CV_32F);
+
+			for (int i=lower; i<=upper; i++) {
+				for (int j=lower; j<=upper; j++,ptr_a_++,ptr_b_++,ptr_c_++,ptr_d_++,ptr__a++,ptr__b++,ptr_inputB_++,ptr_inputBB_++) {
+					float Ms;
+					float As,Bs;
+
+					int a_=*(ptr_a_),b_=*(ptr_b_),c_=*(ptr_c_),d_=*(ptr_d_);
+					int _a=*(ptr__a),_b=*(ptr__b);
+					int s = c_*d_;
+
+					Mat inputACrop=inputA32(Rect (a_,b_,c_,d_));
+					Mat inputBCrop=inputB32(Rect (_a,_b,c_,d_));
+					Mat multResult(c_,d_,CV_32F);
+					Mat multResult2(c_,d_,CV_32F);
+					Mat multResult3(c_,d_,CV_32F);
+					Mat multResult4(c_,d_,CV_32F);
+
+					As = sum(inputACrop)[0]/s;
+					Bs = *(ptr_inputB_)/s;
+
+//					float refSigma = sqrt((double)s-(double)As);
+//					float tesSigma = sqrt((double)s-(double)Bs);
+					float sigma = 1/sqrt(((double)s-(double)As)*((double)s-(double)Bs));
+//					float refSigma = sqrt((double)s*As-(double)As*As);
+//					float tesSigma = sqrt((double)s*Bs-(double)Bs*Bs);
+//
+					//multiply (inputACrop,inputBCrop,multResult);
+					bitwise_and (inputACrop,inputBCrop,multResult);
+					bitwise_and (inputACrop,1-inputBCrop,multResult2);
+					bitwise_and (1-inputACrop,inputBCrop,multResult3);
+					bitwise_and (1-inputACrop,1-inputBCrop,multResult4);
+//					Ms = sum(multResult)[0];
+//					float corrCoef = ((double)s*Ms - (double)As*Bs)*sigma;
+					float Ms1 = sum(multResult)[0]/s;
+					float Ms2 = sum(multResult2)[0]/s;
+					float Ms3 = sum(multResult3)[0]/s;
+					float Ms4 = sum(multResult4)[0]/s;
+					//float corrCoef = (Ms1*Ms4-Ms2*Ms3)/sqrt((Ms1+Ms3)*(Ms2+Ms4)*(Ms1+Ms2)*(Ms3+Ms4));
+
+					float corrCoef = Ms1*log(Ms1/As/Bs)+
+									Ms2*log(Ms2/As/(1-Bs))+
+									Ms3*log(Ms3/(1-As)/Bs)+
+									Ms4*log(Ms4/(1-As)/(1-Bs));
+					//cout<<corrCoef<<endl;
+//
+//					multResult = inputACrop-inputBCrop;
+//					multResult = abs(multResult);
+//					multResult2 = 255-multResult;
+//					min(multResult,multResult2,multResult2);
+//					float corrCoef = -(sum(multResult2)[0]);
+					//724     767 772
+
+//					multiply (inputACrop-As/s,inputBCrop-Bs/s,multResult);
+//					threshold(multResult,multResult2, 0, 99999, THRESH_TOZERO);
+//					threshold(multResult,multResult, 0, 99999, THRESH_TOZERO_INV);
+//					Ms = sum(multResult2)[0] + sum(multResult)[0];
+//					float corrCoef = (double)(s*Ms)/(refSigma*tesSigma);
+					//724 729 772 768 corr-result2-769 binresult277-768
+					//				  pcorr-result2-768
+					//			      corr-result3-764 pcorr-result3-760
+					//									bin-pcorr-result3-764
+					//									bin-corr-result3-764
+
+//					float ssuumm1 = (sum(inputACrop)[0]+sum(inputBCrop)[0])/s;
+//					float ssuumm2 = (sum(1-inputACrop)[0]+sum(1-inputBCrop)[0])/s;
+//					float ssuumm3 = (sum(inputACrop)[0]+sum(1-inputBCrop)[0])/s;
+//					float ssuumm4 = (sum(1-inputACrop)[0]+sum(inputBCrop)[0])/s;
+//									cout<<sum(inputACrop)[0]<<endl;
+//									cout<<sum(1-inputACrop)[0]<<endl;
+//									cout<<sum(inputBCrop)[0]<<endl;
+//									cout<<sum(1-inputBCrop)[0]<<endl;
+////									cout<<sum(multResult)[0]<<endl;
+////									cout<<sum(multResult2)[0]<<endl;
+//									cout<<"k"<<endl;
+					//multiply (inputACrop,inputBCrop,multResult);
+					//multiply (1-inputACrop,1-inputBCrop,multResult2);
+					//Ms = sum(multResult2)[0]*sqrt(sqrt(ssuumm1))+ sum(multResult)[0]*sqrt(sqrt(ssuumm2)); // 14
+					//Ms = sum(multResult2)[0]*sqrt(ssuumm1)+ sum(multResult)[0]*sqrt(ssuumm2); //13
+					//Ms = sum(multResult2)[0]*(ssuumm1)*(ssuumm1)+ sum(multResult)[0]*sqrt(ssuumm2)*sqrt(ssuumm2); //53
+					//Ms = sqrt(sum(multResult2)[0])+sqrt(sum(multResult)[0]); //28
+					//Ms = sum(multResult2)[0]*1.035+ sum(multResult)[0]*0.965; //15
+					//Ms = sum(multResult2)[0]+ sum(multResult)[0]; //
+//					Ms = sum(multResult2)[0]*ssuumm1+ sum(multResult)[0]*ssuumm2; //24
+//					Ms = sum(multResult2)[0]*ssuumm3+ sum(multResult)[0]*ssuumm4; //16
+//					Ms = sum(multResult2)[0]*ssuumm4+ sum(multResult)[0]*ssuumm3; //27
+					//float corrCoef = (double)(Ms)/s;
+
+
+//					float corrCoef = (((double)s*Ms)/(refSigma*tesSigma)-0.5)*2;
+//					float corrCoef = (corrCoef1<corrCoef2)? corrCoef1: corrCoef2;
+
+//					float corrCoef = ((double)s*Ms)/(refSigma*tesSigma);
+					if (sigma == 0) continue;
+					if (maxCorrCoef < corrCoef) {
+						maxCorrCoef = corrCoef;
+						posX = i;
+						posY = j;
+					}
+				}
+			}
+
+			*(ptr_rpx) = posX;
+			*(ptr_rpy) = posY;
+			*(ptr_rs)  = maxCorrCoef;
+			if (maxCorrCoef>max) {
 				max = maxCorrCoef;
 				maxSubjectIndex = j;
 			}
@@ -680,6 +874,7 @@ void FaceRecognition::getScoreTestImageBasedCrop(
 
 	if (criterion == METHOD_CORR){
 		for (int j = 0; j < nTotalReferenceImages; j++,ptr_rpx++,ptr_rpy++,ptr_rs++){
+
 			float maxCorrCoef = -1;
 			int posX = 0;
 			int posY = 0;
@@ -926,15 +1121,16 @@ void FaceRecognition::getPCAscore(
 }
 
 void FaceRecognition::PrintScore(
-		char* 							s)
+		const char* 							s)
 {
 	ofstream a;
 	a.open(s,ios::out);
 	int nTotalReferenceImages = nSubject*nRefImagesPerSubject;
 	for (int i = 0; i<nFiles; i++){
 		for (int j = 0; j<nTotalReferenceImages; j++){
-			a<<(float)RecognitionScore.at<float>(i,j)<<endl;
+			a<<(float)RecognitionScore.at<float>(i,j)<<"\t";
 		}
+		a<<endl;
 	}
 
 	a.close();
@@ -1008,7 +1204,7 @@ void FaceRecognition::_Recognition(
 				for (int i = 0; i < nFiles; i++) {
 					//if (i<32*64) continue;
 					//if (i>=33*64) continue;
-					cout << files[i] << endl;
+					//cout << files[i] << endl;
 					Mat testImage = imread( DirectoryLocation+"/"+files[i], -1 );
 					double t=(double)getTickCount();
 					getScoreTestImageBased(referenceImage, testImage, i, nSearchRadius, criterion);
@@ -1047,7 +1243,7 @@ void FaceRecognition::_Recognition(
 //			}
 
 	}
-	cout <<"done"<<endl;
+	//cout <<"done"<<endl;
 }
 
 
@@ -1262,11 +1458,13 @@ vector<float> FaceRecognition::getAccuracyIncludingBadImagesSubset()
 		}
 	}
 	nCorrect = correctCounter;
-
+	cout<<correctCounter;
 	for (int i=0; i<nImagesSubsetSize; i++){
 		nCorrectSubsetAccuracy[i] = (double)nCorrectSubset[i]/(nImagesSubset[i]*nSubject-nBadImagesSubset[i]);
-		cout<<"# "<<nCorrectSubsetAccuracy[i]<<", "<<nCorrectSubset[i]<<", "<<(nImagesSubset[i]*nSubject-nBadImagesSubset[i])<<endl;
+		cout<<", "<<nCorrectSubset[i];
+		//cout<<"# "<<nCorrectSubsetAccuracy[i]<<", "<<nCorrectSubset[i]<<", "<<(nImagesSubset[i]*nSubject-nBadImagesSubset[i])<<endl;
 	}
+	cout<<endl;
 
 	return nCorrectSubsetAccuracy;
 }
@@ -1473,3 +1671,4 @@ Mat FaceRecognition::asRowMatrix(
 
 
 }
+
