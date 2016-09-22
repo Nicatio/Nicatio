@@ -106,7 +106,7 @@ public:
 			const Mat						inputB,
 			const int						nFileIndex);
 	float getAccuracy(
-			vector<string>						filess);
+			vector<string>						files);
 	float getAccuracyIncludingBadImages();
 	vector<float> getAccuracyIncludingBadImagesSubset();
 	vector<float> getAccuracyIncludingBadImagesSubset(ofstream &fw);

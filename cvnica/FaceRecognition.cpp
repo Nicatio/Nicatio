@@ -7,7 +7,7 @@
 
 
 #include "FaceRecognition.h"
-#define SEARCHRADIUS 7
+#define SEARCHRADIUS 5
 using namespace cv;
 
 namespace cvNica {
@@ -305,7 +305,7 @@ void FaceRecognition::getScoreTestImageBased(
 //					multiply (inputACrop-As/s,inputBCrop-Bs/s,multResult);
 //					threshold(multResult,multResult2, 0, 99999, THRESH_TOZERO);
 //					threshold(multResult,multResult, 0, 99999, THRESH_TOZERO_INV);
-//					Ms = sum(multResult2)[0] + sum(multResult)[0];
+//					Ms = sum(multResult2)[0] ;//+ sum(multResult)[0];
 //					float corrCoef = (double)(s*Ms)/(refSigma*tesSigma);
 					//724 729 772 768 corr-result2-769 binresult277-768
 					//				  pcorr-result2-768
@@ -1204,7 +1204,7 @@ void FaceRecognition::_Recognition(
 				for (int i = 0; i < nFiles; i++) {
 					//if (i<32*64) continue;
 					//if (i>=33*64) continue;
-					//cout << files[i] << endl;
+					cout << files[i] << endl;
 					Mat testImage = imread( DirectoryLocation+"/"+files[i], -1 );
 					double t=(double)getTickCount();
 					getScoreTestImageBased(referenceImage, testImage, i, nSearchRadius, criterion);

@@ -21,7 +21,7 @@ using namespace std;
 //#define PGM
 
 #define DATA_TYPE_SELECT
-#define DATA_TYPE 0
+#define DATA_TYPE 2
 // 0: bmp
 // 1: png
 // 2: pgm
@@ -40,8 +40,9 @@ using namespace std;
 //#define FA
 
 //#define CMQI
+//#define CMQImod
 
-//#define FR_for_integrated
+#define FR_for_integrated
 //#define FR_for_separated
 //#define FR_REGION
 //#define Fileout
@@ -57,7 +58,7 @@ using namespace std;
 //#define crop
 //#define DMQI
 //#define DMQIHE
-
+//#define HE
 
 //#define MDMQI_stretch
 //#define MDMQI_lhe
@@ -83,7 +84,7 @@ using namespace std;
 //#define SMQI_varparam
 //#define SMQI_varparam_adaptive
 
-#define CMQI_varparam
+//#define CMQI_varparam
 //#define MQI_varparam
 
 //#define DMQIADVANCED
@@ -102,7 +103,7 @@ using namespace std;
 //#define FERETcopy
 
 
-//#define illuminationNormalization
+#define illuminationNormalization
 //#define textDetection
 //#define t140311
 //#define faceDetection
@@ -5698,9 +5699,128 @@ int main(int argc, char* argv[] ){
 		return -1;
 	}
 #endif
+		double alphaArr[21] = {1,1.05,1.1,1.15,1.2,
+								 1.25,1.3,1.35,1.4,
+								 1.45,1.5,1.55,1.6,
+								 1.65,1.7,1.75,1.8,
+								 1.85,1.9,1.95,2};
+
+		double kArr[21] = {0.01,0.02,0.05,
+							0.1,0.2,0.5,
+							1.0,2.0,5.0,
+							200,500,1000,2000,5000,10000};
+
+		//for (float alpha=1; alpha<=2.0001;alpha+=0.05){
+		for (int u=0; u<21; u+=2) {
+			for (int k=3; k<9; k++){
+				stringstream ad;
+				stringstream adhe;
+				ad<<dir2<<"/cmqi_param/a"<<alphaArr[u]<<"_k"<<kArr[k];
+				adhe<<dir2<<"/cmqi_param_he/a"<<alphaArr[u]<<"_k"<<kArr[k];
+				cout<<dir2<<"/cmqi_param_he/a"<<alphaArr[u]<<"_k"<<kArr[k]<<endl;
+
+				mkdir(ad.str().c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+				mkdir(adhe.str().c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+				for (unsigned int i = 0;i < files.size();i++) {
+							Mat _image1;
+							_image1 = imread( dir+"/"+files[i], -1 );
+							Size size = _image1.size();
+							Mat _deno1(size,CV_8UC1);
+							Mat _dmqi(size,CV_8UC1);
+							Mat _histeq(size,CV_8UC1);
+							cvNica::Denoise(_image1,_deno1);
+							//cvNica::SelectiveClosingParam(_deno1,_dmqi, 5, 5, 1.4, 0);
+							cvNica::ContinuousMorphQuotImage(_deno1,_dmqi, alphaArr[u], kArr[k],5,9,0);
+							equalizeHist(_dmqi,_histeq);
+							unsigned found = files[i].rfind("bad");
+							vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
 
 
-//					for (unsigned int i = 0;i < files.size();i++) {
+							imwrite(ad.str()+"/"+tokens[0]+"."+dataType,_dmqi);
+							if (found!=std::string::npos)
+								rename( string(ad.str()+"/"+tokens[0]+"."+dataType).c_str() , string(ad.str()+"/"+tokens[0]+"."+dataType+".bad").c_str() );
+
+							imwrite(adhe.str()+"/"+tokens[0]+"."+dataType,_histeq);
+							if (found!=std::string::npos)
+								rename( string(adhe.str()+"/"+tokens[0]+"."+dataType).c_str() , string(adhe.str()+"/"+tokens[0]+"."+dataType+".bad").c_str() );
+
+				}
+
+
+
+			}
+		}
+		for (int u=0; u<21; u+=2) {
+			for (int k=3; k<9; k++){
+				stringstream ad;
+				//ad<<dir<<"/cmqi_param/a"<<alpha<<"_k"<<k;
+				ad<<dir2<<"/cmqi_param/a"<<alphaArr[u]<<"_k"<<kArr[k];
+				cvNica::FaceRecognition fr(ad.str(),refLocation,"integrated");
+					//fr.Recognition(dir,"pgm",DB_YALEB,METHOD_CORR,-45,0);
+
+					fr.Recognition(ad.str(),dataType,DB_YALEB,METHOD_CORR);
+					//fr.Recognition(dir,dataType,DB_YALEB,METHOD_CORRBIN);
+					//fr.Recognition(dir,dataType,DB_YALEB,METHOD_L2NORM2);
+
+					//cout<<"1 "<<fr.getAccuracy(files)<<" "<<endl;
+					//fr.getAccuracyIncludingBadImages();
+					cout<<(float)alphaArr[u]<<", "<<kArr[k]<<", ";
+					fr.getAccuracyIncludingBadImagesSubset();
+
+					//FileStorage abcd("dix.xml",FileStorage::WRITE);
+					//abcd << "frRecognitionResult" << fr.RecognitionResult;
+					//abcd.release();
+					ad<<"_total.txt";
+					fr.PrintScore(ad.str().c_str());
+
+			}
+		}
+		for (int u=0; u<21; u+=2) {
+			for (int k=3; k<9; k++){
+				stringstream adhe;
+				//ad<<dir<<"/cmqi_param/a"<<alpha<<"_k"<<k;
+				adhe<<dir2<<"/cmqi_param_he/a"<<alphaArr[u]<<"_k"<<kArr[k];
+				cvNica::FaceRecognition fr(adhe.str(),refLocation,"integrated");
+					//fr.Recognition(dir,"pgm",DB_YALEB,METHOD_CORR,-45,0);
+
+					fr.Recognition(adhe.str(),dataType,DB_YALEB,METHOD_CORR);
+					//fr.Recognition(dir,dataType,DB_YALEB,METHOD_CORRBIN);
+					//fr.Recognition(dir,dataType,DB_YALEB,METHOD_L2NORM2);
+
+					//cout<<"1 "<<fr.getAccuracy(files)<<" "<<endl;
+					//fr.getAccuracyIncludingBadImages();
+					cout<<(float)alphaArr[u]<<", "<<kArr[k]<<", ";
+					fr.getAccuracyIncludingBadImagesSubset();
+
+					//FileStorage abcd("dix.xml",FileStorage::WRITE);
+					//abcd << "frRecognitionResult" << fr.RecognitionResult;
+					//abcd.release();
+					adhe<<"_total.txt";
+					fr.PrintScore(adhe.str().c_str());
+
+			}
+		}
+
+
+//	double alphaArr[21] = {1,1.05,1.1,1.15,1.2,
+//							 1.25,1.3,1.35,1.4,
+//							 1.45,1.5,1.55,1.6,
+//							 1.65,1.7,1.75,1.8,
+//							 1.85,1.9,1.95,2};
+//	int k=10;
+//	int u=2;
+//
+//	for (int s=3; s<=13; s+=2) {
+//		for (int l=s+2; l<=15; l+=2){
+//			stringstream ad;
+//			stringstream adhe;
+//			ad<<dir2<<"/cmqi_param_sl/ellipse_a"<<alphaArr[u]<<"_k"<<k<<"_s"<<s<<"_l"<<l;
+//			adhe<<dir2<<"/cmqi_param_he_sl/ellipse_a"<<alphaArr[u]<<"_k"<<k<<"_s"<<s<<"_l"<<l;
+//			cout<<dir2<<"/cmqi_param_sl/ellipse_a"<<alphaArr[u]<<"_k"<<k<<"_s"<<s<<"_l"<<l<<endl;
+//
+//			mkdir(ad.str().c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+//			mkdir(adhe.str().c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+//			for (unsigned int i = 0;i < files.size();i++) {
 //						Mat _image1;
 //						_image1 = imread( dir+"/"+files[i], -1 );
 //						Size size = _image1.size();
@@ -5708,119 +5828,362 @@ int main(int argc, char* argv[] ){
 //						Mat _dmqi(size,CV_8UC1);
 //						Mat _histeq(size,CV_8UC1);
 //						cvNica::Denoise(_image1,_deno1);
-//						cvNica::SelectiveMorphQuotImageParam(_deno1,_dmqi, 11, 3, 2.1, 0);
+//						//cvNica::SelectiveClosingParam(_deno1,_dmqi, 5, 5, 1.4, 0);
+//						cvNica::ContinuousMorphQuotImage(_deno1,_dmqi, alphaArr[u], k, s, l);
 //						equalizeHist(_dmqi,_histeq);
 //						unsigned found = files[i].rfind("bad");
 //						vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
-//						imwrite(dir+"/testbed/"+tokens[0]+"."+dataType,_histeq);
+//
+//
+//						imwrite(ad.str()+"/"+tokens[0]+"."+dataType,_dmqi);
 //						if (found!=std::string::npos)
-//							rename( string(dir+"/testbed/"+tokens[0]+"."+dataType).c_str() , string(dir+"/testbed/"+tokens[0]+"."+dataType+".bad").c_str() );
+//							rename( string(ad.str()+"/"+tokens[0]+"."+dataType).c_str() , string(ad.str()+"/"+tokens[0]+"."+dataType+".bad").c_str() );
 //
-//					}
-//					cvNica::FaceRecognition fr(dir+"/testbed",refLocation,"integrated");
-//					fr.Recognition(dir+"/testbed",dataType,DB_YALEB,METHOD_CORR);
-//					fr.getAccuracy(files);
-//					fr.getAccuracyIncludingBadImages();
-//					fr.getAccuracyIncludingBadImagesSubset();
-
-					//fr.PrintScore("dfdf.txt");
-					//of<<large<<"\t"<<small<<"\t"<<alpha<<"\t"<<	fr.getAccuracy(files)<<"\t"<<fr.getAccuracyIncludingBadImages()<<endl;
-
-
-	ofstream of;
-	of.open("output_ddd32.txt");
-
-//	//for (int large=5; large<=15; large+=2){
-//	for (int large=9; large<=9; large+=2){
-//		//for (int small=3; small<large;small+=2){//large; small+=2){
-//		for (int small=5; small<=5;small+=2){
-//			for (float alpha=1; alpha<=3.0; alpha+=0.1){
+//						imwrite(adhe.str()+"/"+tokens[0]+"."+dataType,_histeq);
+//						if (found!=std::string::npos)
+//							rename( string(adhe.str()+"/"+tokens[0]+"."+dataType).c_str() , string(adhe.str()+"/"+tokens[0]+"."+dataType+".bad").c_str() );
 //
-//				for (unsigned int i = 0;i < files.size();i++) {
-//					Mat _image1;
-//					_image1 = imread( dir+"/"+files[i], -1 );
-//					Size size = _image1.size();
-//					Mat _deno1(size,CV_8UC1);
-//					Mat _dmqi(size,CV_8UC1);
-//					Mat _histeq(size,CV_8UC1);
-//					cvNica::Denoise(_image1,_deno1);
-//					cvNica::SelectiveMorphQuotImageParam(_deno1,_dmqi, large, small, alpha, 0);
-//					equalizeHist(_dmqi,_histeq);
-//					unsigned found = files[i].rfind("bad");
-//					vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
-//					imwrite(dir+"/testbed/"+tokens[0]+"."+dataType,_histeq);
-//					if (found!=std::string::npos)
-//						rename( string(dir+"/testbed/"+tokens[0]+"."+dataType).c_str() , string(dir+"/testbed/"+tokens[0]+"."+dataType+".bad").c_str() );
-//
-//				}
-//				cvNica::FaceRecognition fr(dir+"/testbed",refLocation,"integrated");
-//				fr.Recognition(dir+"/testbed",dataType,DB_YALEB,METHOD_CORR);
-//				of<<large<<"\t"<<small<<"\t"<<alpha<<"\t"<<	fr.getAccuracy(files)<<"\t"<<fr.getAccuracyIncludingBadImages()<<endl;
-//				vector<string> ldf;
-//				ldf<<alpha;
-//				fr.PrintScore("dfdf_"+ldf+".txt");
 //			}
 //
-////			for (float alpha=3.; alpha<=10.01; alpha+=1.){
+//
+//
+//		}
+//	}
+//
+//	for (int s=3; s<=13; s+=2) {
+//		for (int l=s+2; l<=15; l+=2){
+//			stringstream ad;
+//			stringstream adhe;
+//			ad<<dir2<<"/cmqi_param_sl/ellipse_a"<<alphaArr[u]<<"_k"<<k<<"_s"<<s<<"_l"<<l;
+//			//adhe<<dir<<"/cmqi_param_he/a"<<alpha<<"_k"<<k;
+//			cvNica::FaceRecognition fr(ad.str(),refLocation,"integrated");
+//				//fr.Recognition(dir,"pgm",DB_YALEB,METHOD_CORR,-45,0);
+//
+//				fr.Recognition(ad.str(),dataType,DB_YALEB,METHOD_CORR);
+//				//fr.Recognition(dir,dataType,DB_YALEB,METHOD_CORRBIN);
+//				//fr.Recognition(dir,dataType,DB_YALEB,METHOD_L2NORM2);
+//
+//				//cout<<"1 "<<fr.getAccuracy(files)<<" "<<endl;
+//				//fr.getAccuracyIncludingBadImages();
+//				cout<<(float)alphaArr[u]<<", "<<k<<", "<<s<<","<<l<<",";
+//				fr.getAccuracyIncludingBadImagesSubset();
+//
+//				//FileStorage abcd("dix.xml",FileStorage::WRITE);
+//				//abcd << "frRecognitionResult" << fr.RecognitionResult;
+//				//abcd.release();
+//				ad<<"_total.txt";
+//				fr.PrintScore(ad.str().c_str());
+//
+//		}
+//	}
+//	for (int s=3; s<=13; s+=2) {
+//		for (int l=s+2; l<=15; l+=2){
+//			stringstream adhe;
+//			//ad<<dir<<"/cmqi_param/a"<<alpha<<"_k"<<k;
+//			adhe<<dir2<<"/cmqi_param_he_sl/ellipse_a"<<alphaArr[u]<<"_k"<<k<<"_s"<<s<<"_l"<<l;
+//			cvNica::FaceRecognition fr(adhe.str(),refLocation,"integrated");
+//				//fr.Recognition(dir,"pgm",DB_YALEB,METHOD_CORR,-45,0);
+//
+//				fr.Recognition(adhe.str(),dataType,DB_YALEB,METHOD_CORR);
+//				//fr.Recognition(dir,dataType,DB_YALEB,METHOD_CORRBIN);
+//				//fr.Recognition(dir,dataType,DB_YALEB,METHOD_L2NORM2);
+//
+//				//cout<<"1 "<<fr.getAccuracy(files)<<" "<<endl;
+//				//fr.getAccuracyIncludingBadImages();
+//				cout<<(double)alphaArr[u]<<", "<<k<<", "<<s<<","<<l<<",";
+//				fr.getAccuracyIncludingBadImagesSubset();
+//
+//				//FileStorage abcd("dix.xml",FileStorage::WRITE);
+//				//abcd << "frRecognitionResult" << fr.RecognitionResult;
+//				//abcd.release();
+//				adhe<<"_total.txt";
+//				fr.PrintScore(adhe.str().c_str());
+//
+//		}
+//	}
+//	//	int k=10;
+//	//	int u=2;
+//		k=20;
+//		u=10;
+//		for (int s=3; s<=13; s+=2) {
+//			for (int l=s+2; l<=15; l+=2){
+//				stringstream ad;
+//				stringstream adhe;
+//				ad<<dir2<<"/cmqi_param_sl/ellipse_a"<<alphaArr[u]<<"_k"<<k<<"_s"<<s<<"_l"<<l;
+//				adhe<<dir2<<"/cmqi_param_he_sl/ellipse_a"<<alphaArr[u]<<"_k"<<k<<"_s"<<s<<"_l"<<l;
+//				cout<<dir2<<"/cmqi_param_sl/ellipse_a"<<alphaArr[u]<<"_k"<<k<<"_s"<<s<<"_l"<<l<<endl;
+//
+//				mkdir(ad.str().c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+//				mkdir(adhe.str().c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+//				for (unsigned int i = 0;i < files.size();i++) {
+//							Mat _image1;
+//							_image1 = imread( dir+"/"+files[i], -1 );
+//							Size size = _image1.size();
+//							Mat _deno1(size,CV_8UC1);
+//							Mat _dmqi(size,CV_8UC1);
+//							Mat _histeq(size,CV_8UC1);
+//							cvNica::Denoise(_image1,_deno1);
+//							//cvNica::SelectiveClosingParam(_deno1,_dmqi, 5, 5, 1.4, 0);
+//							cvNica::ContinuousMorphQuotImage(_deno1,_dmqi, alphaArr[u], k, s, l);
+//							equalizeHist(_dmqi,_histeq);
+//							unsigned found = files[i].rfind("bad");
+//							vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
+//
+//
+//							imwrite(ad.str()+"/"+tokens[0]+"."+dataType,_dmqi);
+//							if (found!=std::string::npos)
+//								rename( string(ad.str()+"/"+tokens[0]+"."+dataType).c_str() , string(ad.str()+"/"+tokens[0]+"."+dataType+".bad").c_str() );
+//
+//							imwrite(adhe.str()+"/"+tokens[0]+"."+dataType,_histeq);
+//							if (found!=std::string::npos)
+//								rename( string(adhe.str()+"/"+tokens[0]+"."+dataType).c_str() , string(adhe.str()+"/"+tokens[0]+"."+dataType+".bad").c_str() );
+//
+//				}
+//
+//
+//
+//			}
+//		}
+//
+//		for (int s=3; s<=13; s+=2) {
+//			for (int l=s+2; l<=15; l+=2){
+//				stringstream ad;
+//				stringstream adhe;
+//				ad<<dir2<<"/cmqi_param_sl/ellipse_a"<<alphaArr[u]<<"_k"<<k<<"_s"<<s<<"_l"<<l;
+//				//adhe<<dir<<"/cmqi_param_he/a"<<alpha<<"_k"<<k;
+//				cvNica::FaceRecognition fr(ad.str(),refLocation,"integrated");
+//					//fr.Recognition(dir,"pgm",DB_YALEB,METHOD_CORR,-45,0);
+//
+//					fr.Recognition(ad.str(),dataType,DB_YALEB,METHOD_CORR);
+//					//fr.Recognition(dir,dataType,DB_YALEB,METHOD_CORRBIN);
+//					//fr.Recognition(dir,dataType,DB_YALEB,METHOD_L2NORM2);
+//
+//					//cout<<"1 "<<fr.getAccuracy(files)<<" "<<endl;
+//					//fr.getAccuracyIncludingBadImages();
+//					cout<<(float)alphaArr[u]<<", "<<k<<", "<<s<<","<<l<<",";
+//					fr.getAccuracyIncludingBadImagesSubset();
+//
+//					//FileStorage abcd("dix.xml",FileStorage::WRITE);
+//					//abcd << "frRecognitionResult" << fr.RecognitionResult;
+//					//abcd.release();
+//					ad<<"_total.txt";
+//					fr.PrintScore(ad.str().c_str());
+//
+//			}
+//		}
+//		for (int s=3; s<=13; s+=2) {
+//			for (int l=s+2; l<=15; l+=2){
+//				stringstream adhe;
+//				//ad<<dir<<"/cmqi_param/a"<<alpha<<"_k"<<k;
+//				adhe<<dir2<<"/cmqi_param_he_sl/ellipse_a"<<alphaArr[u]<<"_k"<<k<<"_s"<<s<<"_l"<<l;
+//				cvNica::FaceRecognition fr(adhe.str(),refLocation,"integrated");
+//					//fr.Recognition(dir,"pgm",DB_YALEB,METHOD_CORR,-45,0);
+//
+//					fr.Recognition(adhe.str(),dataType,DB_YALEB,METHOD_CORR);
+//					//fr.Recognition(dir,dataType,DB_YALEB,METHOD_CORRBIN);
+//					//fr.Recognition(dir,dataType,DB_YALEB,METHOD_L2NORM2);
+//
+//					//cout<<"1 "<<fr.getAccuracy(files)<<" "<<endl;
+//					//fr.getAccuracyIncludingBadImages();
+//					cout<<(double)alphaArr[u]<<", "<<k<<", "<<s<<","<<l<<",";
+//					fr.getAccuracyIncludingBadImagesSubset();
+//
+//					//FileStorage abcd("dix.xml",FileStorage::WRITE);
+//					//abcd << "frRecognitionResult" << fr.RecognitionResult;
+//					//abcd.release();
+//					adhe<<"_total.txt";
+//					fr.PrintScore(adhe.str().c_str());
+//
+//			}
+//		}
+
+//	for (float alpha=1; alpha<=2.0001;alpha+=0.05){
+//	for (int u=0; u<21; u++) {
+//		for (int k=10; k<=100; k+=10){
+//			stringstream ad;
+//			stringstream adhe;
+//			ad<<dir2<<"/cmqi_param_precise/a"<<alphaArr[u]<<"_k"<<k;
+//			adhe<<dir2<<"/cmqi_param_he_precise/a"<<alphaArr[u]<<"_k"<<k;
+//			cout<<dir2<<"/cmqi_param_precise/a"<<alphaArr[u]<<"_k"<<k<<endl;
+//
+//			mkdir(ad.str().c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+//			mkdir(adhe.str().c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+//			for (unsigned int i = 0;i < files.size();i++) {
+//						Mat _image1;
+//						_image1 = imread( dir+"/"+files[i], -1 );
+//						Size size = _image1.size();
+//						Mat _deno1(size,CV_8UC1);
+//						Mat _dmqi(size,CV_8UC1);
+//						Mat _histeq(size,CV_8UC1);
+//						cvNica::Denoise(_image1,_deno1);
+//						//cvNica::SelectiveClosingParam(_deno1,_dmqi, 5, 5, 1.4, 0);
+//						cvNica::ContinuousMorphQuotImage(_deno1,_dmqi, alphaArr[u], k);
+//						equalizeHist(_dmqi,_histeq);
+//						unsigned found = files[i].rfind("bad");
+//						vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
+//
+//
+//						imwrite(ad.str()+"/"+tokens[0]+"."+dataType,_dmqi);
+//						if (found!=std::string::npos)
+//							rename( string(ad.str()+"/"+tokens[0]+"."+dataType).c_str() , string(ad.str()+"/"+tokens[0]+"."+dataType+".bad").c_str() );
+//
+//						imwrite(adhe.str()+"/"+tokens[0]+"."+dataType,_histeq);
+//						if (found!=std::string::npos)
+//							rename( string(adhe.str()+"/"+tokens[0]+"."+dataType).c_str() , string(adhe.str()+"/"+tokens[0]+"."+dataType+".bad").c_str() );
+//
+//			}
+//
+//
+//
+//		}
+//	}
+
+//	for (int u=0; u<21; u++) {
+//		for (int k=10; k<=100; k+=10){
+//			stringstream ad;
+//			stringstream adhe;
+//			ad<<dir2<<"/cmqi_param_precise/a"<<alphaArr[u]<<"_k"<<k;
+//			//adhe<<dir<<"/cmqi_param_he/a"<<alpha<<"_k"<<k;
+//			cvNica::FaceRecognition fr(ad.str(),refLocation,"integrated");
+//				//fr.Recognition(dir,"pgm",DB_YALEB,METHOD_CORR,-45,0);
+//
+//				fr.Recognition(ad.str(),dataType,DB_YALEB,METHOD_CORR);
+//				//fr.Recognition(dir,dataType,DB_YALEB,METHOD_CORRBIN);
+//				//fr.Recognition(dir,dataType,DB_YALEB,METHOD_L2NORM2);
+//
+//				//cout<<"1 "<<fr.getAccuracy(files)<<" "<<endl;
+//				//fr.getAccuracyIncludingBadImages();
+//				cout<<(float)alphaArr[u]<<", "<<k<<", ";
+//				fr.getAccuracyIncludingBadImagesSubset();
+//
+//				//FileStorage abcd("dix.xml",FileStorage::WRITE);
+//				//abcd << "frRecognitionResult" << fr.RecognitionResult;
+//				//abcd.release();
+//				ad<<"_total.txt";
+//				fr.PrintScore(ad.str().c_str());
+//
+//		}
+//	}
+//	for (int u=0; u<21; u++) {
+//		for (int k=10; k<=100; k+=10){
+//			stringstream adhe;
+//			//ad<<dir<<"/cmqi_param/a"<<alpha<<"_k"<<k;
+//			adhe<<dir2<<"/cmqi_param_he_precise/a"<<alphaArr[u]<<"_k"<<k;
+//			cvNica::FaceRecognition fr(adhe.str(),refLocation,"integrated");
+//				//fr.Recognition(dir,"pgm",DB_YALEB,METHOD_CORR,-45,0);
+//
+//				fr.Recognition(adhe.str(),dataType,DB_YALEB,METHOD_CORR);
+//				//fr.Recognition(dir,dataType,DB_YALEB,METHOD_CORRBIN);
+//				//fr.Recognition(dir,dataType,DB_YALEB,METHOD_L2NORM2);
+//
+//				//cout<<"1 "<<fr.getAccuracy(files)<<" "<<endl;
+//				//fr.getAccuracyIncludingBadImages();
+//				cout<<(float)alphaArr[u]<<", "<<k<<", ";
+//				fr.getAccuracyIncludingBadImagesSubset();
+//
+//				//FileStorage abcd("dix.xml",FileStorage::WRITE);
+//				//abcd << "frRecognitionResult" << fr.RecognitionResult;
+//				//abcd.release();
+//				adhe<<"_total.txt";
+//				fr.PrintScore(adhe.str().c_str());
+//
+//		}
+//	}
+
+
+//		for (int u=0; u<21; u++) {
+//			for (int k=10; k<=100; k+=10){
+//				stringstream ad;
+//				stringstream adhe;
+//				ad<<dir2<<"/cmqi_param_precise_double/a"<<alphaArr[u]<<"_k"<<k;
+//				adhe<<dir2<<"/cmqi_param_he_precise_double/a"<<alphaArr[u]<<"_k"<<k;
+//				cout<<dir2<<"/cmqi_param_precise_double/a"<<alphaArr[u]<<"_k"<<k<<endl;
+//
+//				mkdir(ad.str().c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+//				mkdir(adhe.str().c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+//				for (unsigned int i = 0;i < files.size();i++) {
+//							Mat _image1;
+//							_image1 = imread( dir+"/"+files[i], -1 );
+//							Size size = _image1.size();
+//							Mat _deno1(size,CV_8UC1);
+//							Mat _dmqi(size,CV_8UC1);
+//							Mat _histeq(size,CV_8UC1);
+//							cvNica::Denoise(_image1,_deno1);
+//							//cvNica::SelectiveClosingParam(_deno1,_dmqi, 5, 5, 1.4, 0);
+//							cvNica::ContinuousMorphQuotImage(_deno1,_dmqi, alphaArr[u], k);
+//							equalizeHist(_dmqi,_histeq);
+//							unsigned found = files[i].rfind("bad");
+//							vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
+//
+//
+//							imwrite(ad.str()+"/"+tokens[0]+"."+dataType,_dmqi);
+//							if (found!=std::string::npos)
+//								rename( string(ad.str()+"/"+tokens[0]+"."+dataType).c_str() , string(ad.str()+"/"+tokens[0]+"."+dataType+".bad").c_str() );
+//
+//							imwrite(adhe.str()+"/"+tokens[0]+"."+dataType,_histeq);
+//							if (found!=std::string::npos)
+//								rename( string(adhe.str()+"/"+tokens[0]+"."+dataType).c_str() , string(adhe.str()+"/"+tokens[0]+"."+dataType+".bad").c_str() );
+//
+//				}
+//
+//
+//
+//			}
+//		}
+//
+////		for (int u=0; u<21; u++) {
+////			for (int k=10; k<=100; k+=10){
+////				stringstream ad;
+////				stringstream adhe;
+////				ad<<dir2<<"/cmqi_param_precise_double/a"<<alphaArr[u]<<"_k"<<k;
+////				//adhe<<dir<<"/cmqi_param_he/a"<<alpha<<"_k"<<k;
+////				cvNica::FaceRecognition fr(ad.str(),refLocation,"integrated");
+////					//fr.Recognition(dir,"pgm",DB_YALEB,METHOD_CORR,-45,0);
 ////
-////				for (unsigned int i = 0;i < files.size();i++) {
-////					Mat _image1;
-////					_image1 = imread( dir+"/"+files[i], -1 );
-////					Size size = _image1.size();
-////					Mat _deno1(size,CV_8UC1);
-////					Mat _dmqi(size,CV_8UC1);
-////					Mat _histeq(size,CV_8UC1);
-////					cvNica::Denoise(_image1,_deno1);
-////					cvNica::SelectiveMorphQuotImageParam(_deno1,_dmqi, large, small, alpha, 0);
-////					equalizeHist(_dmqi,_histeq);
-////					unsigned found = files[i].rfind("bad");
-////					vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
-////					imwrite(dir+"/testbed/"+tokens[0]+"."+dataType,_histeq);
-////					if (found!=std::string::npos)
-////						rename( string(dir+"/testbed/"+tokens[0]+"."+dataType).c_str() , string(dir+"/testbed/"+tokens[0]+"."+dataType+".bad").c_str() );
+////					fr.Recognition(ad.str(),dataType,DB_YALEB,METHOD_CORR);
+////					//fr.Recognition(dir,dataType,DB_YALEB,METHOD_CORRBIN);
+////					//fr.Recognition(dir,dataType,DB_YALEB,METHOD_L2NORM2);
 ////
-////				}
-////				cvNica::FaceRecognition fr(dir+"/testbed",refLocation,"integrated");
-////				fr.Recognition(dir+"/testbed",dataType,DB_YALEB,METHOD_CORR);
-////				of<<large<<"\t"<<small<<"\t"<<alpha<<"\t"<<	fr.getAccuracy(files)<<"\t"<<fr.getAccuracyIncludingBadImages()<<endl;
+////					//cout<<"1 "<<fr.getAccuracy(files)<<" "<<endl;
+////					//fr.getAccuracyIncludingBadImages();
+////					cout<<(float)alphaArr[u]<<", "<<k<<", ";
+////					fr.getAccuracyIncludingBadImagesSubset();
+////
+////					//FileStorage abcd("dix.xml",FileStorage::WRITE);
+////					//abcd << "frRecognitionResult" << fr.RecognitionResult;
+////					//abcd.release();
+////					ad<<"_total.txt";
+////					fr.PrintScore(ad.str().c_str());
+////
 ////			}
-//
-//		}
-//	}
+////		}
+////		for (int u=0; u<21; u++) {
+////			for (int k=10; k<=100; k+=10){
+////				stringstream adhe;
+////				//ad<<dir<<"/cmqi_param/a"<<alpha<<"_k"<<k;
+////				adhe<<dir2<<"/cmqi_param_he_precise_double/a"<<alphaArr[u]<<"_k"<<k;
+////				cvNica::FaceRecognition fr(adhe.str(),refLocation,"integrated");
+////					//fr.Recognition(dir,"pgm",DB_YALEB,METHOD_CORR,-45,0);
+////
+////					fr.Recognition(adhe.str(),dataType,DB_YALEB,METHOD_CORR);
+////					//fr.Recognition(dir,dataType,DB_YALEB,METHOD_CORRBIN);
+////					//fr.Recognition(dir,dataType,DB_YALEB,METHOD_L2NORM2);
+////
+////					//cout<<"1 "<<fr.getAccuracy(files)<<" "<<endl;
+////					//fr.getAccuracyIncludingBadImages();
+////					cout<<(double)alphaArr[u]<<", "<<k<<", ";
+////					fr.getAccuracyIncludingBadImagesSubset();
+////
+////					//FileStorage abcd("dix.xml",FileStorage::WRITE);
+////					//abcd << "frRecognitionResult" << fr.RecognitionResult;
+////					//abcd.release();
+////					adhe<<"_total.txt";
+////					fr.PrintScore(adhe.str().c_str());
+////
+////			}
+////		}
 
 
-//
-//	for (float alpha=0.0; alpha<=100.0; alpha+=10.0){
-//		//if(alpha>=60.0) alpha=100.0;
-//		for (unsigned int i = 0;i < files.size();i++) {
-//			cout<<i<<endl;
-//			Mat _image1;
-//			_image1 = imread( dir+"/"+files[i], -1 );
-//			Size size = _image1.size();
-//			Mat _deno1(size,CV_8UC1);
-//			Mat _dmqi(size,CV_8UC1);
-//			Mat _histeq(size,CV_8UC1);
-//			cvNica::Denoise(_image1,_deno1);
-//			//cvNica::DynamicMorphQuotImage(_deno1,_dmqi,0);
-//			cvNica::SelectiveMorphQuotImage(_deno1,_dmqi,0);
-//			cvNica::RemoveGrainyNoise(_dmqi,_deno1,alpha);
-//			equalizeHist(_deno1,_histeq);
-//			unsigned found = files[i].rfind("bad");
-//			vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
-//			imwrite(dir+"/testbed3/"+tokens[0]+"."+dataType,_histeq);
-//			if (found!=std::string::npos)
-//				rename( string(dir+"/testbed3/"+tokens[0]+"."+dataType).c_str() , string(dir+"/testbed3/"+tokens[0]+"."+dataType+".bad").c_str() );
-//
-//		}
-//		cvNica::FaceRecognition fr(dir+"/testbed3",refLocation,"integrated");
-//		fr.Recognition(dir+"/testbed3",dataType,DB_YALEB,METHOD_CORR);
-//		//of<<large<<"\t"<<small<<"\t"<<alpha<<"\t"<<	fr.getAccuracy(files)<<"\t"<<fr.getAccuracyIncludingBadImages()<<endl;
-//		of<<alpha<<"\t"<<	fr.getAccuracy(files)<<"\t"<<fr.getAccuracyIncludingBadImages()<<endl;
-//		stringstream ldf;
-//		ldf<<"CMUPIE_mdmhe_only_"<<alpha<<".txt";
-//		string kk = ldf.str().c_str();
-//		fr.PrintScore((char*)kk.c_str());
-//	}
 
 //	for (float alpha=1; alpha<=2.0001;alpha+=0.05){
 //		for (int k=10; k<=100; k+=10){
@@ -6003,98 +6366,98 @@ int main(int argc, char* argv[] ){
 //			}
 //		}
 
-	for (float alpha=1; alpha<=2.001;alpha+=0.05){
-				for (int k=10; k<=100; k+=10){
-					stringstream ad;
-					stringstream adhe;
-					ad<<dir2<<"/cmqi_param_5_9/a"<<alpha<<"_k"<<k;
-					adhe<<dir2<<"/cmqi_param_he_5_9/a"<<alpha<<"_k"<<k;
-					mkdir(ad.str().c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-					mkdir(adhe.str().c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-					for (unsigned int i = 0;i < files.size();i++) {
-								Mat _image1;
-								_image1 = imread( dir+"/"+files[i], -1 );
-								if (_image1.type()!= CV_8UC1) cvtColor(_image1, _image1, CV_RGB2GRAY);
-								Size size = _image1.size();
-								Mat _deno1(size,CV_8UC1);
-								Mat _dmqi(size,CV_8UC1);
-								Mat _histeq(size,CV_8UC1);
-								cvNica::Denoise(_image1,_deno1);
-								//cvNica::SelectiveClosingParam(_deno1,_dmqi, 5, 5, 1.4, 0);
-								cvNica::ContinuousMorphQuotImage(_deno1,_dmqi, alpha, k);
-								equalizeHist(_dmqi,_histeq);
-								unsigned found = files[i].rfind("bad");
-								vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
+//	for (float alpha=1; alpha<=2.001;alpha+=0.05){
+//				for (int k=10; k<=100; k+=10){
+//					stringstream ad;
+//					stringstream adhe;
+//					ad<<dir2<<"/cmqi_param_3_7_disk/a"<<alpha<<"_k"<<k;
+//					adhe<<dir2<<"/cmqi_param_he_3_7_disk/a"<<alpha<<"_k"<<k;
+//					mkdir(ad.str().c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+//					mkdir(adhe.str().c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+//					for (unsigned int i = 0;i < files.size();i++) {
+//								Mat _image1;
+//								_image1 = imread( dir+"/"+files[i], -1 );
+//								if (_image1.type()!= CV_8UC1) cvtColor(_image1, _image1, CV_RGB2GRAY);
+//								Size size = _image1.size();
+//								Mat _deno1(size,CV_8UC1);
+//								Mat _dmqi(size,CV_8UC1);
+//								Mat _histeq(size,CV_8UC1);
+//								cvNica::Denoise(_image1,_deno1);
+//								//cvNica::SelectiveClosingParam(_deno1,_dmqi, 5, 5, 1.4, 0);
+//								cvNica::ContinuousMorphQuotImage(_deno1,_dmqi, alpha, k);
+//								equalizeHist(_dmqi,_histeq);
+//								unsigned found = files[i].rfind("bad");
+//								vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
+//
+//
+//								imwrite(ad.str()+"/"+tokens[0]+"."+dataType,_dmqi);
+//								if (found!=std::string::npos)
+//									rename( string(ad.str()+"/"+tokens[0]+"."+dataType).c_str() , string(ad.str()+"/"+tokens[0]+"."+dataType+".bad").c_str() );
+//
+//								imwrite(adhe.str()+"/"+tokens[0]+"."+dataType,_histeq);
+//								if (found!=std::string::npos)
+//									rename( string(adhe.str()+"/"+tokens[0]+"."+dataType).c_str() , string(adhe.str()+"/"+tokens[0]+"."+dataType+".bad").c_str() );
+//
+//					}
+//
+//
+//
+//				}
+//			}
+
+//	for (float alpha=1; alpha<=2.001;alpha+=0.05){
+//				for (int k=10; k<=100; k+=10){
+//					stringstream ad;
+//					stringstream adhe;
+//					ad<<dir2<<"/cmqi_param_3_7_disk/a"<<alpha<<"_k"<<k;
+//					//adhe<<dir<<"/cmqi_param_he/a"<<alpha<<"_k"<<k;
+//					cvNica::FaceRecognition fr(ad.str(),refLocation,"integrated");
+//						//fr.Recognition(dir,"pgm",DB_YALEB,METHOD_CORR,-45,0);
+//
+//						fr.Recognition(ad.str(),dataType,DB_YALEB,METHOD_CORR);
+//						//fr.Recognition(dir,dataType,DB_YALEB,METHOD_CORRBIN);
+//						//fr.Recognition(dir,dataType,DB_YALEB,METHOD_L2NORM2);
+//
+//						//cout<<"1 "<<fr.getAccuracy(files)<<" "<<endl;
+//						//fr.getAccuracyIncludingBadImages();
+//						cout<<(float)alpha<<", "<<k<<", ";
+//						fr.getAccuracyIncludingBadImagesSubset();
+//
+//						//FileStorage abcd("dix.xml",FileStorage::WRITE);
+//						//abcd << "frRecognitionResult" << fr.RecognitionResult;
+//						//abcd.release();
+//						ad<<"_total.txt";
+//						fr.PrintScore(ad.str().c_str());
+//
+//				}
+//			}
+//	for (float alpha=1; alpha<=2.001;alpha+=0.05){
+//				for (int k=10; k<=100; k+=10){
+//					stringstream adhe;
+//					//ad<<dir<<"/cmqi_param/a"<<alpha<<"_k"<<k;
+//					adhe<<dir2<<"/cmqi_param_he_5_11/a"<<alpha<<"_k"<<k;
+//					cvNica::FaceRecognition fr(adhe.str(),refLocation,"integrated");
+//						//fr.Recognition(dir,"pgm",DB_YALEB,METHOD_CORR,-45,0);
+//
+//						fr.Recognition(adhe.str(),dataType,DB_YALEB,METHOD_CORR);
+//						//fr.Recognition(dir,dataType,DB_YALEB,METHOD_CORRBIN);
+//						//fr.Recognition(dir,dataType,DB_YALEB,METHOD_L2NORM2);
+//
+//						//cout<<"1 "<<fr.getAccuracy(files)<<" "<<endl;
+//						//fr.getAccuracyIncludingBadImages();
+//						cout<<(float)alpha<<", "<<k<<", ";
+//						fr.getAccuracyIncludingBadImagesSubset();
+//
+//						//FileStorage abcd("dix.xml",FileStorage::WRITE);
+//						//abcd << "frRecognitionResult" << fr.RecognitionResult;
+//						//abcd.release();
+//						adhe<<"_total.txt";
+//						fr.PrintScore(adhe.str().c_str());
+//
+//				}
+//			}
 
 
-								imwrite(ad.str()+"/"+tokens[0]+"."+dataType,_dmqi);
-								if (found!=std::string::npos)
-									rename( string(ad.str()+"/"+tokens[0]+"."+dataType).c_str() , string(ad.str()+"/"+tokens[0]+"."+dataType+".bad").c_str() );
-
-								imwrite(adhe.str()+"/"+tokens[0]+"."+dataType,_histeq);
-								if (found!=std::string::npos)
-									rename( string(adhe.str()+"/"+tokens[0]+"."+dataType).c_str() , string(adhe.str()+"/"+tokens[0]+"."+dataType+".bad").c_str() );
-
-					}
-
-
-
-				}
-			}
-
-	for (float alpha=1; alpha<=2.001;alpha+=0.05){
-				for (int k=10; k<=100; k+=10){
-					stringstream ad;
-					stringstream adhe;
-					ad<<dir2<<"/cmqi_param_5_9/a"<<alpha<<"_k"<<k;
-					//adhe<<dir<<"/cmqi_param_he/a"<<alpha<<"_k"<<k;
-					cvNica::FaceRecognition fr(ad.str(),refLocation,"integrated");
-						//fr.Recognition(dir,"pgm",DB_YALEB,METHOD_CORR,-45,0);
-
-						fr.Recognition(ad.str(),dataType,DB_YALEB,METHOD_CORR);
-						//fr.Recognition(dir,dataType,DB_YALEB,METHOD_CORRBIN);
-						//fr.Recognition(dir,dataType,DB_YALEB,METHOD_L2NORM2);
-
-						//cout<<"1 "<<fr.getAccuracy(files)<<" "<<endl;
-						//fr.getAccuracyIncludingBadImages();
-						cout<<(float)alpha<<", "<<k<<", ";
-						fr.getAccuracyIncludingBadImagesSubset();
-
-						//FileStorage abcd("dix.xml",FileStorage::WRITE);
-						//abcd << "frRecognitionResult" << fr.RecognitionResult;
-						//abcd.release();
-						ad<<"_total.txt";
-						fr.PrintScore(ad.str().c_str());
-
-				}
-			}
-	for (float alpha=1; alpha<=2.001;alpha+=0.05){
-				for (int k=10; k<=100; k+=10){
-					stringstream adhe;
-					//ad<<dir<<"/cmqi_param/a"<<alpha<<"_k"<<k;
-					adhe<<dir2<<"/cmqi_param_he_5_9/a"<<alpha<<"_k"<<k;
-					cvNica::FaceRecognition fr(adhe.str(),refLocation,"integrated");
-						//fr.Recognition(dir,"pgm",DB_YALEB,METHOD_CORR,-45,0);
-
-						fr.Recognition(adhe.str(),dataType,DB_YALEB,METHOD_CORR);
-						//fr.Recognition(dir,dataType,DB_YALEB,METHOD_CORRBIN);
-						//fr.Recognition(dir,dataType,DB_YALEB,METHOD_L2NORM2);
-
-						//cout<<"1 "<<fr.getAccuracy(files)<<" "<<endl;
-						//fr.getAccuracyIncludingBadImages();
-						cout<<(float)alpha<<", "<<k<<", ";
-						fr.getAccuracyIncludingBadImagesSubset();
-
-						//FileStorage abcd("dix.xml",FileStorage::WRITE);
-						//abcd << "frRecognitionResult" << fr.RecognitionResult;
-						//abcd.release();
-						adhe<<"_total.txt";
-						fr.PrintScore(adhe.str().c_str());
-
-				}
-			}
-
-	of.close();
 }
 #endif
 
@@ -6114,7 +6477,7 @@ int main(int argc, char* argv[] ){
 #ifdef DATA_TYPE_SELECT
 	string dir = string(argv[1]);
 	string refLocation = string(argv[2]);
-
+	string dir2 = string(argv[4]);
 	vector<string> files = vector<string>();
 	cout<<dataType<<endl;
 	if (nicatio::getdirType(dir,dataType,files,0)) {
@@ -6128,8 +6491,9 @@ int main(int argc, char* argv[] ){
 		for (int strE=3; strE<=15; strE+=2){
 			stringstream ad;
 			stringstream adhe;
-			ad<<dir<<"/mqi_param/strE"<<strE;
-			adhe<<dir<<"/mqi_param_he/strE"<<strE;
+			ad<<dir2<<"/mqi_param/strE"<<strE;
+			adhe<<dir2<<"/mqi_param_he/strE"<<strE;
+			cout<<ad.str().c_str()<<endl;
 			mkdir(ad.str().c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 			mkdir(adhe.str().c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 			for (unsigned int i = 0;i < files.size();i++) {
@@ -6165,7 +6529,7 @@ int main(int argc, char* argv[] ){
 		for (int strE=3; strE<=15; strE+=2){
 			stringstream ad;
 			stringstream adhe;
-			ad<<dir<<"/mqi_param/strE"<<strE;
+			ad<<dir2<<"/mqi_param/strE"<<strE;
 			//adhe<<dir<<"/cmqi_param_he/a"<<alpha<<"_k"<<k;
 			cvNica::FaceRecognition fr(ad.str(),refLocation,"integrated");
 				//fr.Recognition(dir,"pgm",DB_YALEB,METHOD_CORR,-45,0);
@@ -6190,7 +6554,7 @@ int main(int argc, char* argv[] ){
 		for (int strE=3; strE<=15; strE+=2){
 			stringstream adhe;
 			//ad<<dir<<"/cmqi_param/a"<<alpha<<"_k"<<k;
-			adhe<<dir<<"/mqi_param_he/strE"<<strE;
+			adhe<<dir2<<"/mqi_param_he/strE"<<strE;
 			cvNica::FaceRecognition fr(adhe.str(),refLocation,"integrated");
 				//fr.Recognition(dir,"pgm",DB_YALEB,METHOD_CORR,-45,0);
 
@@ -7294,7 +7658,7 @@ int main(int argc, char* argv[] ){
 			//imwrite("deno.bmp",_deno1);
 
 			cvNica::DynamicMorphQuotImage(_deno1,_dmqi,0);
-			cvNica::RemoveGrainyNoise(_dmqi,_deno2,30);
+			cvNica::RemoveGrainyNoise(_dmqi,_deno2,10);
 			equalizeHist(_deno2,_histeq);
 			//cvNica::RemoveGrainyNoise(_dmqi,_histeq,30);
 			//cvNica::RemoveGrainyNoise(_deno1,_deno2,50);
@@ -7302,6 +7666,11 @@ int main(int argc, char* argv[] ){
 //			cvNica::RemoveGrainyNoise(_dmqi,_histeq,100);
 //			//nicatio::HistEqualize(_dmqi.data,_deno2.data,_image1.cols,_image1.rows);
 //
+
+
+
+
+
 			unsigned found = files[i].rfind("bad");
 						vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
 						imwrite(dir+"/dmqi_wRGN_256/"+tokens[0]+"."+dataType,_deno2);
@@ -7311,6 +7680,8 @@ int main(int argc, char* argv[] ){
 						imwrite(dir+"/dmqi_wRGN_256_he/"+tokens[0]+"."+dataType,_histeq);
 						if (found!=std::string::npos)
 							rename( string(dir+"/dmqi_wRGN_256_he/"+tokens[0]+"."+dataType).c_str() , string(dir+"/dmqi_wRGN_256_he/"+tokens[0]+"."+dataType+".bad").c_str() );
+
+
 
 			//imwrite("dmqi.bmp",_dmqi);
 			//nicatio::DynamicMorphQuotImage( _deno1.data,_dmqi.data,_image1.cols,_image1.rows, 0);
@@ -7393,6 +7764,62 @@ int main(int argc, char* argv[] ){
 
 #endif
 
+#ifdef HE
+			//cout << files[i] <<"\r"<< endl;
+			Mat _image1;
+			_image1 = imread( dir+"/"+files[i], -1 );
+			if (_image1.type()!= CV_8UC1) cvtColor(_image1, _image1, CV_RGB2GRAY);
+			Size size = _image1.size();
+
+			Mat _histeq(size,CV_8UC1);
+
+			equalizeHist(_image1,_histeq);
+			//cvNica::RemoveGrainyNoise(_dmqi,_histeq,30);
+			//cvNica::RemoveGrainyNoise(_deno1,_deno2,50);
+//
+//			cvNica::RemoveGrainyNoise(_dmqi,_histeq,100);
+//			//nicatio::HistEqualize(_dmqi.data,_deno2.data,_image1.cols,_image1.rows);
+//
+
+
+
+
+
+			unsigned found = files[i].rfind("bad");
+						vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
+
+						imwrite(dir+"/he/"+tokens[0]+"."+dataType,_histeq);
+						if (found!=std::string::npos)
+							rename( string(dir+"/he/"+tokens[0]+"."+dataType).c_str() , string(dir+"/he/"+tokens[0]+"."+dataType+".bad").c_str() );
+
+
+
+			//imwrite("dmqi.bmp",_dmqi);
+			//nicatio::DynamicMorphQuotImage( _deno1.data,_dmqi.data,_image1.cols,_image1.rows, 0);
+			//nicatio::HistEqualize(_deno2.data,_histeq.data,_image1.cols,_image1.rows);
+			//nicatio::HistEqualize2(_dmqi.data,_histeq2.data,_image1.cols,_image1.rows);
+			//imwrite("histeq.bmp",_histeq);
+			//imwrite("histeq2.bmp",_histeq2);
+			//_deno2=_dmqi;
+			//cvNica::IntensityShifting(_histeq, _deno2, 128);
+//			unsigned found = files[i].rfind("bad");
+//			if (found!=std::string::npos) {
+//				vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
+//				imwrite(dir+"/dmqi/"+tokens[0]+".pgm",_histeq);
+//				rename( string(dir+"/dmqi/"+tokens[0]+".pgm").c_str() , string(dir+"/dmqi/"+tokens[0]+".pgm.bad").c_str() );
+//
+//			} else {
+//
+//				imwrite(dir+"/dmqi/"+files[i],_histeq);
+//
+//			}
+
+
+				//imwrite(dir+"\\dmqi\\"+files[i],_deno2);
+
+
+#endif
+
 #ifdef CMQI
 
 			//cout << files[i] <<"\r"<< endl;
@@ -7413,12 +7840,12 @@ int main(int argc, char* argv[] ){
 			//nicatio::Denoise( _image1.data,_deno1.data,_image1.cols,_image1.rows);
 			//cvNica::Denoise(_image1,_deno1);
 
-			cvNica::Denoise(_image1,_deno1);
 			//_deno1=_image1;
 			//cvNica::DynamicMorphQuotImage(_deno1,_dmqi,0);
 
 			//cvNica::SelectiveMorphQuotImage(_deno1,_deno2,0);
-			cvNica::ContinuousMorphQuotImage(_deno1,_dmqi,1.7,20);
+
+			cvNica::ContinuousMorphQuotImage(_deno1,_dmqi,1.5,20,5,9);
 
 //							namedWindow( "a", CV_WINDOW_AUTOSIZE );
 //							imshow( "a",  _dmqi );
@@ -7471,23 +7898,32 @@ int main(int argc, char* argv[] ){
 
 			unsigned found = files[i].rfind("bad");
 			vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
-			imwrite(dir+"/cmqi6/"+tokens[0]+"."+dataType,_dmqi);
+//			imwrite(dir+"/cmqi7/"+tokens[0]+"."+dataType,_dmqi);
+//			if (found!=std::string::npos)
+//				rename( string(dir+"/cmqi7/"+tokens[0]+"."+dataType).c_str() , string(dir+"/cmqi7/"+tokens[0]+"."+dataType+".bad").c_str() );
+//
+			imwrite(dir+"/cmqihe8/"+tokens[0]+"."+dataType,_histeq);
 			if (found!=std::string::npos)
-				rename( string(dir+"/cmqi6/"+tokens[0]+"."+dataType).c_str() , string(dir+"/cmqi69/"+tokens[0]+"."+dataType+".bad").c_str() );
-
-			imwrite(dir+"/cmqihe6/"+tokens[0]+"."+dataType,_histeq);
-			if (found!=std::string::npos)
-				rename( string(dir+"/cmqihe6/"+tokens[0]+"."+dataType).c_str() , string(dir+"/cmqihe6/"+tokens[0]+"."+dataType+".bad").c_str() );
+				rename( string(dir+"/cmqihe8/"+tokens[0]+"."+dataType).c_str() , string(dir+"/cmqihe8/"+tokens[0]+"."+dataType+".bad").c_str() );
 
 
-			cvNica::ContinuousClosing(_deno1,_dmqi,1.7,20);
+//			nicatio::localHistogramEqualization(_dmqi.data,_histeq.data,_image1.cols,_image1.rows,15);
+//
+//			imwrite(dir+"/cmqilhe7/"+tokens[0]+"."+dataType,_histeq);
+//			if (found!=std::string::npos)
+//				rename( string(dir+"/cmqilhe7/"+tokens[0]+"."+dataType).c_str() , string(dir+"/cmqilhe7/"+tokens[0]+"."+dataType+".bad").c_str() );
 
-			imwrite(dir+"/cmqiclosing6/"+tokens[0]+"."+dataType,_dmqi);
-			if (found!=std::string::npos)
-				rename( string(dir+"/cmqiclosing6/"+tokens[0]+"."+dataType).c_str() , string(dir+"/cmqiclosing6/"+tokens[0]+"."+dataType+".bad").c_str() );
-
-
-
+//			nicatio::CLAHE (_dmqi.data, _image1.cols, _image1.rows, 0, 255, 8, 8, 256, 16);
+//
+//			imwrite(dir+"/cmqiclahe7/"+tokens[0]+"."+dataType,_dmqi);
+//			if (found!=std::string::npos)
+//				rename( string(dir+"/cmqiclahe7/"+tokens[0]+"."+dataType).c_str() , string(dir+"/cmqiclahe7/"+tokens[0]+"."+dataType+".bad").c_str() );
+//
+//			cvNica::ContinuousClosing(_deno1,_dmqi,1.1,10,5,9);
+//
+//			imwrite(dir+"/cmqiclosing7/"+tokens[0]+"."+dataType,_dmqi);
+//			if (found!=std::string::npos)
+//				rename( string(dir+"/cmqiclosing7/"+tokens[0]+"."+dataType).c_str() , string(dir+"/cmqiclosing7/"+tokens[0]+"."+dataType+".bad").c_str() );
 
 
 //			unsigned found = files[i].rfind("bad");
@@ -7498,6 +7934,120 @@ int main(int argc, char* argv[] ){
 
 #endif
 
+
+#ifdef CMQImod
+
+			//cout << files[i] <<"\r"<< endl;
+			Mat _image1;
+			_image1 = imread( dir+"/"+files[i], -1 );
+			//_image0.convertTo(_image1,CV_8UC1);
+			if (_image1.type()!= CV_8UC1) cvtColor(_image1, _image1, CV_RGB2GRAY);
+//			resize(_image1, _image1, Size(0,0), 0.5, 0.5);
+			Size size = _image1.size();
+			Mat _deno1(size,CV_8UC1);
+			cvNica::Denoise(_image1,_deno1);
+
+
+			//Mat _deno2(size,CV_8UC1);
+			Mat _dmqi(size,CV_8UC1);
+			Mat _histeq(size,CV_8UC1);
+			//nicatio::MedianFilter(_image1.data,_deno1.data,_image1.cols,_image1.rows);
+			//nicatio::Denoise( _image1.data,_deno1.data,_image1.cols,_image1.rows);
+			//cvNica::Denoise(_image1,_deno1);
+
+			//_deno1=_image1;
+			//cvNica::DynamicMorphQuotImage(_deno1,_dmqi,0);
+
+			//cvNica::SelectiveMorphQuotImage(_deno1,_deno2,0);
+
+			cvNica::ContinuousMorphQuotImage(_deno1,_dmqi,1.5,20,5,9);
+			//cvNica::ContinuousClosing (_deno1,_dmqi,1.5,20,5,9);
+//							namedWindow( "a", CV_WINDOW_AUTOSIZE );
+//							imshow( "a",  _dmqi );
+//							waitKey(0);
+			//_dmqi=_deno1;
+			//nicatio::DynamicMorphQuotImage( _deno1.data,_dmqi.data,_image1.cols,_image1.rows, 0);
+			//_dmqi = 255-_dmqi;
+
+			equalizeHist(_dmqi,_histeq);
+
+
+
+			//nicatio::HistEqualize(_dmqi.data,_histeq.data,_image1.cols,_image1.rows);
+
+
+
+
+
+			//nicatio::MedianFilter(_histeq.data,_deno2.data,_image1.cols,_image1.rows);
+			//nicatio::Gamma(_dmqi.data,_deno2.data,_image1.cols,_image1.rows,2.0);
+			//nicatio::Gamma(_histeq.data,_deno2.data,_image1.cols,_image1.rows,25.0);
+			//_histeq = 255-_histeq;
+			//equalizeHist(_dmqi,_histeq);
+//			double mmin, mmax;
+//			minMaxIdx(_histeq,&mmin,&mmax);
+//			_deno2 = _histeq - mmin;
+//			_deno2 *= 255.0/(mmax-mmin);
+			//Mat _deno3;
+			//GaussianBlur(_histeq, _deno2, Size(3,3), 1.0, 1.0, BORDER_DEFAULT);
+
+
+			//_deno2;// = _deno3(Rect(1,1,_deno1.size().width,_deno1.size().height));
+			//_deno2=_dmqi;
+
+			//_deno2=_histeq;
+
+			//cvNica::IntensityShifting(_histeq, _deno2, 220);
+//			imwrite("ori.bmp",_image1);
+//			imwrite("dmqi.bmp",_dmqi);
+//			imwrite("histeq.bmp",_deno2);
+
+			//cvNica::IntensityShifting(_histeq, _deno2, 128);
+
+
+
+			//Rect myROI(2, 2, 126, 146);
+			//Mat croppedImage;
+			//Mat(_histeq, myROI).copyTo(_deno2);
+			//imwrite(buffer5.str(),croppedImage);
+
+			unsigned found = files[i].rfind("bad");
+			vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
+//			imwrite(dir+"/cmqi7/"+tokens[0]+"."+dataType,_dmqi);
+//			if (found!=std::string::npos)
+//				rename( string(dir+"/cmqi7/"+tokens[0]+"."+dataType).c_str() , string(dir+"/cmqi7/"+tokens[0]+"."+dataType+".bad").c_str() );
+//
+			imwrite(dir+"/ttest/"+tokens[0]+"."+dataType,_histeq);
+			if (found!=std::string::npos)
+				rename( string(dir+"/ttest/"+tokens[0]+"."+dataType).c_str() , string(dir+"/ttest/"+tokens[0]+"."+dataType+".bad").c_str() );
+
+
+//			nicatio::localHistogramEqualization(_dmqi.data,_histeq.data,_image1.cols,_image1.rows,15);
+//
+//			imwrite(dir+"/cmqilhe7/"+tokens[0]+"."+dataType,_histeq);
+//			if (found!=std::string::npos)
+//				rename( string(dir+"/cmqilhe7/"+tokens[0]+"."+dataType).c_str() , string(dir+"/cmqilhe7/"+tokens[0]+"."+dataType+".bad").c_str() );
+
+//			nicatio::CLAHE (_dmqi.data, _image1.cols, _image1.rows, 0, 255, 8, 8, 256, 16);
+//
+//			imwrite(dir+"/cmqiclahe7/"+tokens[0]+"."+dataType,_dmqi);
+//			if (found!=std::string::npos)
+//				rename( string(dir+"/cmqiclahe7/"+tokens[0]+"."+dataType).c_str() , string(dir+"/cmqiclahe7/"+tokens[0]+"."+dataType+".bad").c_str() );
+//
+//			cvNica::ContinuousClosing(_deno1,_dmqi,1.1,10,5,9);
+//
+//			imwrite(dir+"/cmqiclosing7/"+tokens[0]+"."+dataType,_dmqi);
+//			if (found!=std::string::npos)
+//				rename( string(dir+"/cmqiclosing7/"+tokens[0]+"."+dataType).c_str() , string(dir+"/cmqiclosing7/"+tokens[0]+"."+dataType+".bad").c_str() );
+
+
+//			unsigned found = files[i].rfind("bad");
+//			vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
+//			imwrite(dir+"/deno/"+tokens[0]+"."+dataType,_deno2);
+//			if (found!=std::string::npos)
+//				rename( string(dir+"/deno/"+tokens[0]+"."+dataType).c_str() , string(dir+"/deno/"+tokens[0]+"."+dataType+".bad").c_str() );
+
+#endif
 
 #ifdef SMQI_adaptive
 			Mat _image1;
@@ -7664,17 +8214,17 @@ int main(int argc, char* argv[] ){
 			//imwrite(buffer5.str(),croppedImage);
 
 
-//			unsigned found = files[i].rfind("bad");
-//			vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
-//			imwrite(dir+"/mdmqi/"+tokens[0]+"."+dataType,_histeq);
-//			if (found!=std::string::npos)
-//				rename( string(dir+"/mdmqi/"+tokens[0]+"."+dataType).c_str() , string(dir+"/mdmqi/"+tokens[0]+"."+dataType+".bad").c_str() );
-
 			unsigned found = files[i].rfind("bad");
-						vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
-						imwrite(dir+"/mdmqimovhe/"+tokens[0]+"."+dataType,_histeq);
-						if (found!=std::string::npos)
-							rename( string(dir+"/mdmqimovhe/"+tokens[0]+"."+dataType).c_str() , string(dir+"/mdmqimovhe/"+tokens[0]+"."+dataType+".bad").c_str() );
+			vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
+			imwrite(dir+"/mdmqi/"+tokens[0]+"."+dataType,_histeq);
+			if (found!=std::string::npos)
+				rename( string(dir+"/mdmqi/"+tokens[0]+"."+dataType).c_str() , string(dir+"/mdmqi/"+tokens[0]+"."+dataType+".bad").c_str() );
+
+//			unsigned found = files[i].rfind("bad");
+//						vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
+//						imwrite(dir+"/mdmqimovhe/"+tokens[0]+"."+dataType,_histeq);
+//						if (found!=std::string::npos)
+//							rename( string(dir+"/mdmqimovhe/"+tokens[0]+"."+dataType).c_str() , string(dir+"/mdmqimovhe/"+tokens[0]+"."+dataType+".bad").c_str() );
 
 //			unsigned found = files[i].rfind("bad");
 //			vector<string> tokens = nicatio::StringTokenizer::getTokens(files[i],".");
@@ -7683,6 +8233,8 @@ int main(int argc, char* argv[] ){
 //				rename( string(dir+"/deno/"+tokens[0]+"."+dataType).c_str() , string(dir+"/deno/"+tokens[0]+"."+dataType+".bad").c_str() );
 
 #endif
+
+
 
 #ifdef SMQI_onlyClose
 			//cout << files[i] <<"\r"<< endl;
@@ -11354,9 +11906,9 @@ int main(int argc, char* argv[] ){
 
 		//dir = "../tutorial-haartraining/CMU-MIT_Face_Test_Set/test";
 		//dir = "/cygdrive/e/Documents/Nicatio/Research/DB/Face/BAO/myDataBase";
-		dataType = argv[2];
+		//dataType = argv[2];
 
-		if (nicatio::getdirType(dir,dataType,files,0)) {
+		if (nicatio::getdirType(dir,"JPG",files,0)) {
 			cout<< "Error: Invalid file location \n" <<endl;
 			return -1;
 		}
@@ -11404,7 +11956,9 @@ int main(int argc, char* argv[] ){
 
 		Mat gray; cvtColor(frame,gray,CV_RGB2GRAY);
 
-		//imwrite("dfsafdf.png",gray);
+		imwrite("Face_Detect_00gray.png",gray);
+		imwrite("Face_Detect_01Cb.png",Cb);
+		imwrite("Face_Detect_02Cr.png",Cr);
 
 		Mat thr(size,CV_8UC1);
 		Mat thrCrCb[6];
@@ -11413,13 +11967,13 @@ int main(int argc, char* argv[] ){
 		threshold(Cb, thrCrCb[0], 82, 255, THRESH_BINARY);
 		threshold(Cb, thrCrCb[1], 122, 255, THRESH_BINARY_INV);
 		bitwise_and(thrCrCb[0],thrCrCb[1],thrCrCb[2]);
-		//imwrite("dfsafdf6.png",thrCrCb[2]);
+		imwrite("Face_Detect_03Cb_th.png",thrCrCb[2]);
 		threshold(Cr, thrCrCb[3], 138, 255, THRESH_BINARY);
 		threshold(Cr, thrCrCb[4], 168, 255, THRESH_BINARY_INV);
 		bitwise_and(thrCrCb[3],thrCrCb[4],thrCrCb[5]);
-		//imwrite("dfsafdf7.png",thrCrCb[5]);
+		imwrite("Face_Detect_04Cr_th.png",thrCrCb[5]);
 		bitwise_or(thrCrCb[2],thrCrCb[5],thrCrCb[0]);
-		//imwrite("dfsafdf8.png",thrCrCb[0]);
+		imwrite("Face_Detect_05CbCr_th.png",thrCrCb[0]);
 
 
 
@@ -11438,6 +11992,7 @@ int main(int argc, char* argv[] ){
 				}
 			}
 		}
+		imwrite("Face_Detect_06CbCr_holeFilling.png",thrCrCb[0]);
 		//imwrite("dfsafdf9.png",thrCrCb[0]);
 
 		//bitwise_and(thrCrCb[0],thr,thrCrCb[0]);
@@ -11472,18 +12027,23 @@ int main(int argc, char* argv[] ){
 
 		//if (ccc==2) equalizeHist(frame_gray2,frame_gray2);
 
+		imwrite("Face_Detect_07Dog.png",frame_gray2);
+
 		frame_gray3.convertTo(aa,CV_32FC1);
 		frame_gray2.convertTo(bb,CV_32FC1);
+
+		frame_gray2 = (aa*.9+bb*.1);
+		imwrite("Face_Detect_08Dog_91.png",frame_gray2);
+		frame_gray2 = (aa*.7+bb*.3);
+		imwrite("Face_Detect_09Dog_73.png",frame_gray2);
+
 		frame_gray2 = (aa*aaa+bb*bbb);
-		//frame_gray2 = (aa*.9+bb*.1);
-		//imwrite("dfsafdf7.png",frame_gray2);
-		//frame_gray2 = (aa*.7+bb*.3);
 		//imwrite("dfsafdf7.png",frame_gray2);
 		frame_gray2.convertTo(frame_gray,CV_8UC1);
 		//cvtColor( frame, frame_gray, CV_BGR2GRAY );
-//						namedWindow( window_name, CV_WINDOW_AUTOSIZE );
-//						imshow( window_name,frame_gray);//thrCrCb[0] );
-//						waitKey(0);
+						namedWindow( window_name, CV_WINDOW_AUTOSIZE );
+						imshow( window_name,frame_gray);//thrCrCb[0] );
+						waitKey(0);
 
 
 		//equalizeHist( frame_gray, frame_gray );
@@ -11492,7 +12052,7 @@ int main(int argc, char* argv[] ){
 	    face_cascade.detectMultiScale( frame_gray, faces, 1.1, 3, 0|CV_HAAR_SCALE_IMAGE, Size(20, 20) , Size(150, 150) );
 
 
-	    //	    cout<<"d dfd "<<faces.size()<<endl;
+	   	    cout<<"d dfd "<<faces.size()<<endl;
 	    totalWindow += faces.size();
 //	    for (int k=0; k<865; k++) {
 //			if (bao[k][0] == baoFileList[i]) {
@@ -11532,12 +12092,13 @@ int main(int argc, char* argv[] ){
 		    	}
 
 		    }
+		    ellipse( frame, center, Size( faces[j].width*0.5, faces[j].height*0.5), 0, 0, 360, Scalar( 255, 0, 255 ), 4, 8, 0 );
 	    	if (counts == 1) {
 	    		if (detect[pos]==1) {
 					totalWindow -= 1;
 				} else {
 					detect[pos] = 1;
-					//ellipse( frame, center, Size( faces[j].width*0.5, faces[j].height*0.5), 0, 0, 360, Scalar( 255, 0, 255 ), 4, 8, 0 );
+					ellipse( frame, center, Size( faces[j].width*0.5, faces[j].height*0.5), 0, 0, 360, Scalar( 255, 0, 255 ), 4, 8, 0 );
 				}
 	    	} else if (counts > 1) {
 	    		falsePositive += 1;
@@ -11561,7 +12122,7 @@ int main(int argc, char* argv[] ){
 //		imshow( window_name, frame );
 //		waitKey(0);
 		//frame = imread( dir+"/"+files[i], -1 );
-		//imwrite( dir+"/mine/"+files[i], frame );
+		imwrite( dir+"/mine/"+files[i], frame );
 
 	}
 	for (int k=0; k<865; k++) {

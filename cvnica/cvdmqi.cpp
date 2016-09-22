@@ -195,7 +195,9 @@ void ContinuousClosing(
 		InputArray 						_src,
 		OutputArray						_dst,
 		const double&					alpha,
-		const double&					k)
+		const double&					k,
+		const int&						small,
+		const int&						large)
 {
 	Mat src = _src.getMat();
 	_dst.create(src.size(),src.type());
@@ -212,11 +214,14 @@ void ContinuousClosing(
 	//Mat _ss = Mat(src.size(),src.type());
 
 	int dilation_type = MORPH_RECT;
-	Mat elementL = getStructuringElement( dilation_type, Size( 11,11), Point( 5,5 ) );
+	//int dilation_type = MORPH_ELLIPSE;
+	int small_ = (small-1)/2;
+	int large_ = (large-1)/2;
+	Mat elementL = getStructuringElement( dilation_type, Size( large,large), Point( large_,large_ ) );
 	//Mat elementL = getStructuringElement( dilation_type, Size( 9,9), Point( 4,4 ) );
-	//Mat elementM = getStructuringElement( dilation_type, Size( 7,7 ), Point( 3,3 ) );
-	Mat elementS = getStructuringElement( dilation_type, Size( 5,5), Point( 2,2 ) );
-	//Mat elementSS = getStructuringElement( dilation_type, Size( 3,3 ), Point( 1,1 ) );
+	//Mat elementL = getStructuringElement( dilation_type, Size( 7,7 ), Point( 3,3 ) );
+	Mat elementS = getStructuringElement( dilation_type, Size( small,small), Point( small_,small_ ) );
+	//Mat elementS = getStructuringElement( dilation_type, Size( 3,3 ), Point( 1,1 ) );
 
 	dilate( src, l, elementL);
 	//dilate( src, m, elementM);
@@ -249,12 +254,29 @@ void ContinuousClosing(
 		//_sa = 1./(1+exp(-20*(_sa-1.4)));//2363
 //		_sa = 1./(1+exp(-20*(_sa-1.3)));//2369
 		//_sa = 1./(1+exp(-20*(_sa-1.25)));//2371
+		//std::cout<<"t "<<_sa<<" ";
 		_sa = 1./(1+exp(-k*(_sa-alpha)));//2371
 
 		//_sa = 1./pow((1+exp(-20*(_sa-1.5))),0.9);
 		//_sa = 1./(1+exp(-50*(_sa-1.3)));
-		*(ptrDst) = (unsigned char)(__s*(1-_sa)+__l*_sa);
+		//_sa = (__s*(alpha)*(1-_sa)+__l*_sa);
+		//if (_sa>255)_sa=255;
+		*(ptrDst) = (unsigned char) (__s*(1-_sa)+__l*_sa);
+		//std::cout<<"t "<<_sa<<" "<<*(ptrDst)<<std::endl;
 
+//		*(ptrDst) = (unsigned char) __l;
+
+//		*(ptrDst) = (unsigned char) floor((__l/__s-1)*255);
+//		if (((__l/__s-1)*255)>255) *(ptrDst) = 255;
+
+		//if (((__l/__s-1)*255)<0) *(ptrDst) = 0;
+//		if ((i/168+1 == 52) && ((i%168)+1==9)){
+//			std::cout<<"t "<<i/168+1<<" "<<(i%168)+1<<" "<<__l<<" "<<__s<<" "<<(__l/__s)<<" "<<((__l/__s-1)*255)<<" "<<(int)((unsigned char)((__l/__s-1)*255))<<" "<<(int)*(ptrDst)<<std::endl;
+//		}
+
+//		if ((__l/__s)>2) {
+//			std::cout<<"t "<<i/168+1<<" "<<(i%168)+1<<__l<<" "<<__s<<" "<<(__l/__s)<<std::endl;
+//		}
 		//_sa = __s*1.4;//alpha;
 
 		//if(__l>_sa) *(ptrDst) = __l;
@@ -301,7 +323,8 @@ void Closing(
 
 	Mat l = Mat(src.size(),src.type());
 	Mat _l = Mat(src.size(),src.type());
-	int dilation_type = MORPH_RECT;
+	//int dilation_type = MORPH_RECT;
+	int dilation_type = MORPH_ELLIPSE;
 	Mat elementL = getStructuringElement( dilation_type, Size( strE,strE ), Point( floor(strE/2), floor(strE/2) ) );
 
 	dilate( src, l, elementL);
@@ -533,11 +556,13 @@ void ContinuousMorphQuotImage(
 		OutputArray						_dst,
 		const double&					alpha,
 		const double&					k,
+		const int&						small,
+		const int&						large,
 		const int&						equalize)
 {
 	Mat src = _src.getMat();
 	Mat dc = Mat(src.size(),src.type());
-	ContinuousClosing (src,dc,alpha,k);
+	ContinuousClosing (src,dc,alpha,k,small,large);
 	Reflectance(src,dc,_dst);
 
 }
@@ -576,7 +601,7 @@ void DynamicMorphQuotImage(
 	Mat dc = Mat(src.size(),src.type());
 	DynamicClosing (src,dc);
 	//imwrite("dc.bmp",dc);
-	Reflectance(src,dc,_dst);//,200);
+	Reflectance(src,dc,_dst,200);
 
 }
 
@@ -690,6 +715,42 @@ void DynamicClosing(
 }
 
 void RemoveGrainyNoise(
+		InputArray 						_src,
+		OutputArray						_dst,
+		int								threshold)
+{
+	Mat src = _src.getMat();
+	_dst.create(src.size(),src.type());
+	Mat dst =  _dst.getMat();
+	Mat k(src.rows + 2, src.cols + 2, src.depth());
+	copyMakeBorder(src,k,1,1,1,1,BORDER_REPLICATE);
+	int i,j;
+	int r = src.rows;
+	int c = src.cols;
+	double mx;
+	Rect roi1 (0,0,8,1);
+	Rect roi2 (1,0,8,1);
+
+	for (j=0; j<r; j++){
+		for (i=0; i<c; i++){
+			Rect roi (i,j,3,3);
+			Mat partial = k(roi).clone().reshape(0,1);
+			sort(partial,partial,CV_SORT_DESCENDING);
+			Mat p1 = partial(roi1);
+			Mat p2 = partial(roi2);
+			Mat p3 = p1-p2;
+			minMaxLoc(p3,NULL,&mx);
+			if (mx<threshold && mx>0) {
+				minMaxLoc(partial,NULL,&mx);
+				dst.at<uchar>(j,i) = (uchar)mx;
+			} else
+				dst.at<uchar>(j,i) = src.at<uchar>(j,i);
+		}
+	}
+
+}
+
+void RemoveGrainyNoise_old(
 		InputArray 						_src,
 		OutputArray						_dst,
 		int								threshold)

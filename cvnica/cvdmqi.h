@@ -43,7 +43,9 @@ void ContinuousClosing(
 		InputArray 						_src,
 		OutputArray						_dst,
 		const double&					alpha,
-		const double&					k);
+		const double&					k,
+		const int&						small=5,
+		const int&						large=9);
 
 void Closing(
 		InputArray 						_src,
@@ -75,6 +77,8 @@ void ContinuousMorphQuotImage(
 		OutputArray						_dst,
 		const double&					alpha,
 		const double&					k,
+		const int&						small=5,
+		const int&						large=9,
 		const int&						equalize=0);
 
 void MorphQuotImage(
@@ -111,6 +115,11 @@ void DynamicClosing(
 		const double&					beta=1.35);
 
 void RemoveGrainyNoise(
+		InputArray 						_src,
+		OutputArray						_dst,
+		int								threshold);
+
+void RemoveGrainyNoise_old(
 		InputArray 						_src,
 		OutputArray						_dst,
 		int								threshold);
